@@ -7,6 +7,7 @@ using namespace glm;
 
 struct VertexData {
     glm::vec4 position;
+    glm::vec2 uv;
 };
 
 Application::Application() {
@@ -19,14 +20,36 @@ void Application::initialize(Renderer *renderer) {
     std::vector<VertexData> data;
     std::vector<int> indices;
 
-    data.push_back({vec4(-0.15f, 0.0f, 0.0f, 1.0f)});
-    data.push_back({vec4(0.15f, 0.0f, 0.0f, 1.0f)});
-    data.push_back({vec4(0.15f, 0.25f, 0.0f, 1.0f)});
-    data.push_back({vec4(-0.15f, 0.25f, 0.0f, 1.0f)});
+    data.push_back({
+                           vec4(-0.15f, 0.0f, 0.0f, 1.0f),
+                           vec2(1.f, 0.f)
+                   });
+    data.push_back({
+                           vec4(0.15f, 0.0f, 0.0f, 1.0f),
+                           vec2(0.5f, 0.f)
+                   });
+    data.push_back({
+                           vec4(0.15f, 0.25f, 0.0f, 1.0f),
+                           vec2(1.f, 0.5f)
+                   });
+    data.push_back({
+                           vec4(-0.15f, 0.25f, 0.0f, 1.0f),
+                           vec2(0.3f, 0.5f)
+                   });
 
-    data.push_back({vec4(-0.5f, 0.25f, 0.0f, 1.0f)});
-    data.push_back({vec4(0.5f, 0.25f, 0.0f, 1.0f)});
-    data.push_back({vec4(0.0f, 1.5f, 0.0f, 1.0f)});
+
+    data.push_back({
+                           vec4(-0.5f, 0.25f, 0.0f, 1.0f),
+                           vec2(1.f, 1.f)
+                   });
+    data.push_back({
+                           vec4(0.5f, 0.25f, 0.0f, 1.0f),
+                           vec2(1.f, 0.5f)
+                   });
+    data.push_back({
+                           vec4(0.0f, 1.5f, 0.0f, 1.0f),
+                           vec2(.5f, 0.5f)
+                   });
 
     indices.push_back(0);
     indices.push_back(2);
@@ -52,6 +75,8 @@ void Application::initialize(Renderer *renderer) {
 
     _vertex_layout->addComponent(AttributeType::Position, DataFormat::Vec4, sizeof(VertexData), vertex_idx,
                                  offsetof(VertexData, position));
+    _vertex_layout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), vertex_idx,
+                                 offsetof(VertexData, uv));
     _vertex_layout->setIndexBuffer(index_idx);
 
     _vertex_layout->finalize();

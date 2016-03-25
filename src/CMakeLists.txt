@@ -1,6 +1,6 @@
 
-find_package(SDL2)
-find_package(GLM)
+find_package(SDL2 REQUIRED)
+find_package(GLM REQUIRED)
 
 include(source_groups.cmake)
 
