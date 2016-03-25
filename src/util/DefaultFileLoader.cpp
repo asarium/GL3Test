@@ -3,7 +3,7 @@
 
 #include "DefaultFileLoader.hpp"
 
-DefaultFileLoader::DefaultFileLoader() : _basepath("shaders/") {
+DefaultFileLoader::DefaultFileLoader() : _basepath("resources/") {
 }
 
 DefaultFileLoader::DefaultFileLoader(const std::string &basepath) : _basepath(basepath) {
