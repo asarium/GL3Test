@@ -3,6 +3,7 @@
 #include "VertexLayout.hpp"
 #include "ShaderProgram.hpp"
 #include "DrawCall.hpp"
+#include "ShaderParameters.hpp"
 
 struct PipelineState {
     bool depth_test;
@@ -10,6 +11,7 @@ struct PipelineState {
 
 struct DrawCallProperties {
     ShaderProgram *shader;
+    ShaderParameters *parameters;
     VertexLayout *vertexLayout;
     PipelineState state;
 };

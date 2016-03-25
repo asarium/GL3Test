@@ -61,19 +61,23 @@ void Application::initialize(Renderer *renderer) {
     SDL_GL_GetDrawableSize(window, &width, &height);
 
     _shader = renderer->createShader(ShaderType::Model);
-    auto projMX = glm::perspective(45.0f, width/(float)height, 0.01f,100.0f);
-    _shader->setParameterMat4(ShaderParameter::ProjectionMatrix, projMX);
+    _parameters = renderer->createShaderParameters();
+
+    auto projMX = glm::perspective(45.0f, width / (float) height, 0.01f, 100.0f);
+    _parameters->setParameterMat4(ShaderParameterType::ProjectionMatrix, projMX);
 
     auto viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.5f, 3.0f));
-    _shader->setParameterMat4(ShaderParameter::ViewMatrix, viewMx);
-    _shader->setParameterMat4(ShaderParameter::ModelMatrix, glm::mat4());
+    _parameters->setParameterMat4(ShaderParameterType::ViewMatrix, viewMx);
+    _parameters->setParameterMat4(ShaderParameterType::ModelMatrix, glm::mat4());
 
     DrawCallProperties props;
     props.shader = _shader.get();
     props.vertexLayout = _vertex_layout.get();
     props.state.depth_test = true;
+    props.parameters = _parameters.get();
 
-    _drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle, 9, IndexType::Integer);
+    _drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle, 9,
+                                                                  IndexType::Integer);
 }
 
 void Application::render(Renderer *renderer, Timing *) {
@@ -91,6 +95,8 @@ void Application::deinitialize(Renderer *renderer) {
     _index_buffer.reset();
 
     _shader.reset();
+    _parameters.reset();
+
     _drawCall.reset();
 }
 

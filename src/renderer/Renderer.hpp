@@ -14,6 +14,7 @@
 #include "util/FileLoader.hpp"
 #include "DrawCall.hpp"
 #include "DrawCallManager.hpp"
+#include "ShaderParameters.hpp"
 
 class Renderer {
 public:
@@ -30,6 +31,8 @@ public:
     virtual std::unique_ptr<VertexLayout> createVertexLayout() = 0;
 
     virtual std::unique_ptr<ShaderProgram> createShader(ShaderType type) = 0;
+
+    virtual std::unique_ptr<ShaderParameters> createShaderParameters() = 0;
 
     virtual void clear(const glm::vec4 &color) = 0;
 

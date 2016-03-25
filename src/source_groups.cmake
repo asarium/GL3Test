@@ -10,6 +10,7 @@ set(file_renderer
         renderer/DrawCall.hpp
         renderer/DrawCallManager.hpp
         renderer/Renderer.hpp
+        renderer/ShaderParameters.hpp
         renderer/ShaderProgram.hpp
         renderer/VertexLayout.hpp
         )
@@ -23,6 +24,8 @@ set(file_renderer_opengl
         renderer/opengl/GL3DrawCallManager.hpp
         renderer/opengl/GL3Renderer.cpp
         renderer/opengl/GL3Renderer.hpp
+        renderer/opengl/GL3ShaderParameters.cpp
+        renderer/opengl/GL3ShaderParameters.hpp
         renderer/opengl/GL3ShaderProgram.cpp
         renderer/opengl/GL3ShaderProgram.hpp
         renderer/opengl/GL3VertexLayout.cpp

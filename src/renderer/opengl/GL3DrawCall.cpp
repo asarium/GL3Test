@@ -11,7 +11,7 @@ GL3DrawCall::~GL3DrawCall() {
 }
 
 void GL3DrawCall::setGLState() {
-    _properties.shader->bind();
+    _properties.shader->bindAndSetParameters(_properties.parameters);
     _properties.vertexLayout->bind();
 
     if (_properties.state.depth_test) {
@@ -29,4 +29,8 @@ void GL3DrawCall::draw() {
     } else {
         glDrawArrays(_properties.primitive_type, 0, _properties.count);
     }
+}
+
+ShaderParameters *GL3DrawCall::getParameters() {
+    return _properties.parameters;
 }

@@ -26,6 +26,7 @@ namespace {
         gl_props.state.depth_test = props.state.depth_test;
         gl_props.vertexLayout = static_cast<GL3VertexLayout *>(props.vertexLayout);
         gl_props.shader = static_cast<GL3ShaderProgram *>(props.shader);
+        gl_props.parameters = static_cast<GL3ShaderParameters*>(props.parameters);
 
         return gl_props;
     }

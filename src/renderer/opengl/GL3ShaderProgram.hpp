@@ -1,14 +1,16 @@
 #pragma once
 
 #include "renderer/ShaderProgram.hpp"
+#include "GL3ShaderParameters.hpp"
 
 #include <glad/glad.h>
 
 #include <vector>
 #include <util/FileLoader.hpp>
+#include <renderer/ShaderParameters.hpp>
 
 struct ParameterLocation {
-    ShaderParameter param;
+    ShaderParameterType param;
     GLint location;
 };
 
@@ -16,13 +18,13 @@ class GL3ShaderProgram : public ShaderProgram {
     GLuint _handle;
     std::vector<ParameterLocation> _uniformLocations;
 
-    GLint getUniformLocation(ShaderParameter param);
+    GLint getUniformLocation(ShaderParameterType param);
 public:
     GL3ShaderProgram(FileLoader* loader, ShaderType type);
     virtual ~GL3ShaderProgram();
 
     void bind();
 
-    virtual void setParameterMat4(ShaderParameter param, const glm::mat4 &value) override;
+    void bindAndSetParameters(const GL3ShaderParameters* parameters);
 };
 

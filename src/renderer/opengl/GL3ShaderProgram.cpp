@@ -3,6 +3,7 @@
 
 #include "GL3ShaderProgram.hpp"
 #include "GL3VertexLayout.hpp"
+#include "GL3ShaderParameters.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <renderer/VertexLayout.hpp>
@@ -35,20 +36,20 @@ namespace {
     };
 
     struct UniformNameMapping {
-        ShaderParameter parameter;
+        ShaderParameterType parameter;
         const GLchar *uniform_name;
     };
     UniformNameMapping uniform_mappings[] = {
             {
-                    .parameter = ShaderParameter::ViewMatrix,
+                    .parameter = ShaderParameterType::ViewMatrix,
                     .uniform_name = "view_matrix"
             },
             {
-                    .parameter = ShaderParameter::ModelMatrix,
+                    .parameter = ShaderParameterType::ModelMatrix,
                     .uniform_name = "model_matrix"
             },
             {
-                    .parameter=ShaderParameter::ProjectionMatrix,
+                    .parameter=ShaderParameterType::ProjectionMatrix,
                     .uniform_name = "proj_matrix"
             }
     };
@@ -160,6 +161,14 @@ namespace {
 
         return prog;
     }
+
+    void setUniform(GLint uniform_loc, const ParameterValue &value) {
+        switch (value.data_type) {
+            case ParameterDataType::Mat4:
+                glUniformMatrix4fv(uniform_loc, 1, GL_FALSE, glm::value_ptr(value.value.mat4));
+                break;
+        }
+    }
 }
 
 GL3ShaderProgram::GL3ShaderProgram(FileLoader *loader, ShaderType type) {
@@ -185,18 +194,11 @@ GL3ShaderProgram::~GL3ShaderProgram() {
     glDeleteProgram(_handle);
 }
 
-void GL3ShaderProgram::setParameterMat4(ShaderParameter param, const glm::mat4 &value) {
-    this->bind();
-
-    auto uniform_loc = getUniformLocation(param);
-    glUniformMatrix4fv(uniform_loc, 1, GL_FALSE, glm::value_ptr(value));
-}
-
 void GL3ShaderProgram::bind() {
     glUseProgram(_handle);
 }
 
-GLint GL3ShaderProgram::getUniformLocation(ShaderParameter param) {
+GLint GL3ShaderProgram::getUniformLocation(ShaderParameterType param) {
     for (auto &loc:_uniformLocations) {
         if (loc.param == param) {
             return loc.location;
@@ -204,4 +206,15 @@ GLint GL3ShaderProgram::getUniformLocation(ShaderParameter param) {
     }
     return -1;
 }
+
+void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameters) {
+    this->bind();
+
+    for (auto &parameter : parameters->getValues()) {
+        auto uniform_loc = getUniformLocation(parameter.param_type);
+        setUniform(uniform_loc, parameter);
+    }
+}
+
+
 

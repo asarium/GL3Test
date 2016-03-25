@@ -16,6 +16,8 @@ public:
     ~GL3DrawCall();
 
     virtual void draw() override;
+
+    virtual ShaderParameters* getParameters() override;
 };
 
 
