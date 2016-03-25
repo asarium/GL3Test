@@ -28,6 +28,8 @@ public:
 
     virtual std::unique_ptr<ShaderParameters> createShaderParameters() override;
 
+    virtual std::unique_ptr<Texture2D> createTexture() override;
+
     virtual void clear(const glm::vec4& color) override;
 
     virtual void presentNextFrame() override;

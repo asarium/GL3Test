@@ -3,6 +3,9 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 using namespace glm;
 
 struct VertexData {
@@ -81,6 +84,15 @@ void Application::initialize(Renderer *renderer) {
 
     _vertex_layout->finalize();
 
+    _colorTexture = renderer->createTexture();
+    int x, y, n;
+    auto texture_data = stbi_load("resources/logo-full.png", &x, &y, &n, 0);
+    if (texture_data) {
+        _colorTexture->initialize(x, y, n == 3 ? TextureFormat::R8G8B8 : TextureFormat::R8G8B8A8, texture_data);
+
+        stbi_image_free(texture_data);
+    }
+
     auto window = renderer->getWindow();
     int width, height;
     SDL_GL_GetDrawableSize(window, &width, &height);
@@ -89,11 +101,12 @@ void Application::initialize(Renderer *renderer) {
     _parameters = renderer->createShaderParameters();
 
     auto projMX = glm::perspective(45.0f, width / (float) height, 0.01f, 100.0f);
-    _parameters->setParameterMat4(ShaderParameterType::ProjectionMatrix, projMX);
+    _parameters->setMat4(ShaderParameterType::ProjectionMatrix, projMX);
 
     auto viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.5f, 3.0f));
-    _parameters->setParameterMat4(ShaderParameterType::ViewMatrix, viewMx);
-    _parameters->setParameterMat4(ShaderParameterType::ModelMatrix, glm::mat4());
+    _parameters->setMat4(ShaderParameterType::ViewMatrix, viewMx);
+    _parameters->setMat4(ShaderParameterType::ModelMatrix, glm::mat4());
+    _parameters->setTexture(ShaderParameterType::ColorTexture, _colorTexture.get());
 
     DrawCallProperties props;
     props.shader = _shader.get();

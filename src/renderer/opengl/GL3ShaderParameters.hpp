@@ -5,9 +5,11 @@
 #include <vector>
 #include <cstring>
 #include "renderer/ShaderParameters.hpp"
+#include "GL3Texture2D.hpp"
 
 enum class ParameterDataType {
-    Mat4
+    Mat4,
+    Tex2D
 };
 
 struct ParameterValue {
@@ -16,6 +18,7 @@ struct ParameterValue {
 
     struct {
         glm::mat4 mat4;
+        GL3Texture2D* tex2d;
     } value;
 };
 
@@ -26,7 +29,9 @@ public:
 
     virtual ~GL3ShaderParameters();
 
-    virtual void setParameterMat4(ShaderParameterType param, const glm::mat4 &value) override;
+    virtual void setMat4(ShaderParameterType param, const glm::mat4 &value) override;
+
+    virtual void setTexture(ShaderParameterType param, Texture2D* value) override;
 
     const std::vector<ParameterValue> &getValues() const;
 };

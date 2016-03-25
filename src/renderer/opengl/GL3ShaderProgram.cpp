@@ -51,6 +51,10 @@ namespace {
             {
                     .parameter=ShaderParameterType::ProjectionMatrix,
                     .uniform_name = "proj_matrix"
+            },
+            {
+                    .parameter = ShaderParameterType::ColorTexture,
+                    .uniform_name = "color_texture"
             }
     };
 
@@ -161,14 +165,6 @@ namespace {
 
         return prog;
     }
-
-    void setUniform(GLint uniform_loc, const ParameterValue &value) {
-        switch (value.data_type) {
-            case ParameterDataType::Mat4:
-                glUniformMatrix4fv(uniform_loc, 1, GL_FALSE, glm::value_ptr(value.value.mat4));
-                break;
-        }
-    }
 }
 
 GL3ShaderProgram::GL3ShaderProgram(FileLoader *loader, ShaderType type) {
@@ -209,10 +205,24 @@ GLint GL3ShaderProgram::getUniformLocation(ShaderParameterType param) {
 
 void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameters) {
     this->bind();
+    GLint texture_unit = 0;
 
     for (auto &parameter : parameters->getValues()) {
         auto uniform_loc = getUniformLocation(parameter.param_type);
-        setUniform(uniform_loc, parameter);
+
+        switch (parameter.data_type) {
+            case ParameterDataType::Mat4:
+                glUniformMatrix4fv(uniform_loc, 1, GL_FALSE, glm::value_ptr(parameter.value.mat4));
+                break;
+            case ParameterDataType::Tex2D:
+                glActiveTexture(GL_TEXTURE0 + texture_unit);
+                parameter.value.tex2d->bind();
+
+                glUniform1i(uniform_loc, texture_unit);
+
+                ++texture_unit;
+                break;
+        }
     }
 }
 

@@ -8,7 +8,7 @@
 #include <renderer/Renderer.hpp>
 #include <renderer/opengl/GL3Renderer.hpp>
 #include <util/DefaultFileLoader.hpp>
-#include "Application.hpp"
+#include "test/Application.hpp"
 
 namespace {
     std::unique_ptr<Timing> timing;

@@ -1,10 +1,12 @@
 #version 150
 
-out vec4 out_Color;
+uniform sampler2D color_texture;
+
+out vec4 out_color;
 
 in vec2 vert_tex_coord;
 
 void main()
 {
-    out_Color = vec4(vert_tex_coord.xy, 0.f, 1.f);
+    out_color = texture(color_texture, vert_tex_coord.xy);
 }
