@@ -1,0 +1,91 @@
+//
+//
+
+#include <SDL.h>
+
+#include <memory>
+#include <util/Timing.hpp>
+#include <renderer/Renderer.hpp>
+#include <renderer/opengl/GL3Renderer.hpp>
+#include <util/DefaultFileLoader.hpp>
+#include "Application.hpp"
+
+namespace {
+    std::unique_ptr<Timing> timing;
+    std::unique_ptr<Renderer> renderer;
+
+    std::unique_ptr<Application> app;
+
+    SDL_Window *window = nullptr;
+
+    void render() {
+        app->render(renderer.get(), timing.get());
+    }
+    bool process_events() {
+        SDL_Event event;
+
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    return false;
+                default:
+                    break;
+            }
+        }
+
+        return true;
+    }
+    void run_mainloop() {
+        while(true) {
+            timing->tick();
+
+            render();
+
+            if (!process_events()) {
+                return;
+            }
+        }
+    }
+    bool init() {
+        renderer.reset(new OGL3Renderer());
+        window = renderer->initialize(std::unique_ptr<FileLoader>(new DefaultFileLoader()));
+
+        // Check that the window was successfully created
+        if (window == NULL) {
+            // In the case that the window could not be made...
+            printf("Could not create window: %s\n", SDL_GetError());
+            return false;
+        }
+        SDL_ShowWindow(window);
+
+        timing.reset(new Timing());
+
+        app.reset(new Application());
+        app->initialize(renderer.get());
+
+        return true;
+    }
+    void deinit() {
+        app->deinitialize(renderer.get());
+
+        renderer->deinitialize();
+
+        app.reset();
+        timing.reset();
+        renderer.reset();
+    }
+}
+
+int main(int argc, char **argv) {
+    SDL_Init(0);
+
+    if (!init()) {
+        return 1;
+    }
+
+    run_mainloop();
+
+    deinit();
+
+    SDL_Quit();
+}

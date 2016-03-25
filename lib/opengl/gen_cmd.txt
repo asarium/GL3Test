@@ -1,0 +1,5 @@
+
+#!/bin/bash
+
+glad --api "gl=3.2" --profile core --extensions extensions.txt --generator c --spec gl --out-path release --no-loader
+glad --api "gl=3.2" --profile core --extensions extensions.txt --generator c-debug --spec gl --out-path debug --no-loader
