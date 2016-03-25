@@ -73,13 +73,13 @@ void Application::initialize(Renderer *renderer) {
     props.vertexLayout = _vertex_layout.get();
     props.state.depth_test = true;
 
-    _drawCall = renderer->createDrawCall(props);
+    _drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle, 9, IndexType::Integer);
 }
 
 void Application::render(Renderer *renderer, Timing *) {
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-    _drawCall->drawIndexed(PrimitiveType::Triangle, 9, IndexType::Integer);
+    _drawCall->draw();
 
     renderer->presentNextFrame();
 }

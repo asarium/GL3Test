@@ -202,6 +202,7 @@ SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
     glViewport(0, 0, width, height);
 
     _fileLoader = std::move(fileLoader);
+    _drawCallManager.reset(new GL3DrawCallManager());
 
     return _window;
 }
@@ -232,18 +233,15 @@ std::unique_ptr<ShaderProgram> OGL3Renderer::createShader(ShaderType type) {
     return std::unique_ptr<ShaderProgram>(new GL3ShaderProgram(_fileLoader.get(), type));
 }
 
-std::unique_ptr<DrawCall> OGL3Renderer::createDrawCall(const DrawCallProperties &props) {
-    GL3DrawCallProperties gl_props;
-    gl_props.state.depth_test = props.state.depth_test;
-    gl_props.vertexLayout = static_cast<GL3VertexLayout *>(props.vertexLayout);
-    gl_props.shader = static_cast<GL3ShaderProgram *>(props.shader);
-
-    return std::unique_ptr<DrawCall>(new GL3DrawCall(gl_props));
-}
-
 SDL_Window *OGL3Renderer::getWindow() {
     return _window;
 }
+
+DrawCallManager *OGL3Renderer::getDrawCallManager() {
+    return _drawCallManager.get();
+}
+
+
 
 
 

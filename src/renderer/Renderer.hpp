@@ -13,6 +13,7 @@
 #include "ShaderProgram.hpp"
 #include "util/FileLoader.hpp"
 #include "DrawCall.hpp"
+#include "DrawCallManager.hpp"
 
 class Renderer {
 public:
@@ -22,7 +23,7 @@ public:
 
     virtual SDL_Window *getWindow() = 0;
 
-    virtual void clear(const glm::vec4 &color) = 0;
+    virtual DrawCallManager* getDrawCallManager() = 0;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) = 0;
 
@@ -30,7 +31,7 @@ public:
 
     virtual std::unique_ptr<ShaderProgram> createShader(ShaderType type) = 0;
 
-    virtual std::unique_ptr<DrawCall> createDrawCall(const DrawCallProperties &props) = 0;
+    virtual void clear(const glm::vec4 &color) = 0;
 
     virtual void presentNextFrame() = 0;
 

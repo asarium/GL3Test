@@ -3,24 +3,6 @@
 
 #include "GL3DrawCall.hpp"
 
-namespace {
-    GLenum getPrimitiveType(PrimitiveType type) {
-        switch(type) {
-            case PrimitiveType::Triangle:
-                return GL_TRIANGLES;
-        }
-    }
-
-    GLenum getIndexType(IndexType type) {
-        switch(type) {
-            case IndexType::Short:
-                return GL_UNSIGNED_SHORT;
-            case IndexType::Integer:
-                return GL_UNSIGNED_INT;
-        }
-    }
-}
-
 GL3DrawCall::GL3DrawCall(const GL3DrawCallProperties &props) : _properties(props) {
 }
 
@@ -39,14 +21,12 @@ void GL3DrawCall::setGLState() {
     }
 }
 
-void GL3DrawCall::draw(PrimitiveType type, size_t count) {
+void GL3DrawCall::draw() {
     setGLState();
 
-    glDrawArrays(getPrimitiveType(type), 0, static_cast<GLsizei>(count));
-}
-
-void GL3DrawCall::drawIndexed(PrimitiveType type, size_t count, IndexType indexType) {
-    setGLState();
-
-    glDrawElements(getPrimitiveType(type), static_cast<GLsizei>(count), getIndexType(indexType), nullptr);
+    if (_properties.indexed) {
+        glDrawElements(_properties.primitive_type, _properties.count, _properties.index.type, nullptr);
+    } else {
+        glDrawArrays(_properties.primitive_type, 0, _properties.count);
+    }
 }
