@@ -3,15 +3,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 using namespace glm;
-
-struct VertexData {
-    glm::vec4 position;
-    glm::vec2 uv;
-};
 
 Application::Application() {
 }
@@ -19,40 +11,26 @@ Application::Application() {
 Application::~Application() {
 }
 
+struct VertexData {
+    glm::vec4 position;
+};
+
+
 void Application::initialize(Renderer *renderer) {
+    _model.reset(new AssimpModel());
+    _model->loadModel(renderer, "resources/teapots.DAE");
+
     std::vector<VertexData> data;
     std::vector<int> indices;
 
-    data.push_back({
-                           vec4(-0.15f, 0.0f, 0.0f, 1.0f),
-                           vec2(1.f, 0.f)
-                   });
-    data.push_back({
-                           vec4(0.15f, 0.0f, 0.0f, 1.0f),
-                           vec2(0.5f, 0.f)
-                   });
-    data.push_back({
-                           vec4(0.15f, 0.25f, 0.0f, 1.0f),
-                           vec2(1.f, 0.5f)
-                   });
-    data.push_back({
-                           vec4(-0.15f, 0.25f, 0.0f, 1.0f),
-                           vec2(0.3f, 0.5f)
-                   });
+    data.push_back({vec4(-0.15f, 0.0f, 0.0f, 1.0f)});
+    data.push_back({vec4(0.15f, 0.0f, 0.0f, 1.0f)});
+    data.push_back({vec4(0.15f, 0.25f, 0.0f, 1.0f)});
+    data.push_back({vec4(-0.15f, 0.25f, 0.0f, 1.0f)});
 
-
-    data.push_back({
-                           vec4(-0.5f, 0.25f, 0.0f, 1.0f),
-                           vec2(1.f, 1.f)
-                   });
-    data.push_back({
-                           vec4(0.5f, 0.25f, 0.0f, 1.0f),
-                           vec2(1.f, 0.5f)
-                   });
-    data.push_back({
-                           vec4(0.0f, 1.5f, 0.0f, 1.0f),
-                           vec2(.5f, 0.5f)
-                   });
+    data.push_back({vec4(-0.5f, 0.25f, 0.0f, 1.0f)});
+    data.push_back({vec4(0.5f, 0.25f, 0.0f, 1.0f)});
+    data.push_back({vec4(0.0f, 1.5f, 0.0f, 1.0f)});
 
     indices.push_back(0);
     indices.push_back(2);
@@ -78,64 +56,52 @@ void Application::initialize(Renderer *renderer) {
 
     _vertex_layout->addComponent(AttributeType::Position, DataFormat::Vec4, sizeof(VertexData), vertex_idx,
                                  offsetof(VertexData, position));
-    _vertex_layout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), vertex_idx,
-                                 offsetof(VertexData, uv));
     _vertex_layout->setIndexBuffer(index_idx);
 
     _vertex_layout->finalize();
-
-    _colorTexture = renderer->createTexture();
-    int x, y, n;
-    auto texture_data = stbi_load("resources/logo-full.png", &x, &y, &n, 0);
-    if (texture_data) {
-        _colorTexture->initialize(x, y, n == 3 ? TextureFormat::R8G8B8 : TextureFormat::R8G8B8A8, texture_data);
-
-        stbi_image_free(texture_data);
-    }
 
     auto window = renderer->getWindow();
     int width, height;
     SDL_GL_GetDrawableSize(window, &width, &height);
 
     _shader = renderer->createShader(ShaderType::Model);
-    _parameters = renderer->createShaderParameters();
-
-    auto projMX = glm::perspective(45.0f, width / (float) height, 0.01f, 100.0f);
-    _parameters->setMat4(ShaderParameterType::ProjectionMatrix, projMX);
-
-    auto viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.5f, 3.0f));
-    _parameters->setMat4(ShaderParameterType::ViewMatrix, viewMx);
-    _parameters->setMat4(ShaderParameterType::ModelMatrix, glm::mat4());
-    _parameters->setTexture(ShaderParameterType::ColorTexture, _colorTexture.get());
 
     DrawCallProperties props;
     props.shader = _shader.get();
     props.vertexLayout = _vertex_layout.get();
     props.state.depth_test = true;
-    props.parameters = _parameters.get();
 
     _drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle, 9,
                                                                   IndexType::Integer);
+
+    auto params = _drawCall->getParameters();
+    auto projMX = glm::perspective(60.0f, width / (float) height, 0.01f, 100.0f);
+    params->setMat4(ShaderParameterType::ProjectionMatrix, projMX);
+
+    auto viewMx = glm::translate(mat4(), -glm::vec3(0.0f, -20.f, 500.0f));
+    params->setMat4(ShaderParameterType::ViewMatrix, viewMx);
+    params->setMat4(ShaderParameterType::ModelMatrix, glm::mat4());
 }
 
 void Application::render(Renderer *renderer, Timing *) {
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-    _drawCall->draw();
+    int width, height;
+    SDL_GL_GetDrawableSize(renderer->getWindow(), &width, &height);
+
+    auto viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.5f, 500.0f));
+    //_drawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, viewMx);
+    //_drawCall->draw();
+
+    auto projMX = glm::perspective(45.0f, width / (float) height, 0.01f, 50000.0f);
+
+    _model->drawModel(renderer, projMX, viewMx, mat4());
 
     renderer->presentNextFrame();
 }
 
 void Application::deinitialize(Renderer *renderer) {
-    _vertex_layout.reset();
-
-    _vertex_buffer.reset();
-    _index_buffer.reset();
-
-    _shader.reset();
-    _parameters.reset();
-
-    _drawCall.reset();
+    _model.reset();
 }
 
 

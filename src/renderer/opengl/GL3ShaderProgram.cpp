@@ -55,6 +55,10 @@ namespace {
             {
                     .parameter = ShaderParameterType::ColorTexture,
                     .uniform_name = "color_texture"
+            },
+            {
+                    .parameter = ShaderParameterType::WindowSize,
+                    .uniform_name = "window_size"
             }
     };
 
@@ -130,7 +134,6 @@ namespace {
             glAttachShader(prog, part);
         }
 
-        // TODO: Bind attribute locations here
         for (auto &attribute : attribute_mappings) {
             glBindAttribLocation(prog, GL3VertexLayout::mapAttributeLocation(attribute.attribute), attribute.name);
         }
@@ -211,6 +214,9 @@ void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameter
         auto uniform_loc = getUniformLocation(parameter.param_type);
 
         switch (parameter.data_type) {
+            case ParameterDataType::Vec2:
+                glUniform2fv(uniform_loc, 1, glm::value_ptr(parameter.value.vec2));
+                break;
             case ParameterDataType::Mat4:
                 glUniformMatrix4fv(uniform_loc, 1, GL_FALSE, glm::value_ptr(parameter.value.mat4));
                 break;

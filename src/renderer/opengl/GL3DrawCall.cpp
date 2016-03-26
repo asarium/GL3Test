@@ -4,6 +4,7 @@
 #include "GL3DrawCall.hpp"
 
 GL3DrawCall::GL3DrawCall(const GL3DrawCallProperties &props) : _properties(props) {
+    _parameters.reset(new GL3ShaderParameters());
 }
 
 GL3DrawCall::~GL3DrawCall() {
@@ -11,7 +12,7 @@ GL3DrawCall::~GL3DrawCall() {
 }
 
 void GL3DrawCall::setGLState() {
-    _properties.shader->bindAndSetParameters(_properties.parameters);
+    _properties.shader->bindAndSetParameters(_parameters.get());
     _properties.vertexLayout->bind();
 
     if (_properties.state.depth_test) {
@@ -32,5 +33,5 @@ void GL3DrawCall::draw() {
 }
 
 ShaderParameters *GL3DrawCall::getParameters() {
-    return _properties.parameters;
+    return _parameters.get();
 }

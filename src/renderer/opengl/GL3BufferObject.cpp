@@ -35,8 +35,7 @@ void GL3BufferObject::bind() {
 }
 
 void GL3BufferObject::setData(void *data, size_t size, BufferUsage usage) {
-    GLenum gl_type = getGLType(_type);
-    glBindBuffer(gl_type, _handle);
+    this->bind();
 
     GLenum gl_usage;
     switch (usage) {
@@ -51,6 +50,7 @@ void GL3BufferObject::setData(void *data, size_t size, BufferUsage usage) {
             break;
     }
 
+    GLenum gl_type = getGLType(_type);
     glBufferData(gl_type, size, data, gl_usage);
 
     glBindBuffer(gl_type, 0);

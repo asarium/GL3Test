@@ -1,8 +1,14 @@
 # top-level files
 set(file_root
+        main.cpp
+        )
+
+set(file_test
         test/Application.cpp
         test/Application.hpp
-        main.cpp
+        test/AssimpModel.cpp
+        test/AssimpModel.hpp
+        test/stb_image.h
         )
 
 set(file_renderer
@@ -45,6 +51,7 @@ set(file_util
 
 # the source groups
 source_group("" FILES ${file_root})
+source_group("Test" FILES ${file_test})
 source_group("Renderer" FILES ${file_renderer})
 source_group("Renderer\\opengl" FILES ${file_renderer_opengl})
 source_group("Util" FILES ${file_util})
@@ -52,6 +59,7 @@ source_group("Util" FILES ${file_util})
 # append all files to the file_root
 set(file_root
         ${file_root}
+        ${file_test}
         ${file_renderer}
         ${file_renderer_opengl}
         ${file_util}

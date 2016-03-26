@@ -9,6 +9,8 @@
 class GL3DrawCall : public DrawCall {
     GL3DrawCallProperties _properties;
 
+    std::unique_ptr<GL3ShaderParameters> _parameters;
+
     void setGLState();
 public:
     GL3DrawCall(const GL3DrawCallProperties &);

@@ -11,7 +11,6 @@ struct PipelineState {
 
 struct DrawCallProperties {
     ShaderProgram *shader;
-    ShaderParameters *parameters;
     VertexLayout *vertexLayout;
     PipelineState state;
 };

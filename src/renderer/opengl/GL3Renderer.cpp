@@ -241,10 +241,6 @@ DrawCallManager *OGL3Renderer::getDrawCallManager() {
     return _drawCallManager.get();
 }
 
-std::unique_ptr<ShaderParameters> OGL3Renderer::createShaderParameters() {
-    return std::unique_ptr<ShaderParameters>(new GL3ShaderParameters());
-}
-
 std::unique_ptr<Texture2D> OGL3Renderer::createTexture() {
     return std::unique_ptr<Texture2D>(new GL3Texture2D());
 }

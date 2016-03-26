@@ -1,6 +1,7 @@
 //
 //
 
+#include <iostream>
 #include "GL3VertexLayout.hpp"
 
 GL3VertexLayout::GL3VertexLayout() : _vaoHandle(0), _haveIndexBuffer(false) {

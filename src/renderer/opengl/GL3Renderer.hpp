@@ -26,8 +26,6 @@ public:
 
     virtual std::unique_ptr<ShaderProgram> createShader(ShaderType type) override;
 
-    virtual std::unique_ptr<ShaderParameters> createShaderParameters() override;
-
     virtual std::unique_ptr<Texture2D> createTexture() override;
 
     virtual void clear(const glm::vec4& color) override;

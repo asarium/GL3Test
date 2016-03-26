@@ -32,8 +32,6 @@ public:
 
     virtual std::unique_ptr<ShaderProgram> createShader(ShaderType type) = 0;
 
-    virtual std::unique_ptr<ShaderParameters> createShaderParameters() = 0;
-
     virtual std::unique_ptr<Texture2D> createTexture() = 0;
 
     virtual void clear(const glm::vec4 &color) = 0;

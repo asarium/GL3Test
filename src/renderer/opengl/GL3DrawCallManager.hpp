@@ -10,7 +10,6 @@ struct GL3PipelineState {
 
 struct GL3DrawCallProperties {
     GL3ShaderProgram *shader;
-    GL3ShaderParameters* parameters;
     GL3VertexLayout *vertexLayout;
     GL3PipelineState state;
 

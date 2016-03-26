@@ -12,7 +12,7 @@ enum class AttributeType {
     Position,
     TexCoord,
     Normal,
-    Color ,
+    Color,
 };
 
 enum class DataFormat {
