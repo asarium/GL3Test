@@ -32,22 +32,24 @@ namespace {
 }
 
 std::unique_ptr<DrawCall> GL3DrawCallManager::createDrawCall(const DrawCallProperties &props, PrimitiveType type,
-                                                             size_t count) {
+                                                             size_t offset, size_t count) {
     GL3DrawCallProperties gl_props = convertProperties(props);
 
     gl_props.primitive_type = getPrimitiveType(type);
     gl_props.count = static_cast<GLsizei>(count);
+    gl_props.offset = static_cast<GLint>(offset);
     gl_props.indexed = false;
 
     return std::unique_ptr<DrawCall>(new GL3DrawCall(gl_props));
 }
 
 std::unique_ptr<DrawCall> GL3DrawCallManager::createIndexedCall(const DrawCallProperties &props, PrimitiveType type,
-                                                                size_t count, IndexType indexType) {
+                                                                size_t offset, size_t count, IndexType indexType) {
     GL3DrawCallProperties gl_props = convertProperties(props);
 
     gl_props.primitive_type = getPrimitiveType(type);
     gl_props.count = static_cast<GLsizei>(count);
+    gl_props.offset = static_cast<GLint>(offset);
 
     gl_props.indexed = true;
     gl_props.index.type = getIndexType(indexType);

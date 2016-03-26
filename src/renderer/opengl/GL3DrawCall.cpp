@@ -26,9 +26,10 @@ void GL3DrawCall::draw() {
     setGLState();
 
     if (_properties.indexed) {
-        glDrawElements(_properties.primitive_type, _properties.count, _properties.index.type, nullptr);
+        glDrawElementsBaseVertex(_properties.primitive_type, _properties.count, _properties.index.type, nullptr,
+                                 _properties.offset);
     } else {
-        glDrawArrays(_properties.primitive_type, 0, _properties.count);
+        glDrawArrays(_properties.primitive_type, _properties.offset, _properties.count);
     }
 }
 

@@ -135,7 +135,7 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
         props.state.depth_test = true;
 
         auto drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle,
-                                                                          indices.size(), IndexType::Integer);
+                                                                          0, indices.size(), IndexType::Integer);
 
         _bufferObects.push_back(std::move(vertex_buffer));
         _bufferObects.push_back(std::move(index_buffer));
@@ -154,24 +154,28 @@ void AssimpModel::drawModel(Renderer *renderer, const glm::mat4 &projection, con
 void AssimpModel::recursiveRender(Renderer *renderer, const aiNode *node, const glm::mat4 &projection,
                                   const glm::mat4 &view, const glm::mat4 &model) {
 
-    auto aiTransform = node->mTransformation;
-    aiTransform.Transpose(); // Row major -> column major
-    auto transform = glm::make_mat4x4(&aiTransform.a1); // I hope this works...
+    auto final_transform = model;
+    if (node->mParent) {
+        auto aiTransform = node->mTransformation;
+        aiTransform.Transpose(); // Row major -> column major
+        auto transform = glm::make_mat4x4(&aiTransform.a1); // I hope this works...
 
-    transform = model * transform;
+        final_transform = model * transform;
+    }
+
     for (size_t i = 0; i < node->mNumMeshes; ++i) {
         auto &drawCall = _sceneDrawCalls[node->mMeshes[i]];
 
         auto params = drawCall->getParameters();
         params->setMat4(ShaderParameterType::ProjectionMatrix, projection);
         params->setMat4(ShaderParameterType::ViewMatrix, view);
-        params->setMat4(ShaderParameterType::ModelMatrix, glm::mat4());
+        params->setMat4(ShaderParameterType::ModelMatrix, final_transform);
 
         drawCall->draw();
     }
 
     for (size_t i = 0; i < node->mNumChildren; ++i) {
-        recursiveRender(renderer, node->mChildren[i], projection, view, transform);
+        recursiveRender(renderer, node->mChildren[i], projection, view, final_transform);
     }
 }
 

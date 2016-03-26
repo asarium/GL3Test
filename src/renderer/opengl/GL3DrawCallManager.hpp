@@ -15,6 +15,7 @@ struct GL3DrawCallProperties {
 
     GLenum primitive_type;
     GLsizei count;
+    GLint offset;
 
     bool indexed;
     struct {
@@ -27,10 +28,10 @@ public:
     virtual ~GL3DrawCallManager() {};
 
     virtual std::unique_ptr<DrawCall> createDrawCall(const DrawCallProperties &props, PrimitiveType type,
-                                                     size_t count) override;
+                                                     size_t offset, size_t count) override;
 
     virtual std::unique_ptr<DrawCall> createIndexedCall(const DrawCallProperties &props, PrimitiveType type,
-                                                        size_t count, IndexType indexType) override;
+                                                        size_t offset, size_t count, IndexType indexType) override;
 };
 
 

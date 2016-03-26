@@ -29,8 +29,8 @@ public:
     virtual ~DrawCallManager() { }
 
     virtual std::unique_ptr<DrawCall> createDrawCall(const DrawCallProperties &props, PrimitiveType type,
-                                                     size_t count) = 0;
+                                                     size_t offset, size_t count) = 0;
 
     virtual std::unique_ptr<DrawCall> createIndexedCall(const DrawCallProperties &props, PrimitiveType type,
-                                                        size_t count, IndexType indexType) = 0;
+                                                        size_t offset, size_t count, IndexType indexType) = 0;
 };

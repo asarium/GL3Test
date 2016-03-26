@@ -7,14 +7,8 @@
 class Application {
     std::unique_ptr<AssimpModel> _model;
 
-    std::unique_ptr<BufferObject> _vertex_buffer;
-    std::unique_ptr<BufferObject> _index_buffer;
-
-    std::unique_ptr<VertexLayout> _vertex_layout;
-
-    std::unique_ptr<ShaderProgram> _shader;
-
-    std::unique_ptr<DrawCall> _drawCall;
+    glm::mat4 _projMx;
+    glm::mat4 _viewMx;
 public:
     Application();
 
