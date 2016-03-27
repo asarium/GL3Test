@@ -19,7 +19,7 @@ namespace {
     SDL_Window *window = nullptr;
 
     void render() {
-        app->render(renderer.get(), timing.get());
+        app->render(renderer.get());
     }
     bool process_events() {
         SDL_Event event;
@@ -62,7 +62,7 @@ namespace {
         timing.reset(new Timing());
 
         app.reset(new Application());
-        app->initialize(renderer.get());
+        app->initialize(renderer.get(), timing.get());
 
         return true;
     }
