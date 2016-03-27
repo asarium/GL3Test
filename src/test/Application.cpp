@@ -21,14 +21,14 @@ void Application::initialize(Renderer *renderer, Timing* time) {
     _timing = time;
 
     _model.reset(new AssimpModel());
-    _model->loadModel(renderer, "resources/teapots.DAE");
+    _model->loadModel(renderer, "resources/duck.dae");
 
     int width, height;
     SDL_GL_GetDrawableSize(renderer->getWindow(), &width, &height);
 
-    _viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.0f, 60.0f));
+    _viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.0f, 180.0f));
 
-    _projMx = glm::perspectiveFov(160.0f, (float)width, (float)height, 0.01f, 50000.0f);
+    _projMx = glm::perspectiveFov(45.0f, (float)width, (float)height, 0.01f, 50000.0f);
 }
 
 void Application::render(Renderer *renderer) {
