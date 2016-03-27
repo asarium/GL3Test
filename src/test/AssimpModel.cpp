@@ -5,8 +5,6 @@
 
 #include <assimp/postprocess.h>
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/LogStream.hpp>
-#include <assimp/scene.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
@@ -122,15 +120,15 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
         meshOffset += mesh->mNumVertices;
     }
 
-    _vertexBufferObect = renderer->createBuffer(BufferType::Vertex);
-    _vertexBufferObect->setData(vertex_data.data(), vertex_data.size() * sizeof(vertex_data[0]), BufferUsage::Static);
+    _vertexBuffer = renderer->createBuffer(BufferType::Vertex);
+    _vertexBuffer->setData(vertex_data.data(), vertex_data.size() * sizeof(vertex_data[0]), BufferUsage::Static);
 
-    _indexBufferObect = renderer->createBuffer(BufferType::Index);
-    _indexBufferObect->setData(indices.data(), indices.size() * sizeof(indices[0]), BufferUsage::Static);
+    _indexBuffer = renderer->createBuffer(BufferType::Index);
+    _indexBuffer->setData(indices.data(), indices.size() * sizeof(indices[0]), BufferUsage::Static);
 
     _vertexLayout = renderer->createVertexLayout();
-    auto vertex_idx = _vertexLayout->attachBufferObject(_vertexBufferObect.get());
-    auto index_idx = _vertexLayout->attachBufferObject(_indexBufferObect.get());
+    auto vertex_idx = _vertexLayout->attachBufferObject(_vertexBuffer.get());
+    auto index_idx = _vertexLayout->attachBufferObject(_indexBuffer.get());
 
     _vertexLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), vertex_idx,
                                 offsetof(VertexData, position));

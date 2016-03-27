@@ -15,8 +15,8 @@ class AssimpModel {
 
     std::unique_ptr<VertexLayout> _vertexLayout;
 
-    std::unique_ptr<BufferObject> _vertexBufferObect;
-    std::unique_ptr<BufferObject> _indexBufferObect;
+    std::unique_ptr<BufferObject> _vertexBuffer;
+    std::unique_ptr<BufferObject> _indexBuffer;
 
     bool loadScene(const std::string &path);
 
