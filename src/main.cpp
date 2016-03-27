@@ -29,6 +29,7 @@ namespace {
                 case SDL_QUIT:
                     return false;
                 default:
+                    app->handleEvent(&event);
                     break;
             }
         }

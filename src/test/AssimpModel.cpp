@@ -12,6 +12,9 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 namespace {
     struct VertexData {
         glm::vec3 position;
@@ -56,6 +59,15 @@ AssimpModel::AssimpModel() : _scene(nullptr) {
 bool AssimpModel::loadModel(Renderer *renderer, const std::string &path) {
     if (!loadScene(path)) {
         return false;
+    }
+
+    _texture = renderer->createTexture();
+    int x, y, n;
+    auto texture_data = stbi_load("resources/logo-full.png", &x, &y, &n, 0);
+    if (texture_data) {
+        _texture->initialize(x, y, n == 3 ? TextureFormat::R8G8B8 : TextureFormat::R8G8B8A8, texture_data);
+
+        stbi_image_free(texture_data);
     }
 
     if (!createVertexLayouts(renderer)) {
@@ -136,6 +148,7 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
 
         auto drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle,
                                                                           0, indices.size(), IndexType::Integer);
+        drawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _texture.get());
 
         _bufferObects.push_back(std::move(vertex_buffer));
         _bufferObects.push_back(std::move(index_buffer));
@@ -153,7 +166,6 @@ void AssimpModel::drawModel(Renderer *renderer, const glm::mat4 &projection, con
 
 void AssimpModel::recursiveRender(Renderer *renderer, const aiNode *node, const glm::mat4 &projection,
                                   const glm::mat4 &view, const glm::mat4 &model) {
-
     auto final_transform = model;
     if (node->mParent) {
         auto aiTransform = node->mTransformation;

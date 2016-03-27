@@ -35,4 +35,10 @@ void Application::deinitialize(Renderer *renderer) {
     _model.reset();
 }
 
+void Application::handleEvent(SDL_Event* event) {
+
+}
+
+
+
 

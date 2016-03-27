@@ -44,8 +44,8 @@ void GL3Texture2D::initialize(size_t width, size_t height, TextureFormat format,
     _props.height = static_cast<GLsizei>(height);
 
     glTexImage2D(GL_TEXTURE_2D, 0, _props.internal_format, _props.width, _props.height, 0, _props.format, GL_UNSIGNED_BYTE, data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
 void GL3Texture2D::updateDate(void *data) {

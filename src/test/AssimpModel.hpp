@@ -9,6 +9,7 @@ class AssimpModel {
     const aiScene *_scene;
 
     std::unique_ptr<ShaderProgram> _shaderProgram;
+    std::unique_ptr<Texture2D> _texture;
 
     std::vector<std::unique_ptr<DrawCall>> _sceneDrawCalls;
 
