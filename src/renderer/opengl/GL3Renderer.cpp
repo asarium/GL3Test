@@ -172,9 +172,7 @@ SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
         return nullptr;
     }
     SDL_GL_MakeCurrent(_window, _context);
-    if (SDL_GL_SetSwapInterval(-1) == -1) {
-        SDL_GL_SetSwapInterval(1);
-    }
+    SDL_GL_SetSwapInterval(1);
 
     if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
         deinitialize();

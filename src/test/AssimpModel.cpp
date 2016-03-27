@@ -13,6 +13,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 
 namespace {
@@ -93,11 +94,9 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
 
     std::vector<VertexData> vertex_data;
     std::vector<uint32_t> indices;
+    uint32_t meshOffset = 0;
 
     for (size_t i = 0; i < _scene->mNumMeshes; ++i) {
-        vertex_data.clear();
-        indices.clear();
-
         auto mesh = _scene->mMeshes[i];
 
         for (size_t vert = 0; vert < mesh->mNumVertices; ++vert) {
@@ -115,45 +114,52 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
         for (size_t index = 0; index < mesh->mNumFaces; ++index) {
             auto &face = mesh->mFaces[index];
             assert(face.mNumIndices == 3);
-            indices.push_back(face.mIndices[0]);
-            indices.push_back(face.mIndices[1]);
-            indices.push_back(face.mIndices[2]);
+            indices.push_back(face.mIndices[0] + meshOffset);
+            indices.push_back(face.mIndices[1] + meshOffset);
+            indices.push_back(face.mIndices[2] + meshOffset);
         }
+        // We need to keep track of where the current mesh begins to make sure that the indices still match
+        meshOffset += mesh->mNumVertices;
+    }
 
-        auto vertex_buffer = renderer->createBuffer(BufferType::Vertex);
-        vertex_buffer->setData(vertex_data.data(), vertex_data.size() * sizeof(vertex_data[0]), BufferUsage::Static);
+    _vertexBufferObect = renderer->createBuffer(BufferType::Vertex);
+    _vertexBufferObect->setData(vertex_data.data(), vertex_data.size() * sizeof(vertex_data[0]), BufferUsage::Static);
 
-        auto index_buffer = renderer->createBuffer(BufferType::Index);
-        index_buffer->setData(indices.data(), indices.size() * sizeof(indices[0]), BufferUsage::Static);
+    _indexBufferObect = renderer->createBuffer(BufferType::Index);
+    _indexBufferObect->setData(indices.data(), indices.size() * sizeof(indices[0]), BufferUsage::Static);
 
-        auto layout = renderer->createVertexLayout();
-        auto vertex_idx = layout->attachBufferObject(vertex_buffer.get());
-        auto index_idx = layout->attachBufferObject(index_buffer.get());
+    _vertexLayout = renderer->createVertexLayout();
+    auto vertex_idx = _vertexLayout->attachBufferObject(_vertexBufferObect.get());
+    auto index_idx = _vertexLayout->attachBufferObject(_indexBufferObect.get());
 
-        layout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), vertex_idx,
-                             offsetof(VertexData, position));
-        layout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), vertex_idx,
-                             offsetof(VertexData, normal));
-        layout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), vertex_idx,
-                             offsetof(VertexData, tex_coord));
+    _vertexLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), vertex_idx,
+                                offsetof(VertexData, position));
+    _vertexLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), vertex_idx,
+                                offsetof(VertexData, normal));
+    _vertexLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), vertex_idx,
+                                offsetof(VertexData, tex_coord));
 
-        layout->setIndexBuffer(index_idx);
+    _vertexLayout->setIndexBuffer(index_idx);
 
-        layout->finalize();
+    _vertexLayout->finalize();
+
+    meshOffset = 0;
+    for (size_t i = 0; i < _scene->mNumMeshes; ++i) {
+        auto mesh = _scene->mMeshes[i];
 
         DrawCallProperties props;
         props.shader = _shaderProgram.get();
-        props.vertexLayout = layout.get();
+        props.vertexLayout = _vertexLayout.get();
         props.state.depth_test = true;
 
         auto drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle,
-                                                                          0, indices.size(), IndexType::Integer);
+                                                                          meshOffset, mesh->mNumFaces * 3,
+                                                                          IndexType::Integer);
         drawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _texture.get());
 
-        _bufferObects.push_back(std::move(vertex_buffer));
-        _bufferObects.push_back(std::move(index_buffer));
-        _vertexLayouts.push_back(std::move(layout));
         _sceneDrawCalls.push_back(std::move(drawCall));
+        // We need to keep track of where the current mesh begins to make sure that the indices still match
+        meshOffset += mesh->mNumFaces * 3;
     }
 
     return true;

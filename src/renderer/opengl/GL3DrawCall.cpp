@@ -2,6 +2,20 @@
 //
 
 #include "GL3DrawCall.hpp"
+#include "GL3DrawCallManager.hpp"
+
+namespace {
+    size_t getTypeSize(GLenum type) {
+        switch (type) {
+            case GL_UNSIGNED_SHORT:
+                return sizeof(GLshort);
+            case GL_UNSIGNED_INT:
+                return sizeof(GLint);
+            default:
+                return sizeof(GLint);
+        }
+    }
+}
 
 GL3DrawCall::GL3DrawCall(const GL3DrawCallProperties &props) : _properties(props) {
     _parameters.reset(new GL3ShaderParameters());
@@ -26,8 +40,8 @@ void GL3DrawCall::draw() {
     setGLState();
 
     if (_properties.indexed) {
-        glDrawElementsBaseVertex(_properties.primitive_type, _properties.count, _properties.index.type, nullptr,
-                                 _properties.offset);
+        glDrawElements(_properties.primitive_type, _properties.count, _properties.index.type,
+                       reinterpret_cast<void *>(_properties.offset * getTypeSize(_properties.index.type)));
     } else {
         glDrawArrays(_properties.primitive_type, _properties.offset, _properties.count);
     }

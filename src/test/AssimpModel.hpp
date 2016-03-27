@@ -13,8 +13,10 @@ class AssimpModel {
 
     std::vector<std::unique_ptr<DrawCall>> _sceneDrawCalls;
 
-    std::vector<std::unique_ptr<VertexLayout>> _vertexLayouts;
-    std::vector<std::unique_ptr<BufferObject>> _bufferObects;
+    std::unique_ptr<VertexLayout> _vertexLayout;
+
+    std::unique_ptr<BufferObject> _vertexBufferObect;
+    std::unique_ptr<BufferObject> _indexBufferObect;
 
     bool loadScene(const std::string &path);
 
