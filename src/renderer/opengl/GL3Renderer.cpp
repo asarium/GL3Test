@@ -122,6 +122,9 @@ namespace {
         return true;
     }
 
+	void post_callback(const char *name, void *funcptr, int len_args, ...) {
+
+	}
 #endif
 }
 
@@ -149,7 +152,7 @@ SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     int context_flags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
@@ -178,6 +181,9 @@ SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
         deinitialize();
         return nullptr;
     }
+#ifndef NDEBUG
+	glad_set_post_callback(&post_callback);
+#endif;
 
 #ifndef NDEBUG
     // Set up the debug extension if present
@@ -200,7 +206,9 @@ SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
     glViewport(0, 0, width, height);
 
     _fileLoader = std::move(fileLoader);
+
     _drawCallManager.reset(new GL3DrawCallManager());
+    _lightingManager.reset(new GL3LightingManager());
 
     return _window;
 }
@@ -239,9 +247,15 @@ DrawCallManager *OGL3Renderer::getDrawCallManager() {
     return _drawCallManager.get();
 }
 
+LightingManager *OGL3Renderer::getLightingManager() {
+    return _lightingManager.get();
+}
+
 std::unique_ptr<Texture2D> OGL3Renderer::createTexture() {
     return std::unique_ptr<Texture2D>(new GL3Texture2D());
 }
+
+
 
 
 

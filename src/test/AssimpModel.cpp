@@ -11,7 +11,6 @@
 #include <glm/gtx/string_cast.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
-
 #include "stb_image.h"
 
 namespace {
@@ -30,8 +29,8 @@ namespace {
         loggerCreated = true;
 
         // Change this line to normal if you not want to analyse the import process
-        //Assimp::Logger::LogSeverity severity = Assimp::Logger::NORMAL;
-        Assimp::Logger::LogSeverity severity = Assimp::Logger::VERBOSE;
+        Assimp::Logger::LogSeverity severity = Assimp::Logger::NORMAL;
+        //Assimp::Logger::LogSeverity severity = Assimp::Logger::VERBOSE;
 
         // Create a logger instance for Console Output
         Assimp::DefaultLogger::create("", severity, aiDefaultLogStream_STDOUT);
@@ -61,10 +60,23 @@ bool AssimpModel::loadModel(Renderer *renderer, const std::string &path) {
     }
 
     _texture = renderer->createTexture();
-    int x, y, n;
-    auto texture_data = stbi_load("resources/logo-full.png", &x, &y, &n, 0);
+    int width, height, components;
+    auto texture_data = stbi_load("resources/duckCM.tga", &width, &height, &components, 0);
     if (texture_data) {
-        _texture->initialize(x, y, n == 3 ? TextureFormat::R8G8B8 : TextureFormat::R8G8B8A8, texture_data);
+        auto stride = width * components;
+        std::unique_ptr<uint8_t[]> buffer(new uint8_t[stride]);
+        size_t height_half = width / 2;
+        for (size_t y = 0; y < height_half; ++y)
+        {
+            uint8_t* top = texture_data + y * stride;
+            uint8_t* bottom = texture_data + (height - y - 1) * stride;
+
+            memcpy(buffer.get(), top, stride);
+            memcpy(top, bottom, stride);
+            memcpy(bottom, buffer.get(), stride);
+        }
+
+        _texture->initialize(width, height, components == 3 ? TextureFormat::R8G8B8 : TextureFormat::R8G8B8A8, texture_data);
 
         stbi_image_free(texture_data);
     }
@@ -92,10 +104,16 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
 
     std::vector<VertexData> vertex_data;
     std::vector<uint32_t> indices;
-    uint32_t meshOffset = 0;
+
+    std::unordered_map<uint32_t, std::pair<size_t, size_t>> offset_length_mapping;
+    uint32_t index_offset = 0;
+    size_t index_begin = 0;
 
     for (size_t i = 0; i < _scene->mNumMeshes; ++i) {
         auto mesh = _scene->mMeshes[i];
+        if (mesh->mFaces[0].mNumIndices != 3) {
+            continue;
+        }
 
         for (size_t vert = 0; vert < mesh->mNumVertices; ++vert) {
             const aiVector3D &pPos = mesh->mVertices[vert];
@@ -112,12 +130,14 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
         for (size_t index = 0; index < mesh->mNumFaces; ++index) {
             auto &face = mesh->mFaces[index];
             assert(face.mNumIndices == 3);
-            indices.push_back(face.mIndices[0] + meshOffset);
-            indices.push_back(face.mIndices[1] + meshOffset);
-            indices.push_back(face.mIndices[2] + meshOffset);
+            indices.push_back(face.mIndices[0] + index_offset);
+            indices.push_back(face.mIndices[1] + index_offset);
+            indices.push_back(face.mIndices[2] + index_offset);
         }
-        // We need to keep track of where the current mesh begins to make sure that the indices still match
-        meshOffset += mesh->mNumVertices;
+
+        offset_length_mapping.insert(std::make_pair(i, std::make_pair(index_begin, mesh->mNumFaces * 3)));
+        index_offset += mesh->mNumVertices;
+        index_begin += mesh->mNumFaces * 3;
     }
 
     _vertexBuffer = renderer->createBuffer(BufferType::Vertex);
@@ -131,33 +151,27 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
     auto index_idx = _vertexLayout->attachBufferObject(_indexBuffer.get());
 
     _vertexLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), vertex_idx,
-                                offsetof(VertexData, position));
+                            offsetof(VertexData, position));
     _vertexLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), vertex_idx,
-                                offsetof(VertexData, normal));
+                            offsetof(VertexData, normal));
     _vertexLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), vertex_idx,
-                                offsetof(VertexData, tex_coord));
+                            offsetof(VertexData, tex_coord));
 
     _vertexLayout->setIndexBuffer(index_idx);
 
     _vertexLayout->finalize();
 
-    meshOffset = 0;
-    for (size_t i = 0; i < _scene->mNumMeshes; ++i) {
-        auto mesh = _scene->mMeshes[i];
-
+    for (auto& entry : offset_length_mapping) {
         DrawCallProperties props;
         props.shader = _shaderProgram.get();
         props.vertexLayout = _vertexLayout.get();
         props.state.depth_test = true;
 
         auto drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle,
-                                                                          meshOffset, mesh->mNumFaces * 3,
-                                                                          IndexType::Integer);
+            entry.second.first, entry.second.second, IndexType::Integer);
         drawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _texture.get());
 
-        _sceneDrawCalls.push_back(std::move(drawCall));
-        // We need to keep track of where the current mesh begins to make sure that the indices still match
-        meshOffset += mesh->mNumFaces * 3;
+        _sceneDrawCalls.insert(std::make_pair(entry.first, std::move(drawCall)));
     }
 
     return true;
@@ -171,16 +185,20 @@ void AssimpModel::drawModel(Renderer *renderer, const glm::mat4 &projection, con
 void AssimpModel::recursiveRender(Renderer *renderer, const aiNode *node, const glm::mat4 &projection,
                                   const glm::mat4 &view, const glm::mat4 &model) {
     auto final_transform = model;
-    if (node->mParent) {
-        auto aiTransform = node->mTransformation;
-        aiTransform.Transpose(); // Row major -> column major
-        auto transform = glm::make_mat4x4(&aiTransform.a1); // I hope this works...
 
-        final_transform = model * transform;
-    }
+    auto aiTransform = node->mTransformation;
+    aiTransform.Transpose(); // Row major -> column major
+    auto transform = glm::make_mat4x4(&aiTransform.a1); // I hope this works...
+
+    final_transform = model * transform;
 
     for (size_t i = 0; i < node->mNumMeshes; ++i) {
-        auto &drawCall = _sceneDrawCalls[node->mMeshes[i]];
+        auto it = _sceneDrawCalls.find(node->mMeshes[i]);
+        if (it == _sceneDrawCalls.end()) {
+            continue;
+        }
+
+        auto &drawCall = it->second;
 
         auto params = drawCall->getParameters();
         params->setMat4(ShaderParameterType::ProjectionMatrix, projection);

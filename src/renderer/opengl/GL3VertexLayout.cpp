@@ -78,6 +78,7 @@ GLuint GL3VertexLayout::mapAttributeLocation(AttributeType type) {
         case AttributeType::Color:
             return 3;
     }
+	return 0;
 }
 
 void GL3VertexLayout::bind() {

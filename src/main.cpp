@@ -39,6 +39,7 @@ namespace {
     void run_mainloop() {
         while(true) {
             timing->tick();
+			printf("%2.0f\n", 1.f / timing->getFrametime());
 
             render();
 
@@ -77,6 +78,7 @@ namespace {
     }
 }
 
+#undef main
 int main(int argc, char **argv) {
     SDL_Init(0);
 

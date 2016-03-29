@@ -11,6 +11,7 @@ namespace {
             case TextureFormat::R8G8B8:
                 return GL_RGB;
         }
+        return GL_RGBA;
     }
 
     GLenum getFormat(TextureFormat format) {
@@ -20,6 +21,7 @@ namespace {
             case TextureFormat::R8G8B8:
                 return GL_RGB;
         }
+		return 0;
     }
 }
 

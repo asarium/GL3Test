@@ -15,6 +15,7 @@
 #include "DrawCall.hpp"
 #include "DrawCallManager.hpp"
 #include "ShaderParameters.hpp"
+#include "LightingManager.hpp"
 
 class Renderer {
 public:
@@ -25,6 +26,8 @@ public:
     virtual SDL_Window *getWindow() = 0;
 
     virtual DrawCallManager* getDrawCallManager() = 0;
+
+    virtual LightingManager* getLightingManager() = 0;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) = 0;
 

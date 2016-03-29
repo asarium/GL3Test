@@ -10,6 +10,7 @@ namespace {
             case PrimitiveType::Triangle:
                 return GL_TRIANGLES;
         }
+        return GL_TRIANGLES;
     }
 
     GLenum getIndexType(IndexType type) {
@@ -19,6 +20,7 @@ namespace {
             case IndexType::Integer:
                 return GL_UNSIGNED_INT;
         }
+        return GL_UNSIGNED_INT;
     }
 
     GL3DrawCallProperties convertProperties(const DrawCallProperties& props) {

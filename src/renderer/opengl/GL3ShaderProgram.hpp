@@ -9,14 +9,17 @@
 #include <util/FileLoader.hpp>
 #include <renderer/ShaderParameters.hpp>
 
-struct ParameterLocation {
-    ShaderParameterType param;
-    GLint location;
+#include <unordered_map>
+
+enum class GL3ShaderTypes {
+    DeferredLightningPass
 };
+
+const size_t NUM_SHADER_PARAMETER = 5; // Must match the actual number of parameters!
 
 class GL3ShaderProgram : public ShaderProgram {
     GLuint _handle;
-    std::vector<ParameterLocation> _uniformLocations;
+    GLint _uniformLocations[NUM_SHADER_PARAMETER];
 
     GLint getUniformLocation(ShaderParameterType param);
 public:
@@ -26,5 +29,7 @@ public:
     void bind();
 
     void bindAndSetParameters(const GL3ShaderParameters* parameters);
+
+    static size_t getParameterIndex(ShaderParameterType type);
 };
 

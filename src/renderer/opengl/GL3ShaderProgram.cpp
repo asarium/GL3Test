@@ -18,11 +18,10 @@ namespace {
         ShaderType type;
         std::vector<ShaderFilename> files;
     };
-
     ShaderDefinition shader_definitions[] = {
             {
-                    .type = ShaderType::Model,
-                    .files = {
+                    ShaderType::Model,
+                    {
                             {
                                     GL_VERTEX_SHADER,
                                     "model.vert"
@@ -41,26 +40,28 @@ namespace {
     };
     UniformNameMapping uniform_mappings[] = {
             {
-                    .parameter = ShaderParameterType::ViewMatrix,
-                    .uniform_name = "view_matrix"
+                    ShaderParameterType::ViewMatrix,
+                    "view_matrix"
             },
             {
-                    .parameter = ShaderParameterType::ModelMatrix,
-                    .uniform_name = "model_matrix"
+                    ShaderParameterType::ModelMatrix,
+                    "model_matrix"
             },
             {
-                    .parameter=ShaderParameterType::ProjectionMatrix,
-                    .uniform_name = "proj_matrix"
+                    ShaderParameterType::ProjectionMatrix,
+                    "proj_matrix"
             },
             {
-                    .parameter = ShaderParameterType::ColorTexture,
-                    .uniform_name = "color_texture"
+                    ShaderParameterType::ColorTexture,
+                    "color_texture"
             },
             {
-                    .parameter = ShaderParameterType::WindowSize,
-                    .uniform_name = "window_size"
+                    ShaderParameterType::WindowSize,
+                    "window_size"
             }
     };
+    static_assert((sizeof(uniform_mappings)/sizeof(uniform_mappings[0])) == NUM_SHADER_PARAMETER,
+                  "NUM_SHADER_PARAMETER and defined uniforms does not match!");
 
     struct AttributeNameMapping {
         AttributeType attribute;
@@ -68,20 +69,20 @@ namespace {
     };
     AttributeNameMapping attribute_mappings[] = {
             {
-                    .attribute = AttributeType::Position,
-                    .name = "in_position"
+                    AttributeType::Position,
+                    "in_position"
             },
             {
-                    .attribute = AttributeType::Color,
-                    .name = "in_color"
+                    AttributeType::Color,
+                    "in_color"
             },
             {
-                    .attribute = AttributeType::Normal,
-                    .name = "in_normal"
+                    AttributeType::Normal,
+                    "in_normal"
             },
             {
-                    .attribute = AttributeType::TexCoord,
-                    .name = "in_tex_coord"
+                    AttributeType::TexCoord,
+                    "in_tex_coord"
             }
     };
 
@@ -182,10 +183,7 @@ GL3ShaderProgram::GL3ShaderProgram(FileLoader *loader, ShaderType type) {
     for (auto &mapping : uniform_mappings) {
         auto loc = glGetUniformLocation(_handle, mapping.uniform_name);
 
-        ParameterLocation param_loc;
-        param_loc.location = loc;
-        param_loc.param = mapping.parameter;
-        _uniformLocations.push_back(param_loc);
+        _uniformLocations[getParameterIndex(mapping.parameter)] = loc;
     }
 }
 
@@ -198,12 +196,7 @@ void GL3ShaderProgram::bind() {
 }
 
 GLint GL3ShaderProgram::getUniformLocation(ShaderParameterType param) {
-    for (auto &loc:_uniformLocations) {
-        if (loc.param == param) {
-            return loc.location;
-        }
-    }
-    return -1;
+    return _uniformLocations[getParameterIndex(param)];
 }
 
 void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameters) {
@@ -232,5 +225,19 @@ void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameter
     }
 }
 
-
+size_t GL3ShaderProgram::getParameterIndex(ShaderParameterType type) {
+    switch (type) {
+        case ShaderParameterType::ModelMatrix:
+            return 0;
+        case ShaderParameterType::ViewMatrix:
+            return 1;
+        case ShaderParameterType::ProjectionMatrix:
+            return 2;
+        case ShaderParameterType::ColorTexture:
+            return 3;
+        case ShaderParameterType::WindowSize:
+            return 4;
+    }
+    return 0;
+}
 

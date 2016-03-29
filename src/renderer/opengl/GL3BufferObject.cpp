@@ -13,6 +13,7 @@ namespace {
             case BufferType::Index:
                 return GL_ELEMENT_ARRAY_BUFFER;
         }
+        return GL_INVALID_ENUM;
     }
 }
 

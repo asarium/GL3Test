@@ -26,6 +26,8 @@ struct ParameterValue {
 
 class GL3ShaderParameters : public ShaderParameters {
     std::vector<ParameterValue> _values;
+
+    ParameterValue& getValue(ShaderParameterType type);
 public:
     GL3ShaderParameters();
 
@@ -37,7 +39,7 @@ public:
 
     virtual void setTexture(ShaderParameterType param, Texture2D* value) override;
 
-    const std::vector<ParameterValue> &getValues() const;
+    const std::vector<ParameterValue>& getValues() const;
 };
 
 

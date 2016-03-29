@@ -12,11 +12,6 @@ class Application {
     glm::mat4 _projMx;
     glm::mat4 _viewMx;
     glm::mat4 _modelMx;
-
-    float xAngle;
-    float yAngle;
-
-    void updateModelMatrix();
 public:
     Application();
 
