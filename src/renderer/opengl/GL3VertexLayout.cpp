@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "GL3VertexLayout.hpp"
+#include "EnumTranslation.hpp"
 
 GL3VertexLayout::GL3VertexLayout() : _vaoHandle(0), _haveIndexBuffer(false) {
 
@@ -65,20 +66,6 @@ void GL3VertexLayout::finalize() {
     }
 
     glBindVertexArray(0);
-}
-
-GLuint GL3VertexLayout::mapAttributeLocation(AttributeType type) {
-    switch(type) {
-        case AttributeType::Position:
-            return 0;
-        case AttributeType::TexCoord:
-            return 1;
-        case AttributeType::Normal:
-            return 2;
-        case AttributeType::Color:
-            return 3;
-    }
-	return 0;
 }
 
 void GL3VertexLayout::bind() {

@@ -11,6 +11,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 
 namespace {
@@ -66,17 +67,17 @@ bool AssimpModel::loadModel(Renderer *renderer, const std::string &path) {
         auto stride = width * components;
         std::unique_ptr<uint8_t[]> buffer(new uint8_t[stride]);
         size_t height_half = width / 2;
-        for (size_t y = 0; y < height_half; ++y)
-        {
-            uint8_t* top = texture_data + y * stride;
-            uint8_t* bottom = texture_data + (height - y - 1) * stride;
+        for (size_t y = 0; y < height_half; ++y) {
+            uint8_t *top = texture_data + y * stride;
+            uint8_t *bottom = texture_data + (height - y - 1) * stride;
 
             memcpy(buffer.get(), top, stride);
             memcpy(top, bottom, stride);
             memcpy(bottom, buffer.get(), stride);
         }
 
-        _texture->initialize(width, height, components == 3 ? TextureFormat::R8G8B8 : TextureFormat::R8G8B8A8, texture_data);
+        _texture->initialize(width, height, components == 3 ? TextureFormat::R8G8B8 : TextureFormat::R8G8B8A8,
+                             texture_data);
 
         stbi_image_free(texture_data);
     }
@@ -100,8 +101,6 @@ bool AssimpModel::loadScene(const std::string &path) {
 }
 
 bool AssimpModel::createVertexLayouts(Renderer *renderer) {
-    _shaderProgram = renderer->createShader(ShaderType::Model);
-
     std::vector<VertexData> vertex_data;
     std::vector<uint32_t> indices;
 
@@ -151,24 +150,25 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
     auto index_idx = _vertexLayout->attachBufferObject(_indexBuffer.get());
 
     _vertexLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), vertex_idx,
-                            offsetof(VertexData, position));
+                                offsetof(VertexData, position));
     _vertexLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), vertex_idx,
-                            offsetof(VertexData, normal));
+                                offsetof(VertexData, normal));
     _vertexLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), vertex_idx,
-                            offsetof(VertexData, tex_coord));
+                                offsetof(VertexData, tex_coord));
 
     _vertexLayout->setIndexBuffer(index_idx);
 
     _vertexLayout->finalize();
 
-    for (auto& entry : offset_length_mapping) {
+    for (auto &entry : offset_length_mapping) {
         DrawCallProperties props;
-        props.shader = _shaderProgram.get();
+        props.shader = ShaderType::Mesh;
         props.vertexLayout = _vertexLayout.get();
         props.state.depth_test = true;
 
         auto drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle,
-            entry.second.first, entry.second.second, IndexType::Integer);
+                                                                          entry.second.first, entry.second.second,
+                                                                          IndexType::Integer);
         drawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _texture.get());
 
         _sceneDrawCalls.insert(std::make_pair(entry.first, std::move(drawCall)));

@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 
 struct Component {
-    GLuint attribute_location;
+    GLint attribute_location;
     GLenum data_type;
     GLint size;
     GLsizei stride;
@@ -38,8 +38,6 @@ public:
     virtual void finalize() override;
 
     void bind();
-
-    static GLuint mapAttributeLocation(AttributeType type);
 };
 
 

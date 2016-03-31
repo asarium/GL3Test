@@ -122,9 +122,10 @@ namespace {
         return true;
     }
 
-	void post_callback(const char *name, void *funcptr, int len_args, ...) {
+    void post_callback(const char *name, void *funcptr, int len_args, ...) {
 
-	}
+    }
+
 #endif
 }
 
@@ -133,6 +134,10 @@ OGL3Renderer::~OGL3Renderer() {
 }
 
 void OGL3Renderer::deinitialize() {
+    _drawCallManager.reset();
+    _lightingManager.reset();
+    _shaderManager.reset();
+
     SDL_GL_DeleteContext(_context);
     _context = nullptr;
 
@@ -182,8 +187,8 @@ SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
         return nullptr;
     }
 #ifndef NDEBUG
-	glad_set_post_callback(&post_callback);
-#endif;
+    glad_set_post_callback(&post_callback);
+#endif
 
 #ifndef NDEBUG
     // Set up the debug extension if present
@@ -207,7 +212,11 @@ SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
 
     _fileLoader = std::move(fileLoader);
 
-    _drawCallManager.reset(new GL3DrawCallManager());
+    _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
+    // Preload some shaders
+    _shaderManager->getShader(GL3ShaderType::Mesh);
+
+    _drawCallManager.reset(new GL3DrawCallManager(_shaderManager.get()));
     _lightingManager.reset(new GL3LightingManager());
 
     return _window;
@@ -233,10 +242,6 @@ std::unique_ptr<BufferObject> OGL3Renderer::createBuffer(BufferType type) {
 
 std::unique_ptr<VertexLayout> OGL3Renderer::createVertexLayout() {
     return std::unique_ptr<VertexLayout>(new GL3VertexLayout());
-}
-
-std::unique_ptr<ShaderProgram> OGL3Renderer::createShader(ShaderType type) {
-    return std::unique_ptr<ShaderProgram>(new GL3ShaderProgram(_fileLoader.get(), type));
 }
 
 SDL_Window *OGL3Renderer::getWindow() {

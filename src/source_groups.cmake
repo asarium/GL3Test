@@ -10,12 +10,13 @@ set(file_renderer
         renderer/LightingManager.hpp
         renderer/Renderer.hpp
         renderer/ShaderParameters.hpp
-        renderer/ShaderProgram.hpp
         renderer/Texture2D.hpp
         renderer/VertexLayout.hpp
         )
 
 set(file_renderer_opengl
+        renderer/opengl/Enums.hpp
+        renderer/opengl/EnumTranslation.hpp
         renderer/opengl/GL3BufferObject.cpp
         renderer/opengl/GL3BufferObject.hpp
         renderer/opengl/GL3DrawCall.cpp
@@ -26,6 +27,10 @@ set(file_renderer_opengl
         renderer/opengl/GL3LightingManager.hpp
         renderer/opengl/GL3Renderer.cpp
         renderer/opengl/GL3Renderer.hpp
+        renderer/opengl/GL3ShaderDefintions.cpp
+        renderer/opengl/GL3ShaderDefintions.hpp
+        renderer/opengl/GL3ShaderManager.cpp
+        renderer/opengl/GL3ShaderManager.hpp
         renderer/opengl/GL3ShaderParameters.cpp
         renderer/opengl/GL3ShaderParameters.hpp
         renderer/opengl/GL3ShaderProgram.cpp

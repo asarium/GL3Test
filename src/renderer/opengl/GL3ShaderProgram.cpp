@@ -4,88 +4,12 @@
 #include "GL3ShaderProgram.hpp"
 #include "GL3VertexLayout.hpp"
 #include "GL3ShaderParameters.hpp"
+#include "GL3ShaderDefintions.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <renderer/VertexLayout.hpp>
 
 namespace {
-    struct ShaderFilename {
-        GLenum type;
-        const char *filename;
-    };
-
-    struct ShaderDefinition {
-        ShaderType type;
-        std::vector<ShaderFilename> files;
-    };
-    ShaderDefinition shader_definitions[] = {
-            {
-                    ShaderType::Model,
-                    {
-                            {
-                                    GL_VERTEX_SHADER,
-                                    "model.vert"
-                            },
-                            {
-                                    GL_FRAGMENT_SHADER,
-                                    "model.frag"
-                            }
-                    }
-            }
-    };
-
-    struct UniformNameMapping {
-        ShaderParameterType parameter;
-        const GLchar *uniform_name;
-    };
-    UniformNameMapping uniform_mappings[] = {
-            {
-                    ShaderParameterType::ViewMatrix,
-                    "view_matrix"
-            },
-            {
-                    ShaderParameterType::ModelMatrix,
-                    "model_matrix"
-            },
-            {
-                    ShaderParameterType::ProjectionMatrix,
-                    "proj_matrix"
-            },
-            {
-                    ShaderParameterType::ColorTexture,
-                    "color_texture"
-            },
-            {
-                    ShaderParameterType::WindowSize,
-                    "window_size"
-            }
-    };
-    static_assert((sizeof(uniform_mappings)/sizeof(uniform_mappings[0])) == NUM_SHADER_PARAMETER,
-                  "NUM_SHADER_PARAMETER and defined uniforms does not match!");
-
-    struct AttributeNameMapping {
-        AttributeType attribute;
-        const GLchar *name;
-    };
-    AttributeNameMapping attribute_mappings[] = {
-            {
-                    AttributeType::Position,
-                    "in_position"
-            },
-            {
-                    AttributeType::Color,
-                    "in_color"
-            },
-            {
-                    AttributeType::Normal,
-                    "in_normal"
-            },
-            {
-                    AttributeType::TexCoord,
-                    "in_tex_coord"
-            }
-    };
-
     std::vector<GLuint> compileShaderParts(FileLoader *loader, const std::vector<ShaderFilename> &parts) {
         std::vector<GLuint> compiled_parts;
         compiled_parts.reserve(parts.size());
@@ -126,8 +50,8 @@ namespace {
         return compiled_parts;
     }
 
-    GLuint compileProgram(FileLoader *loader, const ShaderDefinition &params) {
-        auto parts = compileShaderParts(loader, params.files);
+    GLuint compileProgram(FileLoader *loader, const GL3ShaderDefinition &params) {
+        auto parts = compileShaderParts(loader, params.filenames);
 
         auto prog = glCreateProgram();
 
@@ -135,8 +59,8 @@ namespace {
             glAttachShader(prog, part);
         }
 
-        for (auto &attribute : attribute_mappings) {
-            glBindAttribLocation(prog, GL3VertexLayout::mapAttributeLocation(attribute.attribute), attribute.name);
+        for (auto &attribute : params.attribute_bindings) {
+            glBindAttribLocation(prog, attribute.binding_location, attribute.name);
         }
 
         glLinkProgram(prog);
@@ -171,19 +95,14 @@ namespace {
     }
 }
 
-GL3ShaderProgram::GL3ShaderProgram(FileLoader *loader, ShaderType type) {
-    for (auto &def : shader_definitions) {
-        if (def.type == type) {
-            _handle = compileProgram(loader, def);
-            break;
-        }
-    }
+GL3ShaderProgram::GL3ShaderProgram(FileLoader *loader, const GL3ShaderDefinition &definition) {
+    _handle = compileProgram(loader, definition);
 
     // Now get the locations of the uniforms
-    for (auto &mapping : uniform_mappings) {
-        auto loc = glGetUniformLocation(_handle, mapping.uniform_name);
+    for (auto &mapping : definition.uniforms) {
+        auto loc = glGetUniformLocation(_handle, mapping.name);
 
-        _uniformLocations[getParameterIndex(mapping.parameter)] = loc;
+        _uniformLocations[static_cast<size_t>(mapping.parameter)] = loc;
     }
 }
 
@@ -193,10 +112,6 @@ GL3ShaderProgram::~GL3ShaderProgram() {
 
 void GL3ShaderProgram::bind() {
     glUseProgram(_handle);
-}
-
-GLint GL3ShaderProgram::getUniformLocation(ShaderParameterType param) {
-    return _uniformLocations[getParameterIndex(param)];
 }
 
 void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameters) {
@@ -223,21 +138,5 @@ void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameter
                 break;
         }
     }
-}
-
-size_t GL3ShaderProgram::getParameterIndex(ShaderParameterType type) {
-    switch (type) {
-        case ShaderParameterType::ModelMatrix:
-            return 0;
-        case ShaderParameterType::ViewMatrix:
-            return 1;
-        case ShaderParameterType::ProjectionMatrix:
-            return 2;
-        case ShaderParameterType::ColorTexture:
-            return 3;
-        case ShaderParameterType::WindowSize:
-            return 4;
-    }
-    return 0;
 }
 

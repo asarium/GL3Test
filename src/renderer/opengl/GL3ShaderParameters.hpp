@@ -4,7 +4,10 @@
 
 #include <vector>
 #include <cstring>
+
 #include "renderer/ShaderParameters.hpp"
+
+#include "Enums.hpp"
 #include "GL3Texture2D.hpp"
 
 enum class ParameterDataType {
@@ -14,7 +17,7 @@ enum class ParameterDataType {
 };
 
 struct ParameterValue {
-    ShaderParameterType param_type;
+    GL3ShaderParameterType param_type;
     ParameterDataType data_type;
 
     struct {
@@ -27,7 +30,7 @@ struct ParameterValue {
 class GL3ShaderParameters : public ShaderParameters {
     std::vector<ParameterValue> _values;
 
-    ParameterValue& getValue(ShaderParameterType type);
+    ParameterValue& getValue(GL3ShaderParameterType type);
 public:
     GL3ShaderParameters();
 

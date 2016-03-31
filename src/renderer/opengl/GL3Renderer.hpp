@@ -3,6 +3,7 @@
 #include "renderer/Renderer.hpp"
 #include "GL3DrawCallManager.hpp"
 #include "GL3LightingManager.hpp"
+#include "GL3ShaderManager.hpp"
 
 #include <SDL_video.h>
 
@@ -14,6 +15,7 @@ class OGL3Renderer : public Renderer {
 
     std::unique_ptr<GL3DrawCallManager> _drawCallManager;
     std::unique_ptr<GL3LightingManager> _lightingManager;
+    std::unique_ptr<GL3ShaderManager> _shaderManager;
 public:
     virtual ~OGL3Renderer();
 
@@ -28,8 +30,6 @@ public:
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) override;
 
     virtual std::unique_ptr<VertexLayout> createVertexLayout() override;
-
-    virtual std::unique_ptr<ShaderProgram> createShader(ShaderType type) override;
 
     virtual std::unique_ptr<Texture2D> createTexture() override;
 

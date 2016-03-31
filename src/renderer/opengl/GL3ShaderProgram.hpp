@@ -1,35 +1,31 @@
 #pragma once
 
-#include "renderer/ShaderProgram.hpp"
 #include "GL3ShaderParameters.hpp"
+#include "GL3ShaderDefintions.hpp"
 
 #include <glad/glad.h>
 
-#include <vector>
 #include <util/FileLoader.hpp>
 #include <renderer/ShaderParameters.hpp>
+#include <renderer/DrawCallManager.hpp>
 
+#include <vector>
 #include <unordered_map>
 
-enum class GL3ShaderTypes {
-    DeferredLightningPass
-};
-
-const size_t NUM_SHADER_PARAMETER = 5; // Must match the actual number of parameters!
-
-class GL3ShaderProgram : public ShaderProgram {
+class GL3ShaderProgram {
     GLuint _handle;
-    GLint _uniformLocations[NUM_SHADER_PARAMETER];
+    GLint _uniformLocations[num_enum_values<GL3ShaderParameterType>()];
 
-    GLint getUniformLocation(ShaderParameterType param);
+    inline GLint getUniformLocation(GL3ShaderParameterType param) {
+        return _uniformLocations[static_cast<size_t>(param)];
+    }
+
 public:
-    GL3ShaderProgram(FileLoader* loader, ShaderType type);
-    virtual ~GL3ShaderProgram();
+    GL3ShaderProgram(FileLoader *loader, const GL3ShaderDefinition &definition);
+    ~GL3ShaderProgram();
 
     void bind();
 
-    void bindAndSetParameters(const GL3ShaderParameters* parameters);
-
-    static size_t getParameterIndex(ShaderParameterType type);
+    void bindAndSetParameters(const GL3ShaderParameters *parameters);
 };
 

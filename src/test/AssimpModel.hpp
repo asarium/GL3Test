@@ -10,15 +10,14 @@ class AssimpModel {
     Assimp::Importer _importer;
     const aiScene *_scene;
 
-    std::unique_ptr<ShaderProgram> _shaderProgram;
     std::unique_ptr<Texture2D> _texture;
 
     std::unordered_map<size_t, std::unique_ptr<DrawCall>> _sceneDrawCalls;
 
-   std::unique_ptr<VertexLayout> _vertexLayout;
+    std::unique_ptr<VertexLayout> _vertexLayout;
 
-	std::unique_ptr<BufferObject> _vertexBuffer;
-	std::unique_ptr<BufferObject> _indexBuffer;
+    std::unique_ptr<BufferObject> _vertexBuffer;
+    std::unique_ptr<BufferObject> _indexBuffer;
 
     bool loadScene(const std::string &path);
 

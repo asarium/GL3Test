@@ -1,16 +1,19 @@
 #pragma once
 
 #include "VertexLayout.hpp"
-#include "ShaderProgram.hpp"
 #include "DrawCall.hpp"
 #include "ShaderParameters.hpp"
+
+enum class ShaderType {
+    Mesh
+};
 
 struct PipelineState {
     bool depth_test;
 };
 
 struct DrawCallProperties {
-    ShaderProgram *shader;
+    ShaderType shader;
     VertexLayout *vertexLayout;
     PipelineState state;
 };

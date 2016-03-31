@@ -10,7 +10,6 @@
 
 #include "BufferObject.hpp"
 #include "VertexLayout.hpp"
-#include "ShaderProgram.hpp"
 #include "util/FileLoader.hpp"
 #include "DrawCall.hpp"
 #include "DrawCallManager.hpp"
@@ -32,8 +31,6 @@ public:
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) = 0;
 
     virtual std::unique_ptr<VertexLayout> createVertexLayout() = 0;
-
-    virtual std::unique_ptr<ShaderProgram> createShader(ShaderType type) = 0;
 
     virtual std::unique_ptr<Texture2D> createTexture() = 0;
 

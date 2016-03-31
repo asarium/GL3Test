@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ShaderProgram.hpp"
-#include "VertexLayout.hpp"
 #include "ShaderParameters.hpp"
 
 class DrawCall {
