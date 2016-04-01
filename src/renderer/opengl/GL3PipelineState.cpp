@@ -8,5 +8,8 @@
 
 void GL3PipelineState::setupState() {
     GLState->setDepthTest(_props.depth_test);
+
+    GLState->setBlendMode(_props.blending);
+    GLState->setBlendFunc(_props.blendFunction);
 }
 

@@ -30,6 +30,11 @@ void Application::initialize(Renderer *renderer, Timing* time) {
     light->setColor(glm::vec3(1.f, 1.f, 1.f));
     light->setPosition(glm::vec3(10.f, 0.f, 0.f));
     light->setIntesity(200.f);
+
+    light = renderer->getLightingManager()->addLight(LightType::Point);
+    light->setColor(glm::vec3(0.f, 1.f, 1.f));
+    light->setPosition(glm::vec3(-10.f, 0.f, 0.f));
+    light->setIntesity(200.f);
 }
 
 void Application::render(Renderer *renderer) {

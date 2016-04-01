@@ -99,10 +99,10 @@ void GL3StateTracker::setBlendMode(bool enable) {
 }
 
 
-void GL3StateTracker::setBlendFunc(AlphaBlendMode mode) {
+void GL3StateTracker::setBlendFunc(BlendFunction mode) {
     if (_blendFunc.setIfChanged(mode)) {
         switch(mode) {
-            case AlphaBlendMode::Additive:
+            case BlendFunction::Additive:
                 glBlendFunc(GL_ONE, GL_ONE);
                 break;
         }

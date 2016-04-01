@@ -162,6 +162,8 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
 
     PipelineProperties props;
     props.depth_test = true;
+    props.blending = false;
+    props.blendFunction = BlendFunction::None;
     _pipelineState = renderer->createPipelineState(props);
 
     for (auto &entry : offset_length_mapping) {

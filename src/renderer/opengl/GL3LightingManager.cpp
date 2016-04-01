@@ -183,11 +183,16 @@ void GL3LightingManager::beginLightPass() {
 
 void GL3LightingManager::endLightPass() {
     GLState->bindFramebuffer(0);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     GLState->setBlendMode(true);
-    //GLState->setBlendFunc(AlphaBlendMode::Additive);
+    GLState->setBlendFunc(BlendFunction::Additive);
     GLState->setDepthTest(false);
 
     for (auto &light : _lights) {
+
         _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, light->type == LightType::Point ? 0 : 1);
         _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter,
                                         light->type == LightType::Point ? light->position : light->direction);

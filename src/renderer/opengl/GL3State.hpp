@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <vector>
+#include <renderer/PipelineState.hpp>
 
 template<typename T, T DefaultValue = 0>
 class SavedState {
@@ -78,11 +79,6 @@ public:
     void use(GLuint program);
 };
 
-enum class AlphaBlendMode {
-    None,
-    Additive
-};
-
 class GL3StateTracker {
     SavedState<bool, false> _depthTest;
     SavedState<GLuint> _vertexArray;
@@ -90,7 +86,7 @@ class GL3StateTracker {
     SavedState<GLuint> _boundRenderbuffer;
 
     SavedState<bool> _blendEnabled;
-    SavedState<AlphaBlendMode, AlphaBlendMode::None> _blendFunc;
+    SavedState<BlendFunction, BlendFunction::Additive> _blendFunc;
 
 public:
     GL3BufferState Buffer;
@@ -106,7 +102,7 @@ public:
     void bindRenderBuffer(GLuint renderbuffer);
 
     void setBlendMode(bool enable);
-    void setBlendFunc(AlphaBlendMode mode);
+    void setBlendFunc(BlendFunction mode);
 };
 
 extern thread_local std::unique_ptr<GL3StateTracker> GLState;
