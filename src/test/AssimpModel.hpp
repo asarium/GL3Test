@@ -15,6 +15,7 @@ class AssimpModel {
     std::unordered_map<size_t, std::unique_ptr<DrawCall>> _sceneDrawCalls;
 
     std::unique_ptr<VertexLayout> _vertexLayout;
+    std::unique_ptr<PipelineState> _pipelineState;
 
     std::unique_ptr<BufferObject> _vertexBuffer;
     std::unique_ptr<BufferObject> _indexBuffer;

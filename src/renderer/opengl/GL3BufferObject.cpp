@@ -2,6 +2,7 @@
 //
 
 #include "GL3BufferObject.hpp"
+#include "GL3State.hpp"
 
 namespace {
     GLenum getGLType(BufferType type) {
@@ -32,7 +33,16 @@ BufferType GL3BufferObject::getType() {
 }
 
 void GL3BufferObject::bind() {
-    glBindBuffer(getGLType(_type), _handle);
+    switch(_type) {
+        case BufferType::None:
+            return;
+        case BufferType::Vertex:
+            GLState->Buffer.bindArrayBuffer(_handle);
+            break;
+        case BufferType::Index:
+            GLState->Buffer.bindElementBuffer(_handle);
+            break;
+    }
 }
 
 void GL3BufferObject::setData(void *data, size_t size, BufferUsage usage) {
@@ -54,5 +64,14 @@ void GL3BufferObject::setData(void *data, size_t size, BufferUsage usage) {
     GLenum gl_type = getGLType(_type);
     glBufferData(gl_type, size, data, gl_usage);
 
-    glBindBuffer(gl_type, 0);
+    switch(_type) {
+        case BufferType::None:
+            return;
+        case BufferType::Vertex:
+            GLState->Buffer.bindArrayBuffer(0);
+            break;
+        case BufferType::Index:
+            GLState->Buffer.bindElementBuffer(0);
+            break;
+    }
 }

@@ -53,7 +53,7 @@ std::unique_ptr<DrawCall> GL3DrawCallManager::createIndexedCall(const DrawCallPr
 
 GL3DrawCallProperties GL3DrawCallManager::convertProperties(const DrawCallProperties &props) {
     GL3DrawCallProperties gl_props;
-    gl_props.state.depth_test = props.state.depth_test;
+    gl_props.state = static_cast<GL3PipelineState*>(props.state);
     gl_props.vertexLayout = static_cast<GL3VertexLayout *>(props.vertexLayout);
     gl_props.shader = _manager->getShader(convertShaderType(props.shader));
 

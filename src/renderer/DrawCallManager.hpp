@@ -3,19 +3,17 @@
 #include "VertexLayout.hpp"
 #include "DrawCall.hpp"
 #include "ShaderParameters.hpp"
+#include "PipelineState.hpp"
 
 enum class ShaderType {
-    Mesh
-};
-
-struct PipelineState {
-    bool depth_test;
+    Mesh,
+    LightedMesh
 };
 
 struct DrawCallProperties {
     ShaderType shader;
     VertexLayout *vertexLayout;
-    PipelineState state;
+    PipelineState* state;
 };
 
 enum class PrimitiveType {

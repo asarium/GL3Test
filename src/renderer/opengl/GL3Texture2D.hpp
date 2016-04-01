@@ -20,7 +20,7 @@ public:
     GL3Texture2D();
     virtual ~GL3Texture2D();
 
-    void bind();
+    void bind(int tex_unit = 0);
 
     virtual void initialize(size_t width, size_t height, TextureFormat format, void* data) override;
     virtual void updateDate(void* data) override;

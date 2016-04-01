@@ -4,15 +4,12 @@
 #include "GL3VertexLayout.hpp"
 #include "GL3ShaderProgram.hpp"
 #include "GL3ShaderManager.hpp"
-
-struct GL3PipelineState {
-    bool depth_test;
-};
+#include "GL3PipelineState.hpp"
 
 struct GL3DrawCallProperties {
     GL3ShaderProgram *shader;
     GL3VertexLayout *vertexLayout;
-    GL3PipelineState state;
+    GL3PipelineState* state;
 
     GLenum primitive_type;
     GLsizei count;

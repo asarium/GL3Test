@@ -2,10 +2,7 @@
 //
 
 #include "GL3Renderer.hpp"
-#include "GL3BufferObject.hpp"
-#include "GL3VertexLayout.hpp"
-#include "GL3ShaderProgram.hpp"
-#include "GL3DrawCall.hpp"
+#include "GL3State.hpp"
 
 #include <glad/glad.h>
 #include <SDL.h>
@@ -129,11 +126,11 @@ namespace {
 #endif
 }
 
-OGL3Renderer::~OGL3Renderer() {
+GL3Renderer::~GL3Renderer() {
 
 }
 
-void OGL3Renderer::deinitialize() {
+void GL3Renderer::deinitialize() {
     _drawCallManager.reset();
     _lightingManager.reset();
     _shaderManager.reset();
@@ -147,7 +144,7 @@ void OGL3Renderer::deinitialize() {
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
+SDL_Window *GL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
     SDL_InitSubSystem(SDL_INIT_VIDEO);
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -205,6 +202,7 @@ SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
         }
     }
 #endif
+    GLState.reset(new GL3StateTracker());
 
     int width, height;
     SDL_GL_GetDrawableSize(_window, &width, &height);
@@ -217,22 +215,22 @@ SDL_Window *OGL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
     _shaderManager->getShader(GL3ShaderType::Mesh);
 
     _drawCallManager.reset(new GL3DrawCallManager(_shaderManager.get()));
-    _lightingManager.reset(new GL3LightingManager());
+    _lightingManager.reset(new GL3LightingManager(this));
 
     return _window;
 }
 
 
-void OGL3Renderer::presentNextFrame() {
+void GL3Renderer::presentNextFrame() {
     SDL_GL_SwapWindow(_window);
 }
 
-void OGL3Renderer::clear(const glm::vec4 &color) {
+void GL3Renderer::clear(const glm::vec4 &color) {
     glClearColor(color.r, color.g, color.b, color.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-std::unique_ptr<BufferObject> OGL3Renderer::createBuffer(BufferType type) {
+std::unique_ptr<BufferObject> GL3Renderer::createBuffer(BufferType type) {
     if (type == BufferType::None) {
         return nullptr;
     }
@@ -240,27 +238,26 @@ std::unique_ptr<BufferObject> OGL3Renderer::createBuffer(BufferType type) {
     return std::unique_ptr<BufferObject>(new GL3BufferObject(type));
 }
 
-std::unique_ptr<VertexLayout> OGL3Renderer::createVertexLayout() {
+std::unique_ptr<VertexLayout> GL3Renderer::createVertexLayout() {
     return std::unique_ptr<VertexLayout>(new GL3VertexLayout());
 }
 
-SDL_Window *OGL3Renderer::getWindow() {
+SDL_Window *GL3Renderer::getWindow() {
     return _window;
 }
 
-DrawCallManager *OGL3Renderer::getDrawCallManager() {
+DrawCallManager *GL3Renderer::getDrawCallManager() {
     return _drawCallManager.get();
 }
 
-LightingManager *OGL3Renderer::getLightingManager() {
+LightingManager *GL3Renderer::getLightingManager() {
     return _lightingManager.get();
 }
 
-std::unique_ptr<Texture2D> OGL3Renderer::createTexture() {
+std::unique_ptr<Texture2D> GL3Renderer::createTexture() {
     return std::unique_ptr<Texture2D>(new GL3Texture2D());
 }
 
-
-
-
-
+std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelineProperties &props) {
+    return std::unique_ptr<PipelineState>(new GL3PipelineState(props));
+}

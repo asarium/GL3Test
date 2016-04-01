@@ -23,6 +23,8 @@ inline GL3ShaderType convertShaderType(ShaderType type) {
     switch (type) {
         case ShaderType::Mesh:
             return GL3ShaderType::Mesh;
+        case ShaderType::LightedMesh:
+            return GL3ShaderType::LightedMesh;
     }
 }
 

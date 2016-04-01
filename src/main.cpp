@@ -21,6 +21,7 @@ namespace {
     void render() {
         app->render(renderer.get());
     }
+
     bool process_events() {
         SDL_Event event;
 
@@ -36,20 +37,30 @@ namespace {
 
         return true;
     }
+
     void run_mainloop() {
-        while(true) {
+        int counter = 0;
+        float lastTime = 0.f;
+
+        while (true) {
             timing->tick();
-			printf("%2.0f\n", 1.f / timing->getFrametime());
 
             render();
 
             if (!process_events()) {
                 return;
             }
+            ++counter;
+            if (timing->getTotalTime() - lastTime >= 1.f) {
+                printf("%2.0f\n", counter / (timing->getTotalTime() - lastTime));
+                counter = 0;
+                lastTime = timing->getTotalTime();
+            }
         }
     }
+
     bool init() {
-        renderer.reset(new OGL3Renderer());
+        renderer.reset(new GL3Renderer());
         window = renderer->initialize(std::unique_ptr<FileLoader>(new DefaultFileLoader()));
 
         // Check that the window was successfully created
@@ -67,6 +78,7 @@ namespace {
 
         return true;
     }
+
     void deinit() {
         app->deinitialize(renderer.get());
 
@@ -79,6 +91,7 @@ namespace {
 }
 
 #undef main
+
 int main(int argc, char **argv) {
     SDL_Init(0);
 

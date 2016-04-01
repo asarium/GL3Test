@@ -4,6 +4,7 @@
 #include <iostream>
 #include "GL3VertexLayout.hpp"
 #include "EnumTranslation.hpp"
+#include "GL3State.hpp"
 
 GL3VertexLayout::GL3VertexLayout() : _vaoHandle(0), _haveIndexBuffer(false) {
 
@@ -53,7 +54,7 @@ void GL3VertexLayout::setIndexBuffer(BufferIndex source) {
 
 void GL3VertexLayout::finalize() {
     glGenVertexArrays(1, &_vaoHandle);
-    glBindVertexArray(_vaoHandle);
+    GLState->bindVertexArray(_vaoHandle);
     for (auto& comp : _components) {
         comp.buffer->bind();
 
@@ -65,9 +66,9 @@ void GL3VertexLayout::finalize() {
         _attachedBuffers[_indexBuffer]->bind();
     }
 
-    glBindVertexArray(0);
+    GLState->bindVertexArray(0);
 }
 
 void GL3VertexLayout::bind() {
-    glBindVertexArray(_vaoHandle);
+    GLState->bindVertexArray(_vaoHandle);
 }

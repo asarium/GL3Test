@@ -27,12 +27,7 @@ GL3DrawCall::~GL3DrawCall() {
 void GL3DrawCall::setGLState() {
     _properties.shader->bindAndSetParameters(&_parameters);
     _properties.vertexLayout->bind();
-
-    if (_properties.state.depth_test) {
-        glEnable(GL_DEPTH_TEST);
-    } else {
-        glDisable(GL_DEPTH_TEST);
-    }
+    _properties.state->setupState();
 }
 
 void GL3DrawCall::draw() {

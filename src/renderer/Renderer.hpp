@@ -34,6 +34,8 @@ public:
 
     virtual std::unique_ptr<Texture2D> createTexture() = 0;
 
+    virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) = 0;
+
     virtual void clear(const glm::vec4 &color) = 0;
 
     virtual void presentNextFrame() = 0;

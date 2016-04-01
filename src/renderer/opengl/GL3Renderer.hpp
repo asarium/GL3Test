@@ -7,7 +7,7 @@
 
 #include <SDL_video.h>
 
-class OGL3Renderer : public Renderer {
+class GL3Renderer : public Renderer {
     SDL_GLContext _context;
     SDL_Window *_window;
 
@@ -17,7 +17,7 @@ class OGL3Renderer : public Renderer {
     std::unique_ptr<GL3LightingManager> _lightingManager;
     std::unique_ptr<GL3ShaderManager> _shaderManager;
 public:
-    virtual ~OGL3Renderer();
+    virtual ~GL3Renderer();
 
     virtual SDL_Window *initialize(std::unique_ptr<FileLoader> &&fileLoader) override;
 
@@ -32,6 +32,8 @@ public:
     virtual std::unique_ptr<VertexLayout> createVertexLayout() override;
 
     virtual std::unique_ptr<Texture2D> createTexture() override;
+
+    virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) override;
 
     virtual void clear(const glm::vec4 &color) override;
 

@@ -8,6 +8,7 @@ set(file_renderer
         renderer/DrawCall.hpp
         renderer/DrawCallManager.hpp
         renderer/LightingManager.hpp
+        renderer/PipelineState.hpp
         renderer/Renderer.hpp
         renderer/ShaderParameters.hpp
         renderer/Texture2D.hpp
@@ -25,6 +26,8 @@ set(file_renderer_opengl
         renderer/opengl/GL3DrawCallManager.hpp
         renderer/opengl/GL3LightingManager.cpp
         renderer/opengl/GL3LightingManager.hpp
+        renderer/opengl/GL3PipelineState.cpp
+        renderer/opengl/GL3PipelineState.hpp
         renderer/opengl/GL3Renderer.cpp
         renderer/opengl/GL3Renderer.hpp
         renderer/opengl/GL3ShaderDefintions.cpp
@@ -35,6 +38,8 @@ set(file_renderer_opengl
         renderer/opengl/GL3ShaderParameters.hpp
         renderer/opengl/GL3ShaderProgram.cpp
         renderer/opengl/GL3ShaderProgram.hpp
+        renderer/opengl/GL3State.cpp
+        renderer/opengl/GL3State.hpp
         renderer/opengl/GL3Texture2D.cpp
         renderer/opengl/GL3Texture2D.hpp
         renderer/opengl/GL3VertexLayout.cpp

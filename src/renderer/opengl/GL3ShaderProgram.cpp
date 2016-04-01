@@ -5,6 +5,7 @@
 #include "GL3VertexLayout.hpp"
 #include "GL3ShaderParameters.hpp"
 #include "GL3ShaderDefintions.hpp"
+#include "GL3State.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <renderer/VertexLayout.hpp>
@@ -111,12 +112,14 @@ GL3ShaderProgram::~GL3ShaderProgram() {
 }
 
 void GL3ShaderProgram::bind() {
-    glUseProgram(_handle);
+    GLState->Program.use(_handle);
 }
 
 void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameters) {
     this->bind();
     GLint texture_unit = 0;
+
+    GLState->Texture.unbindAll();
 
     for (auto &parameter : parameters->getValues()) {
         auto uniform_loc = getUniformLocation(parameter.param_type);
@@ -129,8 +132,7 @@ void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameter
                 glUniformMatrix4fv(uniform_loc, 1, GL_FALSE, glm::value_ptr(parameter.value.mat4));
                 break;
             case ParameterDataType::Tex2D:
-                glActiveTexture(GL_TEXTURE0 + texture_unit);
-                parameter.value.tex2d->bind();
+                parameter.value.tex2d->bind(texture_unit);
 
                 glUniform1i(uniform_loc, texture_unit);
 

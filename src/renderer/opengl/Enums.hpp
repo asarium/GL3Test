@@ -20,6 +20,7 @@ enum class GL3ShaderParameterType {
 
 enum class GL3ShaderType {
     Mesh = 0,
+    LightedMesh,
 
     NUM_VALUES
 };
