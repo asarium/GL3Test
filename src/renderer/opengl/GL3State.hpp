@@ -39,7 +39,7 @@ public:
     }
 
     saved_type operator*() {
-        return _saved;
+        return _dirty ? DefaultValue : _saved;
     }
 };
 
@@ -78,9 +78,20 @@ public:
     void use(GLuint program);
 };
 
+enum class AlphaBlendMode {
+    None,
+    Additive
+};
+
 class GL3StateTracker {
     SavedState<bool, false> _depthTest;
     SavedState<GLuint> _vertexArray;
+    SavedState<GLuint> _boundFramebuffer;
+    SavedState<GLuint> _boundRenderbuffer;
+
+    SavedState<bool> _blendEnabled;
+    SavedState<AlphaBlendMode, AlphaBlendMode::None> _blendFunc;
+
 public:
     GL3BufferState Buffer;
     GL3TextureState Texture;
@@ -89,6 +100,13 @@ public:
     void setDepthTest(bool enable);
 
     void bindVertexArray(GLuint handle);
+
+    void bindFramebuffer(GLuint framebuffer);
+
+    void bindRenderBuffer(GLuint renderbuffer);
+
+    void setBlendMode(bool enable);
+    void setBlendFunc(AlphaBlendMode mode);
 };
 
 extern thread_local std::unique_ptr<GL3StateTracker> GLState;

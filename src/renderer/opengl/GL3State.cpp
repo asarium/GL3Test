@@ -21,7 +21,7 @@ GL3TextureState::GL3TextureState() {
 }
 
 void GL3TextureState::bindTexture(int tex_unit, GLenum target, GLuint handle) {
-    auto& texunit = _textureUnits[tex_unit];
+    auto &texunit = _textureUnits[tex_unit];
 
     if (texunit.textureTarget.isNewValue(target) || texunit.boundTexture.isNewValue(handle)) {
         texunit.textureTarget.setIfChanged(target);
@@ -36,7 +36,7 @@ void GL3TextureState::bindTexture(int tex_unit, GLenum target, GLuint handle) {
 
 void GL3TextureState::unbindAll() {
     for (size_t i = 0; i < _textureUnits.size(); ++i) {
-        auto& targetState = _textureUnits[i].textureTarget;
+        auto &targetState = _textureUnits[i].textureTarget;
         auto target = targetState.isDirty() ? GL_TEXTURE_2D : *targetState;
         bindTexture(static_cast<int>(i), target, 0);
     }
@@ -49,7 +49,7 @@ void GL3TextureState::setActiveUnit(int tex_unit) {
 }
 
 void GL3TextureState::bindTexture(GLenum target, GLuint handle) {
-    auto& texunit = _textureUnits[*_activeTextureUnit];
+    auto &texunit = _textureUnits[*_activeTextureUnit];
 
     if (texunit.textureTarget.isNewValue(target) || texunit.boundTexture.isNewValue(handle)) {
         texunit.textureTarget.setIfChanged(target);
@@ -73,6 +73,39 @@ void GL3StateTracker::setDepthTest(bool enable) {
 void GL3StateTracker::bindVertexArray(GLuint handle) {
     if (_vertexArray.setIfChanged(handle)) {
         glBindVertexArray(handle);
+    }
+}
+
+void GL3StateTracker::bindFramebuffer(GLuint framebuffer) {
+    if (_boundFramebuffer.setIfChanged(framebuffer)) {
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    }
+}
+
+void GL3StateTracker::bindRenderBuffer(GLuint renderbuffer) {
+    if (_boundRenderbuffer.setIfChanged(renderbuffer)) {
+        glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+    }
+}
+
+void GL3StateTracker::setBlendMode(bool enable) {
+    if (_blendEnabled.setIfChanged(enable)) {
+        if (enable) {
+            glEnable(GL_BLEND);
+        } else {
+            glDisable(GL_BLEND);
+        }
+    }
+}
+
+
+void GL3StateTracker::setBlendFunc(AlphaBlendMode mode) {
+    if (_blendFunc.setIfChanged(mode)) {
+        switch(mode) {
+            case AlphaBlendMode::Additive:
+                glBlendFunc(GL_ONE, GL_ONE);
+                break;
+        }
     }
 }
 

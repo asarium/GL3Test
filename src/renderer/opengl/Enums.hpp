@@ -15,12 +15,23 @@ enum class GL3ShaderParameterType {
     ColorTexture,
     WindowSize,
 
+    // Parameters for the deferred lighting shader
+    PositionTexture,
+    NormalTexture,
+    AlbedoTexture,
+
+    LightType,
+    LightVectorParameter,
+    LightColor,
+    LightIntensitiy,
+
     NUM_VALUES
 };
 
 enum class GL3ShaderType {
     Mesh = 0,
-    LightedMesh,
+    DeferredMesh,
+    LightingPass,
 
     NUM_VALUES
 };

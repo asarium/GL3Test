@@ -213,9 +213,11 @@ SDL_Window *GL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
     // Preload some shaders
     _shaderManager->getShader(GL3ShaderType::Mesh);
+    _shaderManager->getShader(GL3ShaderType::DeferredMesh);
 
     _drawCallManager.reset(new GL3DrawCallManager(_shaderManager.get()));
     _lightingManager.reset(new GL3LightingManager(this));
+    _lightingManager->initialize(width, height);
 
     return _window;
 }
@@ -261,3 +263,9 @@ std::unique_ptr<Texture2D> GL3Renderer::createTexture() {
 std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelineProperties &props) {
     return std::unique_ptr<PipelineState>(new GL3PipelineState(props));
 }
+
+GL3ShaderManager *GL3Renderer::getShaderManager() {
+    return _shaderManager.get();
+}
+
+

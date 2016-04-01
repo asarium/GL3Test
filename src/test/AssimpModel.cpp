@@ -166,7 +166,7 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
 
     for (auto &entry : offset_length_mapping) {
         DrawCallProperties props;
-        props.shader = ShaderType::Mesh;
+        props.shader = ShaderType::LightedMesh;
         props.vertexLayout = _vertexLayout.get();
         props.state = _pipelineState.get();
 

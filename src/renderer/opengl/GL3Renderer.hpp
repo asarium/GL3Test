@@ -27,6 +27,8 @@ public:
 
     virtual LightingManager *getLightingManager() override;
 
+    GL3ShaderManager* getShaderManager();
+
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) override;
 
     virtual std::unique_ptr<VertexLayout> createVertexLayout() override;

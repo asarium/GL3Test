@@ -25,6 +25,11 @@ void Application::initialize(Renderer *renderer, Timing* time) {
     _modelMx = mat4();
 
     _projMx = glm::perspectiveFov(45.0f, (float)width, (float)height, 0.01f, 50000.0f);
+
+    auto light = renderer->getLightingManager()->addLight(LightType::Point);
+    light->setColor(glm::vec3(1.f, 1.f, 1.f));
+    light->setPosition(glm::vec3(10.f, 0.f, 0.f));
+    light->setIntesity(200.f);
 }
 
 void Application::render(Renderer *renderer) {
@@ -35,7 +40,9 @@ void Application::render(Renderer *renderer) {
 
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
+    renderer->getLightingManager()->beginLightPass();
     _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
+    renderer->getLightingManager()->endLightPass();
 
     renderer->presentNextFrame();
 }

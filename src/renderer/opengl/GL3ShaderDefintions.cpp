@@ -19,6 +19,32 @@ namespace {
                     "model.frag"
                 }
             }
+        },
+        {
+            GL3ShaderType::DeferredMesh,
+            {
+                {
+                    GL_VERTEX_SHADER,
+                    "mesh_deferred.vert"
+                },
+                {
+                    GL_FRAGMENT_SHADER,
+                    "mesh_deferred.frag"
+                }
+            }
+        },
+        {
+            GL3ShaderType::LightingPass,
+            {
+                {
+                    GL_VERTEX_SHADER,
+                    "lighting_pass.vert"
+                },
+                {
+                    GL_FRAGMENT_SHADER,
+                    "lighting_pass.frag"
+                }
+            }
         }
     };
 
@@ -42,6 +68,34 @@ namespace {
         {
             GL3ShaderParameterType::WindowSize,
             "window_size"
+        },
+        {
+            GL3ShaderParameterType::PositionTexture,
+            "g_position"
+        },
+        {
+            GL3ShaderParameterType::NormalTexture,
+            "g_normal"
+        },
+        {
+            GL3ShaderParameterType::AlbedoTexture,
+            "g_albedo"
+        },
+        {
+            GL3ShaderParameterType::LightType,
+            "light_type"
+        },
+        {
+            GL3ShaderParameterType::LightVectorParameter,
+            "light_vector"
+        },
+        {
+            GL3ShaderParameterType::LightColor,
+            "light_color"
+        },
+        {
+            GL3ShaderParameterType::LightIntensitiy,
+            "light_intensity"
         }
     };
 

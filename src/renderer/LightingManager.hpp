@@ -16,6 +16,8 @@ public:
     virtual void setDirection(const glm::vec3 &dir) = 0;
 
     virtual void setColor(const glm::vec3 &color) = 0;
+
+    virtual void setIntesity(float intensity) = 0;
 };
 
 class LightingManager {

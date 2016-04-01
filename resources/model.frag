@@ -1,4 +1,4 @@
-#version 150
+#version 150 core
 
 uniform sampler2D color_texture;
 uniform vec2 window_size;
@@ -11,6 +11,6 @@ in vec3 vert_normal;
 
 void main()
 {
-    //out_color = texture(color_texture, vert_tex_coord);
-    out_color = vec4(vert_normal, 1.f);
+    //out_color = vec4(vert_tex_coord, 1.f, 1.f);
+    out_color = texture(color_texture, vert_tex_coord);
 }
