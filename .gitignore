@@ -1,0 +1,6 @@
+
+# Common build directory
+build
+
+# CLion files
+.idea
