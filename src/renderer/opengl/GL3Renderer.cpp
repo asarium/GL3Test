@@ -268,6 +268,7 @@ std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelinePr
     gl_props.blending = props.blending;
     gl_props.blendFunction = props.blendFunction;
     gl_props.depth_test = props.depth_test;
+    gl_props.depthFunction = props.depthFunction;
 
     return std::unique_ptr<PipelineState>(new GL3PipelineState(gl_props));
 }

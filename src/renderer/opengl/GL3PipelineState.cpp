@@ -9,6 +9,7 @@
 void GL3PipelineState::setupState(const GL3ShaderParameters *parms) {
     _props.shader->bindAndSetParameters(parms);
     GLState->setDepthTest(_props.depth_test);
+    GLState->setDepthFunc(_props.depthFunction);
 
     GLState->setBlendMode(_props.blending);
     GLState->setBlendFunc(_props.blendFunction);

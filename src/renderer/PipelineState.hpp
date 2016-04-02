@@ -22,6 +22,7 @@ struct PipelineProperties {
     ShaderType shaderType;
 
     bool depth_test;
+    DepthFunction depthFunction;
 
     bool blending;
     BlendFunction blendFunction;

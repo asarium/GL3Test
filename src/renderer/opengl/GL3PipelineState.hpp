@@ -7,6 +7,7 @@ struct GL3PipelineProperties {
     GL3ShaderProgram *shader;
 
     bool depth_test;
+    DepthFunction depthFunction;
 
     bool blending;
     BlendFunction blendFunction;
