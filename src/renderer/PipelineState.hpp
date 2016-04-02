@@ -7,6 +7,17 @@ enum class BlendFunction {
     Additive
 };
 
+enum class DepthFunction {
+	Never,
+	Always,
+	Less,
+	Greater,
+	Equal,
+	NotEqual,
+	LessOrEqual,
+	GreaterOrEqual
+};
+
 struct PipelineProperties {
     ShaderType shaderType;
 
