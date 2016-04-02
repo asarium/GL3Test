@@ -16,6 +16,8 @@ inline GL3ShaderParameterType convertParameterType(ShaderParameterType type) {
             return GL3ShaderParameterType::ColorTexture;
         case ShaderParameterType::WindowSize:
             return GL3ShaderParameterType::WindowSize;
+        default:
+            return GL3ShaderParameterType::ModelMatrix;
     }
 }
 
@@ -25,6 +27,8 @@ inline GL3ShaderType convertShaderType(ShaderType type) {
             return GL3ShaderType::Mesh;
         case ShaderType::LightedMesh:
             return GL3ShaderType::DeferredMesh;
+        default:
+            return GL3ShaderType::Mesh;
     }
 }
 
