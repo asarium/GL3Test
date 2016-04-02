@@ -18,21 +18,11 @@ namespace {
         data.push_back({glm::vec3(-1.0f, -1.0f, 0.f),
                         glm::vec2(0.f, 0.f)
                        });
-        data.push_back({glm::vec3(1.0f, -1.0f, 0.f),
-                        glm::vec2(1.f, 0.f)
+        data.push_back({glm::vec3(3.0f, -1.0f, 0.f),
+                        glm::vec2(2.f, 0.f)
                        });
-        data.push_back({glm::vec3(-1.0f, 1.0f, 0.f),
-                        glm::vec2(0.f, 1.f)
-                       });
-
-        data.push_back({glm::vec3(-1.0f, 1.0f, 0.f),
-                        glm::vec2(0.f, 1.f)
-                       });
-        data.push_back({glm::vec3(1.0f, -1.0f, 0.f),
-                        glm::vec2(1.f, 0.f)
-                       });
-        data.push_back({glm::vec3(1.0f, 1.0f, 0.f),
-                        glm::vec2(1.f, 1.f)
+        data.push_back({glm::vec3(-1.0f, 3.0f, 0.f),
+                        glm::vec2(0.f, 2.f)
                        });
 
         return data;
