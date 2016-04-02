@@ -97,6 +97,8 @@ class GL3FramebufferState {
 
     std::stack<FramebufferBinding> _framebufferStack;
 public:
+    GL3FramebufferState();
+
     void bindRead(GLuint name);
 
     void bindDraw(GLuint name);

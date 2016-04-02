@@ -145,6 +145,12 @@ void GL3ProgramState::use(GLuint handle) {
 }
 
 
+GL3FramebufferState::GL3FramebufferState()
+{
+    _activeDrawBuffer = 0;
+    _activeReadBuffer = 0;
+}
+
 void GL3FramebufferState::bindRead(GLuint name) {
     if (_activeReadBuffer.setIfChanged(name)) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, name);
