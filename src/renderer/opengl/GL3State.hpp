@@ -7,7 +7,7 @@
 #include <stack>
 #include <renderer/PipelineState.hpp>
 
-template<typename T, T DefaultValue = 0>
+template<typename T>
 class SavedState {
 public:
     typedef T saved_type;
@@ -17,7 +17,7 @@ private:
     bool _dirty; // true if the saved value is not up to date
 
 public:
-    SavedState() : _saved(DefaultValue), _dirty(true) { }
+    SavedState() : _dirty(true) { }
 
     bool setIfChanged(saved_type new_val) {
         if (_dirty || new_val != _saved) {
@@ -41,7 +41,7 @@ public:
     }
 
     saved_type operator*() {
-        return _dirty ? DefaultValue : _saved;
+        return _saved;
     }
 
     SavedState &operator=(const saved_type &value) {
@@ -109,13 +109,13 @@ public:
 };
 
 class GL3StateTracker {
-    SavedState<bool, false> _depthTest;
+    SavedState<bool> _depthTest;
 	SavedState<DepthFunction> _depthFunction;
     SavedState<GLuint> _vertexArray;
     SavedState<GLuint> _boundRenderbuffer;
 
     SavedState<bool> _blendEnabled;
-    SavedState<BlendFunction, BlendFunction::Additive> _blendFunc;
+    SavedState<BlendFunction> _blendFunc;
 
 public:
     GL3BufferState Buffer;
