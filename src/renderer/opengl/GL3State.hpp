@@ -42,6 +42,11 @@ public:
     saved_type operator*() {
         return _dirty ? DefaultValue : _saved;
     }
+
+    SavedState& operator=(const saved_type& value) {
+        setIfChanged(value);
+        return *this;
+    }
 };
 
 class GL3BufferState {
@@ -79,10 +84,20 @@ public:
     void use(GLuint program);
 };
 
+class GL3FramebufferState {
+    SavedState<GLuint> _activeReadBuffer;
+    SavedState<GLuint> _activeWriteBuffer;
+
+public:
+    void bindRead(GLuint name);
+    void bindDraw(GLuint name);
+
+    void bind(GLuint name);
+};
+
 class GL3StateTracker {
     SavedState<bool, false> _depthTest;
     SavedState<GLuint> _vertexArray;
-    SavedState<GLuint> _boundFramebuffer;
     SavedState<GLuint> _boundRenderbuffer;
 
     SavedState<bool> _blendEnabled;
@@ -92,12 +107,11 @@ public:
     GL3BufferState Buffer;
     GL3TextureState Texture;
     GL3ProgramState Program;
+    GL3FramebufferState Framebuffer;
 
     void setDepthTest(bool enable);
 
     void bindVertexArray(GLuint handle);
-
-    void bindFramebuffer(GLuint framebuffer);
 
     void bindRenderBuffer(GLuint renderbuffer);
 

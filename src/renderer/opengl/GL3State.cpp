@@ -76,12 +76,6 @@ void GL3StateTracker::bindVertexArray(GLuint handle) {
     }
 }
 
-void GL3StateTracker::bindFramebuffer(GLuint framebuffer) {
-    if (_boundFramebuffer.setIfChanged(framebuffer)) {
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    }
-}
-
 void GL3StateTracker::bindRenderBuffer(GLuint renderbuffer) {
     if (_boundRenderbuffer.setIfChanged(renderbuffer)) {
         glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
@@ -101,7 +95,7 @@ void GL3StateTracker::setBlendMode(bool enable) {
 
 void GL3StateTracker::setBlendFunc(BlendFunction mode) {
     if (_blendFunc.setIfChanged(mode)) {
-        switch(mode) {
+        switch (mode) {
             case BlendFunction::Additive:
                 glBlendFunc(GL_ONE, GL_ONE);
                 break;
@@ -112,6 +106,29 @@ void GL3StateTracker::setBlendFunc(BlendFunction mode) {
 void GL3ProgramState::use(GLuint handle) {
     if (_activeProgram.setIfChanged(handle)) {
         glUseProgram(handle);
+    }
+}
+
+
+void GL3FramebufferState::bindRead(GLuint name) {
+    if (_activeReadBuffer.setIfChanged(name)) {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, name);
+    }
+}
+
+void GL3FramebufferState::bindDraw(GLuint name) {
+    if (_activeWriteBuffer.setIfChanged(name)) {
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, name);
+    }
+}
+
+void GL3FramebufferState::bind(GLuint name) {
+    // GL_FRAMEBUFFER is a shortcut for both GL_DRAW_FRAMEBUFFER and GL_READ_FRAMEBUFFER
+    if (_activeWriteBuffer.isNewValue(name) || _activeReadBuffer.isNewValue(name)) {
+        _activeReadBuffer = name;
+        _activeWriteBuffer = name;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, name);
     }
 }
 

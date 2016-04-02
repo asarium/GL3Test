@@ -37,16 +37,19 @@ class GL3LightingManager : public LightingManager {
         ALBEDO_BUFFER = 0,
         POSITION_BUFFER = 1,
         NORMAL_BUFFER = 2,
-        DEPTH_BUFFER = 3,
 
         NUM_GBUFFERS
     };
+
+    glm::ivec2 _framebufferSize;
 
     std::vector<std::unique_ptr<GL3Light>> _lights;
 
     GLuint _renderFrameBuffer;
 
     GLuint _gBufferTextures[NUM_GBUFFERS];
+
+    GLuint _depthRenderBuffer;
 
     GL3Renderer *_renderer;
 
