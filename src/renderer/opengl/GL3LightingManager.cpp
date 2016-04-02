@@ -203,7 +203,7 @@ void GL3LightingManager::endLightPass() {
 
         _lightingPassProgram->bindAndSetParameters(&_lightingPassParameters);
         _quadVertexLayout->bind();
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 
     // Now copy the depth component back to the screen
