@@ -1,9 +1,13 @@
 #pragma once
 
-#include "VertexLayout.hpp"
 #include "DrawCall.hpp"
 #include "ShaderParameters.hpp"
-#include "PipelineState.hpp"
+
+#include <memory>
+
+class VertexLayout;
+
+class PipelineState;
 
 enum class ShaderType {
     Mesh,
@@ -11,9 +15,8 @@ enum class ShaderType {
 };
 
 struct DrawCallProperties {
-    ShaderType shader;
     VertexLayout *vertexLayout;
-    PipelineState* state;
+    PipelineState *state;
 };
 
 enum class PrimitiveType {

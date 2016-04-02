@@ -153,6 +153,15 @@ bool GL3LightingManager::initialize(int width, int height) {
     _lightingPassParameters.set2dTextureHandle(GL3ShaderParameterType::NormalTexture, _gBufferTextures[NORMAL_BUFFER]);
     _lightingPassParameters.set2dTextureHandle(GL3ShaderParameterType::AlbedoTexture, _gBufferTextures[ALBEDO_BUFFER]);
 
+    PipelineProperties pipelineProperties;
+    pipelineProperties.shaderType = ShaderType::LightedMesh;
+
+    pipelineProperties.depth_test = true;
+    pipelineProperties.blending = false;
+    pipelineProperties.blendFunction = BlendFunction::None;
+
+    _geometryPipelineState = _renderer->createPipelineState(pipelineProperties);
+
     return true;
 }
 
@@ -223,4 +232,8 @@ void GL3Light::setColor(const glm::vec3 &color) {
 
 void GL3Light::setIntesity(float intensity) {
     this->intensity = intensity;
+}
+
+PipelineState *GL3LightingManager::getRenderPipeline() {
+    return _geometryPipelineState.get();
 }

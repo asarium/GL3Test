@@ -25,9 +25,8 @@ GL3DrawCall::~GL3DrawCall() {
 }
 
 void GL3DrawCall::setGLState() {
-    _properties.shader->bindAndSetParameters(&_parameters);
     _properties.vertexLayout->bind();
-    _properties.state->setupState();
+    _properties.state->setupState(&_parameters);
 }
 
 void GL3DrawCall::draw() {

@@ -55,7 +55,6 @@ GL3DrawCallProperties GL3DrawCallManager::convertProperties(const DrawCallProper
     GL3DrawCallProperties gl_props;
     gl_props.state = static_cast<GL3PipelineState*>(props.state);
     gl_props.vertexLayout = static_cast<GL3VertexLayout *>(props.vertexLayout);
-    gl_props.shader = _manager->getShader(convertShaderType(props.shader));
 
     return gl_props;
 }

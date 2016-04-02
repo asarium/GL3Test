@@ -1,15 +1,25 @@
 #pragma once
 
 #include "renderer/PipelineState.hpp"
+#include "GL3ShaderProgram.hpp"
+
+struct GL3PipelineProperties {
+    GL3ShaderProgram *shader;
+
+    bool depth_test;
+
+    bool blending;
+    BlendFunction blendFunction;
+};
 
 class GL3PipelineState : public PipelineState {
-    PipelineProperties _props;
+    GL3PipelineProperties _props;
 public:
-    GL3PipelineState(const PipelineProperties &props) : _props(props) { }
+    GL3PipelineState(const GL3PipelineProperties &props) : _props(props) { }
 
     virtual ~GL3PipelineState() { }
 
-    void setupState();
+    void setupState(const GL3ShaderParameters* params);
 };
 
 

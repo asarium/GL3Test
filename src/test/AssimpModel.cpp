@@ -160,19 +160,12 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
 
     _vertexLayout->finalize();
 
-    PipelineProperties props;
-    props.depth_test = true;
-    props.blending = false;
-    props.blendFunction = BlendFunction::None;
-    _pipelineState = renderer->createPipelineState(props);
-
     for (auto &entry : offset_length_mapping) {
-        DrawCallProperties props;
-        props.shader = ShaderType::LightedMesh;
-        props.vertexLayout = _vertexLayout.get();
-        props.state = _pipelineState.get();
+        DrawCallProperties draw_props;
+        draw_props.vertexLayout = _vertexLayout.get();
+        draw_props.state = renderer->getLightingManager()->getRenderPipeline();
 
-        auto drawCall = renderer->getDrawCallManager()->createIndexedCall(props, PrimitiveType::Triangle,
+        auto drawCall = renderer->getDrawCallManager()->createIndexedCall(draw_props, PrimitiveType::Triangle,
                                                                           entry.second.first, entry.second.second,
                                                                           IndexType::Integer);
         drawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _texture.get());

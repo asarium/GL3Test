@@ -7,7 +7,6 @@
 #include "GL3PipelineState.hpp"
 
 struct GL3DrawCallProperties {
-    GL3ShaderProgram *shader;
     GL3VertexLayout *vertexLayout;
     GL3PipelineState* state;
 

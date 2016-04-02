@@ -14,7 +14,8 @@ class GL3Renderer;
 class GL3Light : public Light {
 public:
     GL3Light(LightType type);
-    virtual ~GL3Light() {}
+
+    virtual ~GL3Light() { }
 
     virtual void setPosition(const glm::vec3 &pos) override;
 
@@ -47,22 +48,27 @@ class GL3LightingManager : public LightingManager {
 
     GLuint _gBufferTextures[NUM_GBUFFERS];
 
-    GL3Renderer* _renderer;
+    GL3Renderer *_renderer;
 
     std::unique_ptr<BufferObject> _quadVertexBuffer;
     std::unique_ptr<GL3VertexLayout> _quadVertexLayout;
 
-    GL3ShaderProgram* _lightingPassProgram;
+    std::unique_ptr<PipelineState> _geometryPipelineState;
+
+    GL3ShaderProgram *_lightingPassProgram;
     GL3ShaderParameters _lightingPassParameters;
 public:
-    GL3LightingManager(GL3Renderer* renderer);
+    GL3LightingManager(GL3Renderer *renderer);
+
     virtual ~GL3LightingManager();
 
     bool initialize(int width, int height);
 
     virtual Light *addLight(LightType type) override;
 
-    virtual void removeLight(Light* light) override;
+    virtual void removeLight(Light *light) override;
+
+    virtual PipelineState *getRenderPipeline() override;
 
     virtual void clearLights() override;
 

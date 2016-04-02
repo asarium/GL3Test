@@ -1,8 +1,9 @@
 #pragma once
 
-#include <glad/glad.h>
-
 #include <renderer/DrawCallManager.hpp>
+#include <renderer/VertexLayout.hpp>
+
+#include <glad/glad.h>
 
 #include "Enums.hpp"
 

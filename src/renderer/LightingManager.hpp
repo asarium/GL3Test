@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "PipelineState.hpp"
+
 enum class LightType {
     Directional,
     Point
@@ -25,6 +27,8 @@ public:
     virtual ~LightingManager() { };
 
     virtual Light *addLight(LightType type) = 0;
+
+    virtual PipelineState* getRenderPipeline() = 0;
 
     virtual void removeLight(Light* light) = 0;
 

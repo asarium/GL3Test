@@ -3,6 +3,7 @@
 
 #include "GL3Renderer.hpp"
 #include "GL3State.hpp"
+#include "EnumTranslation.hpp"
 
 #include <glad/glad.h>
 #include <SDL.h>
@@ -261,7 +262,14 @@ std::unique_ptr<Texture2D> GL3Renderer::createTexture() {
 }
 
 std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelineProperties &props) {
-    return std::unique_ptr<PipelineState>(new GL3PipelineState(props));
+    GL3PipelineProperties gl_props;
+    gl_props.shader = _shaderManager->getShader(convertShaderType(props.shaderType));
+
+    gl_props.blending = props.blending;
+    gl_props.blendFunction = props.blendFunction;
+    gl_props.depth_test = props.depth_test;
+
+    return std::unique_ptr<PipelineState>(new GL3PipelineState(gl_props));
 }
 
 GL3ShaderManager *GL3Renderer::getShaderManager() {
