@@ -187,6 +187,7 @@ void GL3LightingManager::clearLights() {
 }
 
 void GL3LightingManager::beginLightPass() {
+    GLState->Framebuffer.pushBinding();
     GLState->Framebuffer.bind(_renderFrameBuffer);
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -194,7 +195,7 @@ void GL3LightingManager::beginLightPass() {
 }
 
 void GL3LightingManager::endLightPass() {
-    GLState->Framebuffer.bind(0);
+    GLState->Framebuffer.popBinding();
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);

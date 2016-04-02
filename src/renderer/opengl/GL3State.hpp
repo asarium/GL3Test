@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <vector>
+#include <stack>
 #include <renderer/PipelineState.hpp>
 
 template<typename T, T DefaultValue = 0>
@@ -43,7 +44,7 @@ public:
         return _dirty ? DefaultValue : _saved;
     }
 
-    SavedState& operator=(const saved_type& value) {
+    SavedState &operator=(const saved_type &value) {
         setIfChanged(value);
         return *this;
     }
@@ -71,6 +72,7 @@ public:
     GL3TextureState();
 
     void setActiveUnit(int tex_unit);
+
     void bindTexture(GLenum target, GLuint handle);
 
     void bindTexture(int tex_unit, GLenum target, GLuint handle);
@@ -85,14 +87,25 @@ public:
 };
 
 class GL3FramebufferState {
-    SavedState<GLuint> _activeReadBuffer;
-    SavedState<GLuint> _activeWriteBuffer;
+    struct FramebufferBinding {
+        GLuint readBuffer;
+        GLuint drawBuffer;
+    };
 
+    SavedState<GLuint> _activeReadBuffer;
+    SavedState<GLuint> _activeDrawBuffer;
+
+    std::stack<FramebufferBinding> _framebufferStack;
 public:
     void bindRead(GLuint name);
+
     void bindDraw(GLuint name);
 
     void bind(GLuint name);
+
+    void pushBinding();
+
+    void popBinding();
 };
 
 class GL3StateTracker {
@@ -116,6 +129,7 @@ public:
     void bindRenderBuffer(GLuint renderbuffer);
 
     void setBlendMode(bool enable);
+
     void setBlendFunc(BlendFunction mode);
 };
 

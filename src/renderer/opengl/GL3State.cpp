@@ -117,18 +117,39 @@ void GL3FramebufferState::bindRead(GLuint name) {
 }
 
 void GL3FramebufferState::bindDraw(GLuint name) {
-    if (_activeWriteBuffer.setIfChanged(name)) {
+    if (_activeDrawBuffer.setIfChanged(name)) {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, name);
     }
 }
 
 void GL3FramebufferState::bind(GLuint name) {
     // GL_FRAMEBUFFER is a shortcut for both GL_DRAW_FRAMEBUFFER and GL_READ_FRAMEBUFFER
-    if (_activeWriteBuffer.isNewValue(name) || _activeReadBuffer.isNewValue(name)) {
+    if (_activeDrawBuffer.isNewValue(name) || _activeReadBuffer.isNewValue(name)) {
         _activeReadBuffer = name;
-        _activeWriteBuffer = name;
+        _activeDrawBuffer = name;
 
         glBindFramebuffer(GL_FRAMEBUFFER, name);
+    }
+}
+
+void GL3FramebufferState::pushBinding() {
+    FramebufferBinding binding;
+    binding.drawBuffer = *_activeDrawBuffer;
+    binding.readBuffer = *_activeReadBuffer;
+
+    _framebufferStack.push(binding);
+}
+
+void GL3FramebufferState::popBinding() {
+    auto previousBinding = _framebufferStack.top();
+    _framebufferStack.pop();
+
+    // Restore the previous state
+    if (previousBinding.readBuffer == previousBinding.drawBuffer) {
+        bind(previousBinding.drawBuffer);
+    } else {
+        bindRead(previousBinding.readBuffer);
+        bindDraw(previousBinding.drawBuffer);
     }
 }
 
