@@ -70,6 +70,41 @@ void GL3StateTracker::setDepthTest(bool enable) {
     }
 }
 
+void GL3StateTracker::setDepthFunc(DepthFunction mode) {
+	if (_depthFunction.setIfChanged(mode)) {
+		GLint depthMode;
+
+		switch (mode) {
+		case DepthFunction::Always:
+			depthMode = GL_ALWAYS;
+			break;
+		case DepthFunction::Equal:
+			depthMode = GL_EQUAL;
+			break;
+		case DepthFunction::Greater:
+			depthMode = GL_GREATER;
+			break;
+		case DepthFunction::GreaterOrEqual:
+			depthMode = GL_GEQUAL;
+			break;
+		case DepthFunction::Less:
+			depthMode = GL_LESS;
+			break;
+		case DepthFunction::LessOrEqual:
+			depthMode = GL_LEQUAL;
+			break;
+		case DepthFunction::Never:
+			depthMode = GL_NEVER;
+			break;
+		case DepthFunction::NotEqual:
+			depthMode = GL_NOTEQUAL;
+			break;
+		}
+
+		glDepthFunc(depthMode);
+	}
+}
+
 void GL3StateTracker::bindVertexArray(GLuint handle) {
     if (_vertexArray.setIfChanged(handle)) {
         glBindVertexArray(handle);

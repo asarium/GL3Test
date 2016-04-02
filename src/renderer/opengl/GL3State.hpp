@@ -81,6 +81,7 @@ public:
 
 class GL3StateTracker {
     SavedState<bool, false> _depthTest;
+	SavedState<DepthFunction> _depthFunction;
     SavedState<GLuint> _vertexArray;
     SavedState<GLuint> _boundFramebuffer;
     SavedState<GLuint> _boundRenderbuffer;
@@ -94,6 +95,7 @@ public:
     GL3ProgramState Program;
 
     void setDepthTest(bool enable);
+	void setDepthFunc(DepthFunction mode);
 
     void bindVertexArray(GLuint handle);
 
