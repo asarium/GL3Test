@@ -12,9 +12,9 @@ All 3D data are stored as independent triangles (e.g. GL_TRIANGLES in OpenGL)
 ## Data Types
  Name | Description
 --------|-------------------------------------------
- vec<n> | An n-dimensional vector consisting of n floating point numbers
- mat<n> | A nxn matrix consisting of n * n floating point numbers. The matrix is stored in column major format
- (u)int<n> | An (un)signed n-bit integer
+ vec*n* | An n-dimensional vector consisting of n floating point numbers
+ mat*n* | A nxn matrix consisting of n * n floating point numbers. The matrix is stored in column major format
+ (u)int*n* | An (un)signed n-bit integer
  string | A null terminated UTF-8 string
 
 # Versioning
