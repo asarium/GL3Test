@@ -150,6 +150,7 @@ bool GL3LightingManager::initialize(int width, int height) {
     pipelineProperties.shaderType = ShaderType::LightedMesh;
 
     pipelineProperties.depth_test = true;
+    pipelineProperties.depthFunction = DepthFunction::Less;
     pipelineProperties.blending = false;
     pipelineProperties.blendFunction = BlendFunction::None;
 
