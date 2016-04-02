@@ -34,9 +34,9 @@ public:
 
 class GL3LightingManager : public LightingManager {
     enum GBuffer {
-        ALBEDO_BUFFER = 0,
-        POSITION_BUFFER = 1,
-        NORMAL_BUFFER = 2,
+        POSITION_BUFFER = 0,
+        NORMAL_BUFFER = 1,
+        ALBEDO_BUFFER = 2,
 
         NUM_GBUFFERS
     };
