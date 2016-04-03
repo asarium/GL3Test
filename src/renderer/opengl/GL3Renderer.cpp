@@ -220,52 +220,16 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height, std::unique
 
     _renderTargetManager.reset(new GL3RenderTargetManager(this));
 
-    changeResolution(width, height);
+    resolutionChanged(width, height);
 
     return _window;
 }
 
-void GL3Renderer::changeResolution(uint32_t width, uint32_t height) {
-    SDL_SetWindowSize(_window, width, height);
-    if (SDL_GetWindowFlags(_window) & SDL_WINDOW_FULLSCREEN) {
-        // In fullscreen mode the normal method doesn't work
-        SDL_DisplayMode target;
-        target.w = width;
-        target.h = height;
-        target.format = 0; // don't care
-        target.refresh_rate = 0; // dont't care
-        target.driverdata   = 0; // initialize to 0
-
-        SDL_DisplayMode closest;
-
-        if (SDL_GetClosestDisplayMode(0, &target, &closest) != nullptr) {
-            // First we have to exit fullscreen mode to change the display mode
-            SDL_HideWindow(_window);
-            SDL_SetWindowDisplayMode(_window, &closest);
-            SDL_ShowWindow(_window);
-        }
-    }
-
+void GL3Renderer::resolutionChanged(uint32_t width, uint32_t height) {
     _lightingManager->resizeFramebuffer(width, height);
 
     _renderTargetManager->updateDefaultTarget(width, height);
     _renderTargetManager->useRenderTarget(nullptr); // Setup correct view port
-}
-
-void GL3Renderer::changeWindowStatus(WindowStatus newStatus) {
-    switch(newStatus) {
-        case WindowStatus::Fullscreen:
-            SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
-            break;
-        case WindowStatus::BorderlessWindow:
-            SDL_SetWindowFullscreen(_window, 0);
-            SDL_SetWindowBordered(_window, SDL_FALSE);
-            break;
-        case WindowStatus::Windowed:
-            SDL_SetWindowFullscreen(_window, 0);
-            SDL_SetWindowBordered(_window, SDL_TRUE);
-            break;
-    }
 }
 
 void GL3Renderer::presentNextFrame() {

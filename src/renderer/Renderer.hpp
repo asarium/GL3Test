@@ -17,21 +17,13 @@
 #include "LightingManager.hpp"
 #include "RenderTargetManager.hpp"
 
-enum class WindowStatus {
-    Fullscreen,
-    BorderlessWindow,
-    Windowed
-};
-
 class Renderer {
 public:
     virtual ~Renderer() { }
 
     virtual SDL_Window *initialize(uint32_t width, uint32_t height, std::unique_ptr<FileLoader> &&fileLoader) = 0;
 
-    virtual void changeResolution(uint32_t width, uint32_t height) = 0;
-
-    virtual void changeWindowStatus(WindowStatus newStatus) = 0;
+    virtual void resolutionChanged(uint32_t width, uint32_t height) = 0;
 
     virtual DrawCallManager* getDrawCallManager() = 0;
 

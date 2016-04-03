@@ -155,13 +155,15 @@ void Application::handleEvent(SDL_Event *event) {
                     }
                     break;
                 case SDL_SCANCODE_F:
-                    _renderer->changeWindowStatus(WindowStatus::Fullscreen);
+                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), SDL_WINDOW_FULLSCREEN);
                     break;
                 case SDL_SCANCODE_B:
-                    _renderer->changeWindowStatus(WindowStatus::BorderlessWindow);
+                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
+                    SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_FALSE);
                     break;
                 case SDL_SCANCODE_W:
-                    _renderer->changeWindowStatus(WindowStatus::Windowed);
+                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
+                    SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_TRUE);
                     break;
             }
             break;
@@ -169,7 +171,28 @@ void Application::handleEvent(SDL_Event *event) {
 }
 
 void Application::changeResolution(uint32_t width, uint32_t height) {
-    _renderer->changeResolution(width, height);
+    SDL_Window *window = SDL_GL_GetCurrentWindow();
+    SDL_SetWindowSize(window, width, height);
+    if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
+        // In fullscreen mode the normal method doesn't work
+        SDL_DisplayMode target;
+        target.w = width;
+        target.h = height;
+        target.format = 0; // don't care
+        target.refresh_rate = 0; // dont't care
+        target.driverdata   = 0; // initialize to 0
+
+        SDL_DisplayMode closest;
+
+        if (SDL_GetClosestDisplayMode(0, &target, &closest) != nullptr) {
+            // First we have to exit fullscreen mode to change the display mode
+            SDL_HideWindow(window);
+            SDL_SetWindowDisplayMode(window, &closest);
+            SDL_ShowWindow(window);
+        }
+    }
+
+    _renderer->resolutionChanged(width, height);
 
     _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
 }

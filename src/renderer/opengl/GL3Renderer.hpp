@@ -25,9 +25,7 @@ public:
 
     virtual void deinitialize() override;
 
-    virtual void changeResolution(uint32_t width, uint32_t height) override;
-
-    virtual void changeWindowStatus(WindowStatus newStatus) override;
+    virtual void resolutionChanged(uint32_t width, uint32_t height) override;
 
     virtual DrawCallManager *getDrawCallManager() override;
 
