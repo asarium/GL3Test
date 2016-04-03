@@ -6,8 +6,13 @@
 #include "EnumTranslation.hpp"
 
 #include <glad/glad.h>
+
 #include <SDL.h>
 #include <SDL_video.h>
+
+#include <sstream>
+
+#include <renderer/Exceptions.hpp>
 
 namespace {
 
@@ -170,21 +175,26 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height, std::unique
                                SDL_WINDOW_OPENGL);
 
     if (!_window) {
-        return nullptr;
+        std::stringstream ss;
+        ss << "Error while creating window: " << SDL_GetError();
+        throw RendererException(ss.str());
     }
 
     _context = SDL_GL_CreateContext(_window);
 
     if (!_context) {
         SDL_DestroyWindow(_window);
-        return nullptr;
+
+        std::stringstream ss;
+        ss << "Error while creating OpenGL context: " << SDL_GetError();
+        throw RendererException(ss.str());
     }
     SDL_GL_MakeCurrent(_window, _context);
     SDL_GL_SetSwapInterval(1);
 
     if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
         deinitialize();
-        return nullptr;
+        throw RendererException("Failed to load OpenGL function pointers!");
     }
 #ifndef NDEBUG
     glad_set_post_callback(&post_callback);

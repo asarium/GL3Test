@@ -16,6 +16,7 @@
 #include "ShaderParameters.hpp"
 #include "LightingManager.hpp"
 #include "RenderTargetManager.hpp"
+#include "Exceptions.hpp"
 
 class Renderer {
 public:

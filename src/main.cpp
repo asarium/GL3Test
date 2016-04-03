@@ -7,7 +7,7 @@
 #include <util/Timing.hpp>
 #include <renderer/Renderer.hpp>
 #include <renderer/opengl/GL3Renderer.hpp>
-#include <util/DefaultFileLoader.hpp>
+#include <util/DefaultFileLoader.hpp>#include <renderer/Exceptions.hpp>
 #include "test/Application.hpp"
 
 namespace {
@@ -61,7 +61,12 @@ namespace {
 
     bool init() {
         renderer.reset(new GL3Renderer());
-        window = renderer->initialize(1680, 1050, std::unique_ptr<FileLoader>(new DefaultFileLoader()));
+        try {
+            window = renderer->initialize(1680, 1050, std::unique_ptr<FileLoader>(new DefaultFileLoader()));
+        } catch (const RendererException& e) {
+            printf("Failed to initialize renderer: %s\n", e.what());
+            return false;
+        }
 
         // Check that the window was successfully created
         if (window == NULL) {
