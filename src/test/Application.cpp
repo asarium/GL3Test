@@ -103,8 +103,6 @@ void Application::initialize(Renderer *renderer, Timing *time) {
     props.vertexLayout = _quadLayout.get();
     _quadDrawCall = renderer->getDrawCallManager()->createDrawCall(props, PrimitiveType::Triangle, 0, 6);
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
-    _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix,
-                                            glm::translate(mat4(), glm::vec3(0.f, 0.f, -5.f)));
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ModelMatrix, mat4());
     _quadDrawCall->getParameters()->setRenderTarget(ShaderParameterType::ColorTexture, _renderTarget.get());
 }
@@ -125,6 +123,7 @@ void Application::render(Renderer *renderer) {
     renderer->getRenderTargetManager()->useRenderTarget(nullptr);
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
+    _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
     _quadDrawCall->draw();
 
     renderer->presentNextFrame();
