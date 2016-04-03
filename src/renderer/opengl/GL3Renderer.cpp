@@ -125,11 +125,6 @@ namespace {
 
         return true;
     }
-
-    void post_callback(const char *name, void *funcptr, int len_args, ...) {
-
-    }
-
 #endif
 }
 
@@ -196,9 +191,6 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height, std::unique
         deinitialize();
         throw RendererException("Failed to load OpenGL function pointers!");
     }
-#ifndef NDEBUG
-    glad_set_post_callback(&post_callback);
-#endif
 
 #ifndef NDEBUG
     // Set up the debug extension if present
