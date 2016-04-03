@@ -45,7 +45,7 @@ void GL3BufferObject::bind() {
     }
 }
 
-void GL3BufferObject::setData(void *data, size_t size, BufferUsage usage) {
+void GL3BufferObject::setData(const void *data, size_t size, BufferUsage usage) {
     this->bind();
 
     GLenum gl_usage;

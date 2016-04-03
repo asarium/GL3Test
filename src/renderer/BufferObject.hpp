@@ -25,7 +25,7 @@ public:
 
     virtual BufferType getType() = 0;
 
-    virtual void setData(void* data, size_t size, BufferUsage usage) = 0;
+    virtual void setData(const void* data, size_t size, BufferUsage usage) = 0;
 };
 
 #endif //PROJECT_VERTEXBUFFER_H

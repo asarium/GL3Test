@@ -16,7 +16,7 @@ public:
 
     virtual BufferType getType();
 
-    virtual void setData(void *data, size_t size, BufferUsage usage);
+    virtual void setData(const void *data, size_t size, BufferUsage usage);
 };
 
 
