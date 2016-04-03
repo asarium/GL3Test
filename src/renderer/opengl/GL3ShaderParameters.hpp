@@ -44,19 +44,32 @@ public:
 
     virtual ~GL3ShaderParameters();
 
+    virtual void setInteger(ShaderParameterType param, int value) override;
+
+    virtual void setFloat(ShaderParameterType param, float value) override;
+
+    virtual void setVec2(ShaderParameterType param, const glm::vec2& value) override;
+
+    virtual void setVec3(ShaderParameterType param, const glm::vec3& value) override;
+
+    virtual void setMat4(ShaderParameterType param, const glm::mat4 &value) override;
+
+    virtual void setTexture(ShaderParameterType param, Texture2D* value) override;
+
+
     void set2dTextureHandle(GL3ShaderParameterType param, GLuint handle);
 
     void setInteger(GL3ShaderParameterType param, GLint value);
 
     void setFloat(GL3ShaderParameterType param, GLfloat value);
 
-    virtual void setVec2(ShaderParameterType param, const glm::vec2& value) override;
+    void setVec2(GL3ShaderParameterType param, const glm::vec2& value);
 
     void setVec3(GL3ShaderParameterType param, const glm::vec3& value);
 
-    virtual void setMat4(ShaderParameterType param, const glm::mat4 &value) override;
+    void setMat4(GL3ShaderParameterType param, const glm::mat4 &value);
 
-    virtual void setTexture(ShaderParameterType param, Texture2D* value) override;
+    void setTexture(GL3ShaderParameterType param, Texture2D* value);
 
     const std::vector<ParameterValue>& getValues() const;
 };
