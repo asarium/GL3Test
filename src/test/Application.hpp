@@ -16,11 +16,16 @@ class Application {
 
     std::unique_ptr<Texture2D> _copyTexture;
 
-    Timing* _timing;
+    Timing *_timing;
+    Renderer *_renderer;
 
     glm::mat4 _projMx;
     glm::mat4 _viewMx;
     glm::mat4 _modelMx;
+
+    int resolution_index = 0;
+    void changeResolution(uint32_t width, uint32_t height);
+
 public:
     Application();
 
@@ -30,9 +35,10 @@ public:
 
     void render(Renderer *renderer);
 
-    void handleEvent(SDL_Event* event);
+    void handleEvent(SDL_Event *event);
 
     void deinitialize(Renderer *renderer);
+
 };
 
 

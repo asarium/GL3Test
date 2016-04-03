@@ -67,9 +67,9 @@ public:
 
     virtual ~GL3LightingManager();
 
-    bool initialize(int width, int height);
+    bool initialize();
 
-    void resizeFramebuffer(int width, int height);
+    void resizeFramebuffer(uint32_t width, uint32_t height);
 
     virtual Light *addLight(LightType type) override;
 

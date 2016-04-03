@@ -12,7 +12,7 @@ public:
     GL3RenderTargetManager(GL3Renderer* renderer);
     virtual ~GL3RenderTargetManager() {};
 
-    void initialize(int width, int height);
+    void updateDefaultTarget(uint32_t width, uint32_t height);
 
     GL3RenderTarget* getCurrentRenderTarget();
 

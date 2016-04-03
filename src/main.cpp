@@ -61,7 +61,7 @@ namespace {
 
     bool init() {
         renderer.reset(new GL3Renderer());
-        window = renderer->initialize(std::unique_ptr<FileLoader>(new DefaultFileLoader()));
+        window = renderer->initialize(1680, 1050, std::unique_ptr<FileLoader>(new DefaultFileLoader()));
 
         // Check that the window was successfully created
         if (window == NULL) {

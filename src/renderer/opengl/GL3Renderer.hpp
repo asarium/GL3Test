@@ -21,9 +21,13 @@ class GL3Renderer : public Renderer {
 public:
     virtual ~GL3Renderer();
 
-    virtual SDL_Window *initialize(std::unique_ptr<FileLoader> &&fileLoader) override;
+    virtual SDL_Window *initialize(uint32_t width, uint32_t height, std::unique_ptr<FileLoader> &&fileLoader) override;
 
-    virtual SDL_Window *getWindow() override;
+    virtual void deinitialize() override;
+
+    virtual void changeResolution(uint32_t width, uint32_t height) override;
+
+    virtual void changeWindowStatus(WindowStatus newStatus) override;
 
     virtual DrawCallManager *getDrawCallManager() override;
 
@@ -42,8 +46,6 @@ public:
     virtual void clear(const glm::vec4 &color) override;
 
     virtual void presentNextFrame() override;
-
-    virtual void deinitialize() override;
 
     GL3DrawCallManager *getGLDrawCallManager();
 

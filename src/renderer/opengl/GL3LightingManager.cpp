@@ -49,9 +49,7 @@ GL3LightingManager::~GL3LightingManager() {
     freeResources();
 }
 
-bool GL3LightingManager::initialize(int width, int height) {
-    resizeFramebuffer(width, height);
-
+bool GL3LightingManager::initialize() {
     _quadVertexBuffer = _renderer->createBuffer(BufferType::Vertex);
     auto quadData = getQuadVertexData();
     _quadVertexBuffer->setData(quadData.data(), quadData.size() * sizeof(VertexData), BufferUsage::Static);
@@ -105,7 +103,7 @@ void GL3LightingManager::beginLightPass() {
     auto height = currentRenderTarget->getHeight();
 
     // Make sure our framebuffer is big enough for the current render target
-    resizeFramebuffer((int) width, (int) height);
+    resizeFramebuffer((uint32_t) width, (uint32_t) height);
 
     GLState->Framebuffer.pushBinding();
     GLState->Framebuffer.bind(_renderFrameBuffer);
@@ -282,7 +280,7 @@ void GL3LightingManager::createFrameBuffer(int width, int height) {
     GLState->Framebuffer.popBinding();
 }
 
-void GL3LightingManager::resizeFramebuffer(int width, int height) {
+void GL3LightingManager::resizeFramebuffer(uint32_t width, uint32_t height) {
     // First check if the new size is actually bigger than the old
     if (width <= _framebufferSize.x && height <= _framebufferSize.y) {
         return; // Framebuffer is big enough, no need to change the size

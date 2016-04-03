@@ -7,6 +7,7 @@
 
 #include <glad/glad.h>
 #include <SDL.h>
+#include <SDL_video.h>
 
 namespace {
 
@@ -135,6 +136,7 @@ void GL3Renderer::deinitialize() {
     _drawCallManager.reset();
     _lightingManager.reset();
     _shaderManager.reset();
+    _renderTargetManager.reset();
 
     SDL_GL_DeleteContext(_context);
     _context = nullptr;
@@ -145,7 +147,7 @@ void GL3Renderer::deinitialize() {
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-SDL_Window *GL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
+SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height, std::unique_ptr<FileLoader> &&fileLoader) {
     SDL_InitSubSystem(SDL_INIT_VIDEO);
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -164,7 +166,7 @@ SDL_Window *GL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
 #endif
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, context_flags);
 
-    _window = SDL_CreateWindow("OGL3 Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1680, 1050,
+    _window = SDL_CreateWindow("OGL3 Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height,
                                SDL_WINDOW_OPENGL);
 
     if (!_window) {
@@ -205,10 +207,6 @@ SDL_Window *GL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
 #endif
     GLState.reset(new GL3StateTracker());
 
-    int width, height;
-    SDL_GL_GetDrawableSize(_window, &width, &height);
-    glViewport(0, 0, width, height);
-
     _fileLoader = std::move(fileLoader);
 
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
@@ -218,12 +216,56 @@ SDL_Window *GL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
 
     _drawCallManager.reset(new GL3DrawCallManager(_shaderManager.get()));
     _lightingManager.reset(new GL3LightingManager(this));
-    _lightingManager->initialize(width, height);
+    _lightingManager->initialize();
 
     _renderTargetManager.reset(new GL3RenderTargetManager(this));
-    _renderTargetManager->initialize(width, height);
+
+    changeResolution(width, height);
 
     return _window;
+}
+
+void GL3Renderer::changeResolution(uint32_t width, uint32_t height) {
+    SDL_SetWindowSize(_window, width, height);
+    if (SDL_GetWindowFlags(_window) & SDL_WINDOW_FULLSCREEN) {
+        // In fullscreen mode the normal method doesn't work
+        SDL_DisplayMode target;
+        target.w = width;
+        target.h = height;
+        target.format = 0; // don't care
+        target.refresh_rate = 0; // dont't care
+        target.driverdata   = 0; // initialize to 0
+
+        SDL_DisplayMode closest;
+
+        if (SDL_GetClosestDisplayMode(0, &target, &closest) != nullptr) {
+            // First we have to exit fullscreen mode to change the display mode
+            SDL_HideWindow(_window);
+            SDL_SetWindowDisplayMode(_window, &closest);
+            SDL_ShowWindow(_window);
+        }
+    }
+
+    _lightingManager->resizeFramebuffer(width, height);
+
+    _renderTargetManager->updateDefaultTarget(width, height);
+    _renderTargetManager->useRenderTarget(nullptr); // Setup correct view port
+}
+
+void GL3Renderer::changeWindowStatus(WindowStatus newStatus) {
+    switch(newStatus) {
+        case WindowStatus::Fullscreen:
+            SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
+            break;
+        case WindowStatus::BorderlessWindow:
+            SDL_SetWindowFullscreen(_window, 0);
+            SDL_SetWindowBordered(_window, SDL_FALSE);
+            break;
+        case WindowStatus::Windowed:
+            SDL_SetWindowFullscreen(_window, 0);
+            SDL_SetWindowBordered(_window, SDL_TRUE);
+            break;
+    }
 }
 
 void GL3Renderer::presentNextFrame() {
@@ -245,10 +287,6 @@ std::unique_ptr<BufferObject> GL3Renderer::createBuffer(BufferType type) {
 
 std::unique_ptr<VertexLayout> GL3Renderer::createVertexLayout() {
     return std::unique_ptr<VertexLayout>(new GL3VertexLayout());
-}
-
-SDL_Window *GL3Renderer::getWindow() {
-    return _window;
 }
 
 DrawCallManager *GL3Renderer::getDrawCallManager() {
@@ -294,13 +332,5 @@ GL3LightingManager *GL3Renderer::getGLLightingManager() {
 GL3RenderTargetManager *GL3Renderer::getGLRenderTargetManager() {
     return _renderTargetManager.get();
 }
-
-
-
-
-
-
-
-
 
 

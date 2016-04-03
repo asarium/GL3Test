@@ -90,8 +90,7 @@ GL3RenderTarget *GL3RenderTargetManager::getCurrentRenderTarget() {
     return _currentRenderTarget;
 }
 
-
-void GL3RenderTargetManager::initialize(int width, int height) {
+void GL3RenderTargetManager::updateDefaultTarget(uint32_t width, uint32_t height) {
     _defaultRenderTarget.reset(new GL3RenderTarget((size_t) width, (size_t) height, 0, 0, 0));
     _currentRenderTarget = _defaultRenderTarget.get(); // By default the current render target is the screen
 }

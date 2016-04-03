@@ -52,12 +52,13 @@ Application::~Application() {
 
 void Application::initialize(Renderer *renderer, Timing *time) {
     _timing = time;
+    _renderer = renderer;
 
     _model.reset(new AssimpModel());
     _model->loadModel(renderer, "resources/duck.dae");
 
     int width, height;
-    SDL_GL_GetDrawableSize(renderer->getWindow(), &width, &height);
+    SDL_GL_GetDrawableSize(SDL_GL_GetCurrentWindow(), &width, &height);
 
     _viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.0f, 180.0f));
     _modelMx = mat4();
@@ -129,6 +130,7 @@ void Application::render(Renderer *renderer) {
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
+    _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
     _quadDrawCall->draw();
 
@@ -139,5 +141,36 @@ void Application::deinitialize(Renderer *renderer) {
     _model.reset();
 }
 
-void Application::handleEvent(SDL_Event *) {
+void Application::handleEvent(SDL_Event *event) {
+    switch (event->type) {
+        case SDL_KEYUP:
+            switch (event->key.keysym.scancode) {
+                case SDL_SCANCODE_R:
+                    resolution_index = (resolution_index + 1) % 2;
+
+                    if (resolution_index == 0) {
+                        changeResolution(1680, 1050);
+                    } else {
+                        changeResolution(1920, 1200);
+                    }
+                    break;
+                case SDL_SCANCODE_F:
+                    _renderer->changeWindowStatus(WindowStatus::Fullscreen);
+                    break;
+                case SDL_SCANCODE_B:
+                    _renderer->changeWindowStatus(WindowStatus::BorderlessWindow);
+                    break;
+                case SDL_SCANCODE_W:
+                    _renderer->changeWindowStatus(WindowStatus::Windowed);
+                    break;
+            }
+            break;
+    }
 }
+
+void Application::changeResolution(uint32_t width, uint32_t height) {
+    _renderer->changeResolution(width, height);
+
+    _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
+}
+
