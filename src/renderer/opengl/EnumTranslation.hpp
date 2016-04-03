@@ -42,6 +42,8 @@ inline GLint mapAttributeLocation(AttributeType type) {
             return 2;
         case AttributeType::Color:
             return 3;
+        case AttributeType::Tangent:
+            return 4;
         default:
             return 0;
     }

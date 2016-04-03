@@ -123,6 +123,11 @@ namespace {
             AttributeType::TexCoord,
             "in_tex_coord",
             mapAttributeLocation(AttributeType::TexCoord)
+        },
+        {
+            AttributeType::Tangent,
+            "in_tangent",
+            mapAttributeLocation(AttributeType::Tangent)
         }
     };
 }

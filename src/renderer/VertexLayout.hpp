@@ -13,6 +13,7 @@ enum class AttributeType {
     TexCoord,
     Normal,
     Color,
+    Tangent,
 };
 
 enum class DataFormat {
