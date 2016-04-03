@@ -14,6 +14,8 @@ class Application {
     std::unique_ptr<PipelineState> _quadPipelineState;
     std::unique_ptr<DrawCall> _quadDrawCall;
 
+    std::unique_ptr<Texture2D> _copyTexture;
+
     Timing* _timing;
 
     glm::mat4 _projMx;

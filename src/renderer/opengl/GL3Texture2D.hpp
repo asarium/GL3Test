@@ -22,7 +22,10 @@ public:
 
     void bind(int tex_unit = 0);
 
+    void copyDataFromFramebuffer(GLsizei width, GLsizei height);
+
     virtual void initialize(size_t width, size_t height, TextureFormat format, void* data) override;
+
     virtual void updateData(void *data) override;
 };
 

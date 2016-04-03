@@ -3,10 +3,11 @@
 #include "renderer/RenderTarget.hpp"
 
 #include <glad/glad.h>
+#include <renderer/Texture2D.hpp>
 
 class GL3RenderTarget : public RenderTarget {
-    size_t _width;
-    size_t _heigth;
+    GLsizei _width;
+    GLsizei _heigth;
 
     GLuint _renderFramebuffer;
     GLuint _colorTexture;
@@ -19,6 +20,8 @@ public:
     virtual size_t getWidth() override;
 
     virtual size_t getHeight() override;
+
+    virtual void copyToTexture(Texture2D* target) override;
 
     void bindFramebuffer();
 

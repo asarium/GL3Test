@@ -104,24 +104,30 @@ void Application::initialize(Renderer *renderer, Timing *time) {
     _quadDrawCall = renderer->getDrawCallManager()->createDrawCall(props, PrimitiveType::Triangle, 0, 6);
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ModelMatrix, mat4());
-    _quadDrawCall->getParameters()->setRenderTarget(ShaderParameterType::ColorTexture, _renderTarget.get());
+
+
+    _copyTexture = renderer->createTexture();
+    _quadDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _copyTexture.get());
+
+    renderer->getRenderTargetManager()->useRenderTarget(_renderTarget.get());
+    renderer->clear(glm::vec4(0.f, 1.f, 0.f, 1.f));
+
+    renderer->getLightingManager()->beginLightPass();
+    _model->drawModel(renderer, _projMx, glm::translate(mat4(), -glm::vec3(0.f, 0.f, 5.f)), _modelMx);
+    renderer->getLightingManager()->endLightPass();
+
+    renderer->getRenderTargetManager()->useRenderTarget(nullptr);
+
+    _renderTarget->copyToTexture(_copyTexture.get());
 }
 
 void Application::render(Renderer *renderer) {
+    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
+
     float radius = 5.0f;
     float camX = sin(_timing->getTotalTime()) * radius;
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-
-    renderer->getRenderTargetManager()->useRenderTarget(_renderTarget.get());
-    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
-
-    renderer->getLightingManager()->beginLightPass();
-    _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
-    renderer->getLightingManager()->endLightPass();
-
-    renderer->getRenderTargetManager()->useRenderTarget(nullptr);
-    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
     _quadDrawCall->draw();

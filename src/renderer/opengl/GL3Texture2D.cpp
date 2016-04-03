@@ -63,3 +63,24 @@ void GL3Texture2D::updateData(void *data) {
 
     GLState->Texture.bindTexture(0, GL_TEXTURE_2D, 0);
 }
+
+void GL3Texture2D::copyDataFromFramebuffer(GLsizei width, GLsizei height) {
+    this->bind();
+
+    _props.format = GL_RGBA;
+    _props.internal_format = GL_RGBA8;
+    _props.width = static_cast<GLsizei>(width);
+    _props.height = static_cast<GLsizei>(height);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, width, height, 0);
+    GLState->Texture.bindTexture(0, GL_TEXTURE_2D, 0);
+}
+
+
+
