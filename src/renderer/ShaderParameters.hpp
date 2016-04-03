@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "Texture2D.hpp"
+#include "RenderTarget.hpp"
 
 enum class ShaderParameterType {
     ModelMatrix,
@@ -26,4 +27,6 @@ public:
     virtual void setMat4(ShaderParameterType param, const glm::mat4 &value) = 0;
 
     virtual void setTexture(ShaderParameterType param, Texture2D* value) = 0;
+
+    virtual void setRenderTarget(ShaderParameterType param, RenderTarget* value) = 0;
 };

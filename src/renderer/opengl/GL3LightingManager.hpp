@@ -4,6 +4,7 @@
 #include "GL3ShaderProgram.hpp"
 #include "GL3BufferObject.hpp"
 #include "GL3VertexLayout.hpp"
+#include "GL3Object.hpp"
 
 #include <memory>
 #include <vector>
@@ -32,7 +33,7 @@ public:
     float intensity;
 };
 
-class GL3LightingManager : public LightingManager {
+class GL3LightingManager : GL3Object, public LightingManager {
     enum GBuffer {
         POSITION_BUFFER = 0,
         NORMAL_BUFFER = 1,
@@ -51,8 +52,6 @@ class GL3LightingManager : public LightingManager {
 
     GLuint _depthRenderBuffer;
 
-    GL3Renderer *_renderer;
-
     std::unique_ptr<BufferObject> _quadVertexBuffer;
     std::unique_ptr<GL3VertexLayout> _quadVertexLayout;
 
@@ -60,12 +59,17 @@ class GL3LightingManager : public LightingManager {
 
     GL3ShaderProgram *_lightingPassProgram;
     GL3ShaderParameters _lightingPassParameters;
+
+    void createFrameBuffer(int width, int height);
+    void freeResources();
 public:
     GL3LightingManager(GL3Renderer *renderer);
 
     virtual ~GL3LightingManager();
 
     bool initialize(int width, int height);
+
+    void resizeFramebuffer(int width, int height);
 
     virtual Light *addLight(LightType type) override;
 

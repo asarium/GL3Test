@@ -9,6 +9,7 @@
 
 #include "Enums.hpp"
 #include "GL3Texture2D.hpp"
+#include "GL3RenderTarget.hpp"
 
 enum class ParameterDataType {
     Float,
@@ -56,6 +57,8 @@ public:
 
     virtual void setTexture(ShaderParameterType param, Texture2D* value) override;
 
+    virtual void setRenderTarget(ShaderParameterType param, RenderTarget* value) override;
+
 
     void set2dTextureHandle(GL3ShaderParameterType param, GLuint handle);
 
@@ -69,7 +72,9 @@ public:
 
     void setMat4(GL3ShaderParameterType param, const glm::mat4 &value);
 
-    void setTexture(GL3ShaderParameterType param, Texture2D* value);
+    void setTexture(GL3ShaderParameterType param, GL3Texture2D* value);
+
+    void setRenderTarget(GL3ShaderParameterType param, GL3RenderTarget* value);
 
     const std::vector<ParameterValue>& getValues() const;
 };

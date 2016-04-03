@@ -15,6 +15,8 @@ enum class GL3ShaderParameterType {
     ColorTexture,
     WindowSize,
 
+    UVScale,
+
     // Parameters for the deferred lighting shader
     PositionTexture,
     NormalTexture,

@@ -1,5 +1,7 @@
 #version 330 core
 
+uniform vec2 uv_scale;
+
 in vec3 in_position;
 in vec2 in_tex_coord;
 
@@ -11,5 +13,5 @@ void main()
     gl_Position = vec4(in_position, 1.f);
 
     vert_position = in_position;
-    vert_tex_coord = in_tex_coord;
+    vert_tex_coord = in_tex_coord * uv_scale;
 }

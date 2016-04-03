@@ -70,6 +70,10 @@ namespace {
             "window_size"
         },
         {
+            GL3ShaderParameterType::UVScale,
+            "uv_scale"
+        },
+        {
             GL3ShaderParameterType::PositionTexture,
             "g_position"
         },

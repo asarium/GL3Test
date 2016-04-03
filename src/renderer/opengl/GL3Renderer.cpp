@@ -220,9 +220,11 @@ SDL_Window *GL3Renderer::initialize(std::unique_ptr<FileLoader> &&fileLoader) {
     _lightingManager.reset(new GL3LightingManager(this));
     _lightingManager->initialize(width, height);
 
+    _renderTargetManager.reset(new GL3RenderTargetManager(this));
+    _renderTargetManager->initialize(width, height);
+
     return _window;
 }
-
 
 void GL3Renderer::presentNextFrame() {
     SDL_GL_SwapWindow(_window);
@@ -276,5 +278,29 @@ std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelinePr
 GL3ShaderManager *GL3Renderer::getShaderManager() {
     return _shaderManager.get();
 }
+
+RenderTargetManager *GL3Renderer::getRenderTargetManager() {
+    return _renderTargetManager.get();
+}
+
+GL3DrawCallManager *GL3Renderer::getGLDrawCallManager() {
+    return _drawCallManager.get();
+}
+
+GL3LightingManager *GL3Renderer::getGLLightingManager() {
+    return _lightingManager.get();
+}
+
+GL3RenderTargetManager *GL3Renderer::getGLRenderTargetManager() {
+    return _renderTargetManager.get();
+}
+
+
+
+
+
+
+
+
 
 

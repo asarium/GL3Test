@@ -1,4 +1,3 @@
-
 #include "Application.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -6,13 +5,52 @@
 
 using namespace glm;
 
-Application::Application(){
+namespace {
+    struct VertexData {
+        glm::vec3 position;
+        glm::vec3 normal;
+        glm::vec2 tex_coord;
+    };
+
+    std::vector<VertexData> getQuadVertexData() {
+        std::vector<VertexData> data;
+        data.push_back({glm::vec3(-1.0f, -1.0f, 0.f),
+                        glm::vec3(0.f, 0.f, -1.f),
+                        glm::vec2(0.f, 0.f)
+                       });
+        data.push_back({glm::vec3(1.0f, -1.0f, 0.f),
+                        glm::vec3(0.f, 0.f, -1.f),
+                        glm::vec2(1.f, 0.f)
+                       });
+        data.push_back({glm::vec3(-1.0f, 1.0f, 0.f),
+                        glm::vec3(0.f, 0.f, -1.f),
+                        glm::vec2(0.f, 1.f)
+                       });
+
+        data.push_back({glm::vec3(-1.0f, 1.0f, 0.f),
+                        glm::vec3(0.f, 0.f, -1.f),
+                        glm::vec2(0.f, 1.f)
+                       });
+        data.push_back({glm::vec3(1.0f, -1.0f, 0.f),
+                        glm::vec3(0.f, 0.f, -1.f),
+                        glm::vec2(1.f, 0.f)
+                       });
+        data.push_back({glm::vec3(1.0f, 1.0f, 0.f),
+                        glm::vec3(0.f, 0.f, -1.f),
+                        glm::vec2(1.f, 1.f)
+                       });
+
+        return data;
+    }
+}
+
+Application::Application() {
 }
 
 Application::~Application() {
 }
 
-void Application::initialize(Renderer *renderer, Timing* time) {
+void Application::initialize(Renderer *renderer, Timing *time) {
     _timing = time;
 
     _model.reset(new AssimpModel());
@@ -24,7 +62,7 @@ void Application::initialize(Renderer *renderer, Timing* time) {
     _viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.0f, 180.0f));
     _modelMx = mat4();
 
-    _projMx = glm::perspectiveFov(45.0f, (float)width, (float)height, 0.01f, 50000.0f);
+    _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
 
     auto light = renderer->getLightingManager()->addLight(LightType::Point);
     light->setColor(glm::vec3(1.f, 1.f, 1.f));
@@ -35,6 +73,40 @@ void Application::initialize(Renderer *renderer, Timing* time) {
     light->setColor(glm::vec3(0.f, 1.f, 1.f));
     light->setPosition(glm::vec3(-10.f, 0.f, 0.f));
     light->setIntesity(200.f);
+
+    _renderTarget = renderer->getRenderTargetManager()->createRenderTarget(2048, 2048);
+
+    auto quadData = getQuadVertexData();
+    _quadObject = renderer->createBuffer(BufferType::Vertex);
+    _quadObject->setData(quadData.data(), sizeof(VertexData) * quadData.size(), BufferUsage::Static);
+
+    _quadLayout = renderer->createVertexLayout();
+    auto index = _quadLayout->attachBufferObject(_quadObject.get());
+    _quadLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), index,
+                              offsetof(VertexData, position));
+    _quadLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), index,
+                              offsetof(VertexData, normal));
+    _quadLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), index,
+                              offsetof(VertexData, tex_coord));
+    _quadLayout->finalize();
+
+    PipelineProperties pipeline_props;
+    pipeline_props.blendFunction = BlendFunction::None;
+    pipeline_props.blending = false;
+    pipeline_props.depth_test = false;
+    pipeline_props.depthFunction = DepthFunction::Always;
+    pipeline_props.shaderType = ShaderType::Mesh;
+    _quadPipelineState = renderer->createPipelineState(pipeline_props);
+
+    DrawCallProperties props;
+    props.state = _quadPipelineState.get();
+    props.vertexLayout = _quadLayout.get();
+    _quadDrawCall = renderer->getDrawCallManager()->createDrawCall(props, PrimitiveType::Triangle, 0, 6);
+    _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
+    _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix,
+                                            glm::translate(mat4(), glm::vec3(0.f, 0.f, -5.f)));
+    _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ModelMatrix, mat4());
+    _quadDrawCall->getParameters()->setRenderTarget(ShaderParameterType::ColorTexture, _renderTarget.get());
 }
 
 void Application::render(Renderer *renderer) {
@@ -43,11 +115,17 @@ void Application::render(Renderer *renderer) {
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
+    renderer->getRenderTargetManager()->useRenderTarget(_renderTarget.get());
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     renderer->getLightingManager()->beginLightPass();
     _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
     renderer->getLightingManager()->endLightPass();
+
+    renderer->getRenderTargetManager()->useRenderTarget(nullptr);
+    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
+
+    _quadDrawCall->draw();
 
     renderer->presentNextFrame();
 }
@@ -56,5 +134,5 @@ void Application::deinitialize(Renderer *renderer) {
     _model.reset();
 }
 
-void Application::handleEvent(SDL_Event*) {
+void Application::handleEvent(SDL_Event *) {
 }

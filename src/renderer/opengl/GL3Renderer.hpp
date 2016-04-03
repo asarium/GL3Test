@@ -4,6 +4,7 @@
 #include "GL3DrawCallManager.hpp"
 #include "GL3LightingManager.hpp"
 #include "GL3ShaderManager.hpp"
+#include "GL3RenderTargetManager.hpp"
 
 #include <SDL_video.h>
 
@@ -16,6 +17,7 @@ class GL3Renderer : public Renderer {
     std::unique_ptr<GL3DrawCallManager> _drawCallManager;
     std::unique_ptr<GL3LightingManager> _lightingManager;
     std::unique_ptr<GL3ShaderManager> _shaderManager;
+    std::unique_ptr<GL3RenderTargetManager> _renderTargetManager;
 public:
     virtual ~GL3Renderer();
 
@@ -27,7 +29,7 @@ public:
 
     virtual LightingManager *getLightingManager() override;
 
-    GL3ShaderManager* getShaderManager();
+    virtual RenderTargetManager* getRenderTargetManager() override;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) override;
 
@@ -42,6 +44,14 @@ public:
     virtual void presentNextFrame() override;
 
     virtual void deinitialize() override;
+
+    GL3DrawCallManager *getGLDrawCallManager();
+
+    GL3LightingManager *getGLLightingManager();
+
+    GL3RenderTargetManager* getGLRenderTargetManager();
+
+    GL3ShaderManager* getShaderManager();
 };
 
 
