@@ -23,6 +23,6 @@ public:
     void bind(int tex_unit = 0);
 
     virtual void initialize(size_t width, size_t height, TextureFormat format, void* data) override;
-    virtual void updateDate(void* data) override;
+    virtual void updateData(void *data) override;
 };
 

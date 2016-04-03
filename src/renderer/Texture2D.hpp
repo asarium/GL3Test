@@ -12,5 +12,6 @@ public:
     virtual ~Texture2D() { }
 
     virtual void initialize(size_t width, size_t height, TextureFormat format, void* data) = 0;
-    virtual void updateDate(void* data) = 0;
+
+    virtual void updateData(void *data) = 0;
 };

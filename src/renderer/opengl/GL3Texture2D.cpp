@@ -56,7 +56,7 @@ void GL3Texture2D::initialize(size_t width, size_t height, TextureFormat format,
     GLState->Texture.bindTexture(0, GL_TEXTURE_2D, 0);
 }
 
-void GL3Texture2D::updateDate(void *data) {
+void GL3Texture2D::updateData(void *data) {
     this->bind(0);
 
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _props.width, _props.height, _props.format, GL_UNSIGNED_BYTE, data);
