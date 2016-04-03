@@ -23,7 +23,7 @@ GL3RenderTarget::~GL3RenderTarget() {
     }
 
     if (glIsRenderbuffer(_depthRenderBuffer)) {
-        glDeleteTextures(1, &_depthRenderBuffer);
+        glDeleteRenderbuffers(1, &_depthRenderBuffer);
     }
 }
 
