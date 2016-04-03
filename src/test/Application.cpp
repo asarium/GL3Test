@@ -44,13 +44,7 @@ namespace {
     }
 }
 
-Application::Application() {
-}
-
-Application::~Application() {
-}
-
-void Application::initialize(Renderer *renderer, Timing *time) {
+Application::Application(Renderer *renderer, Timing *time) {
     _timing = time;
     _renderer = renderer;
 
@@ -63,7 +57,7 @@ void Application::initialize(Renderer *renderer, Timing *time) {
     _viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.0f, 180.0f));
     _modelMx = mat4();
 
-    _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
+    _projMx = glm::perspectiveFov(45.0f, (float)width, (float)height, 0.01f, 50000.0f);
 
     auto light = renderer->getLightingManager()->addLight(LightType::Point);
     light->setColor(glm::vec3(1.f, 1.f, 1.f));
@@ -84,11 +78,11 @@ void Application::initialize(Renderer *renderer, Timing *time) {
     _quadLayout = renderer->createVertexLayout();
     auto index = _quadLayout->attachBufferObject(_quadObject.get());
     _quadLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), index,
-                              offsetof(VertexData, position));
+        offsetof(VertexData, position));
     _quadLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), index,
-                              offsetof(VertexData, normal));
+        offsetof(VertexData, normal));
     _quadLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), index,
-                              offsetof(VertexData, tex_coord));
+        offsetof(VertexData, tex_coord));
     _quadLayout->finalize();
 
     PipelineProperties pipeline_props;
@@ -122,6 +116,9 @@ void Application::initialize(Renderer *renderer, Timing *time) {
     _renderTarget->copyToTexture(_copyTexture.get());
 }
 
+Application::~Application() {
+}
+
 void Application::render(Renderer *renderer) {
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
@@ -135,10 +132,6 @@ void Application::render(Renderer *renderer) {
     _quadDrawCall->draw();
 
     renderer->presentNextFrame();
-}
-
-void Application::deinitialize(Renderer *renderer) {
-    _model.reset();
 }
 
 void Application::handleEvent(SDL_Event *event) {

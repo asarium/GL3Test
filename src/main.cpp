@@ -7,7 +7,8 @@
 #include <util/Timing.hpp>
 #include <renderer/Renderer.hpp>
 #include <renderer/opengl/GL3Renderer.hpp>
-#include <util/DefaultFileLoader.hpp>#include <renderer/Exceptions.hpp>
+#include <util/DefaultFileLoader.hpp>
+#include <renderer/Exceptions.hpp>
 #include "test/Application.hpp"
 
 namespace {
@@ -78,18 +79,16 @@ namespace {
 
         timing.reset(new Timing());
 
-        app.reset(new Application());
-        app->initialize(renderer.get(), timing.get());
+        app.reset(new Application(renderer.get(), timing.get()));
 
         return true;
     }
 
     void deinit() {
-        app->deinitialize(renderer.get());
+        app.reset();
 
         renderer->deinitialize();
 
-        app.reset();
         timing.reset();
         renderer.reset();
     }

@@ -27,11 +27,9 @@ class Application {
     void changeResolution(uint32_t width, uint32_t height);
 
 public:
-    Application();
+    Application(Renderer *renderer, Timing *timimg);
 
     ~Application();
-
-    void initialize(Renderer *renderer, Timing *timimg);
 
     void render(Renderer *renderer);
 
