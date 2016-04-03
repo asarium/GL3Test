@@ -186,9 +186,7 @@ void Application::changeResolution(uint32_t width, uint32_t height) {
 
         if (SDL_GetClosestDisplayMode(0, &target, &closest) != nullptr) {
             // First we have to exit fullscreen mode to change the display mode
-            SDL_HideWindow(window);
             SDL_SetWindowDisplayMode(window, &closest);
-            SDL_ShowWindow(window);
         }
     }
 
