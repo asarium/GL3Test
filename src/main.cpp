@@ -61,9 +61,9 @@ namespace {
     }
 
     bool init() {
-        renderer.reset(new GL3Renderer());
+        renderer.reset(new GL3Renderer(std::unique_ptr<FileLoader>(new DefaultFileLoader())));
         try {
-            window = renderer->initialize(1680, 1050, std::unique_ptr<FileLoader>(new DefaultFileLoader()));
+            window = renderer->initialize(1680, 1050);
         } catch (const RendererException& e) {
             printf("Failed to initialize renderer: %s\n", e.what());
             return false;

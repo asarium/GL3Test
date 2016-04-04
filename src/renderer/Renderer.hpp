@@ -18,19 +18,38 @@
 #include "RenderTargetManager.hpp"
 #include "Exceptions.hpp"
 
+enum class SettingsParameterType {
+    Boolean
+};
+
+enum class SettingsParameter {
+    VerticalSync
+};
+
+class RendererSettings {
+public:
+    virtual ~RendererSettings() { }
+
+    virtual void changeResolution(uint32_t width, uint32_t height) = 0;
+
+    virtual bool supportsOption(SettingsParameter param, SettingsParameterType *parameterType = nullptr) = 0;
+
+    virtual void setOption(SettingsParameter param, void *value) = 0;
+};
+
 class Renderer {
 public:
     virtual ~Renderer() { }
 
-    virtual SDL_Window *initialize(uint32_t width, uint32_t height, std::unique_ptr<FileLoader> &&fileLoader) = 0;
+    virtual SDL_Window *initialize(uint32_t width, uint32_t height) = 0;
 
-    virtual void resolutionChanged(uint32_t width, uint32_t height) = 0;
+    virtual RendererSettings *getSettings() = 0;
 
-    virtual DrawCallManager* getDrawCallManager() = 0;
+    virtual DrawCallManager *getDrawCallManager() = 0;
 
-    virtual LightingManager* getLightingManager() = 0;
+    virtual LightingManager *getLightingManager() = 0;
 
-    virtual RenderTargetManager* getRenderTargetManager() = 0;
+    virtual RenderTargetManager *getRenderTargetManager() = 0;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) = 0;
 
@@ -38,7 +57,7 @@ public:
 
     virtual std::unique_ptr<Texture2D> createTexture() = 0;
 
-    virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) = 0;
+    virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties &props) = 0;
 
     virtual void clear(const glm::vec4 &color) = 0;
 

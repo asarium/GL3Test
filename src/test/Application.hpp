@@ -23,7 +23,9 @@ class Application {
     glm::mat4 _viewMx;
     glm::mat4 _modelMx;
 
-    int resolution_index = 0;
+    int _resolution_index = 0;
+    bool _last_vsync = true;
+
     void changeResolution(uint32_t width, uint32_t height);
 
 public:

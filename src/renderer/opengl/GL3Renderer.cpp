@@ -125,7 +125,12 @@ namespace {
 
         return true;
     }
+
 #endif
+}
+
+GL3Renderer::GL3Renderer(std::unique_ptr<FileLoader> &&fileLoader) : _fileLoader(std::move(fileLoader)), _settings(this) {
+
 }
 
 GL3Renderer::~GL3Renderer() {
@@ -147,7 +152,7 @@ void GL3Renderer::deinitialize() {
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height, std::unique_ptr<FileLoader> &&fileLoader) {
+SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height) {
     SDL_InitSubSystem(SDL_INIT_VIDEO);
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -209,8 +214,6 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height, std::unique
 #endif
     GLState.reset(new GL3StateTracker());
 
-    _fileLoader = std::move(fileLoader);
-
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
     // Preload some shaders
     _shaderManager->getShader(GL3ShaderType::Mesh);
@@ -222,16 +225,20 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height, std::unique
 
     _renderTargetManager.reset(new GL3RenderTargetManager(this));
 
-    resolutionChanged(width, height);
+    updateResolution(width, height);
 
     return _window;
 }
 
-void GL3Renderer::resolutionChanged(uint32_t width, uint32_t height) {
+void GL3Renderer::updateResolution(uint32_t width, uint32_t height) {
     _lightingManager->resizeFramebuffer(width, height);
 
     _renderTargetManager->updateDefaultTarget(width, height);
     _renderTargetManager->useRenderTarget(nullptr); // Setup correct view port
+}
+
+RendererSettings *GL3Renderer::getSettings() {
+    return &_settings;
 }
 
 void GL3Renderer::presentNextFrame() {
@@ -299,4 +306,54 @@ GL3RenderTargetManager *GL3Renderer::getGLRenderTargetManager() {
     return _renderTargetManager.get();
 }
 
+SDL_Window *GL3Renderer::getWindow() {
+    return _window;
+}
 
+GL3Renderer::GL3RenderSettings::GL3RenderSettings(GL3Renderer *renderer) : GL3Object(renderer) {
+}
+
+void GL3Renderer::GL3RenderSettings::changeResolution(uint32_t width, uint32_t height) {
+    SDL_Window *window = SDL_GL_GetCurrentWindow();
+    SDL_SetWindowSize(window, width, height);
+    if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
+        // In fullscreen mode the normal method doesn't work
+        SDL_DisplayMode target;
+        target.w = width;
+        target.h = height;
+        target.format = 0; // don't care
+        target.refresh_rate = 0; // dont't care
+        target.driverdata = 0; // initialize to 0
+
+        SDL_DisplayMode closest;
+
+        if (SDL_GetClosestDisplayMode(0, &target, &closest) != nullptr) {
+            SDL_SetWindowDisplayMode(window, &closest);
+        }
+    }
+
+    _renderer->updateResolution(width, height);
+}
+
+bool GL3Renderer::GL3RenderSettings::supportsOption(SettingsParameter param, SettingsParameterType *parameterType) {
+    switch (param) {
+        case SettingsParameter::VerticalSync:
+            if (parameterType != nullptr) {
+                *parameterType = SettingsParameterType::Boolean;
+            }
+            return true;
+        default:
+            return false;
+    }
+}
+
+void GL3Renderer::GL3RenderSettings::setOption(SettingsParameter param, void *value) {
+    switch (param) {
+        case SettingsParameter::VerticalSync:
+        {
+            bool val = *reinterpret_cast<bool*>(value);
+            SDL_GL_SetSwapInterval(val ? 1 : 0);
+            break;
+        }
+    }
+}

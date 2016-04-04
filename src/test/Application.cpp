@@ -100,32 +100,34 @@ Application::Application(Renderer *renderer, Timing *time) {
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ModelMatrix, mat4());
 
-
     _copyTexture = renderer->createTexture();
-    _quadDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _copyTexture.get());
-
-    renderer->getRenderTargetManager()->useRenderTarget(_renderTarget.get());
-    renderer->clear(glm::vec4(0.f, 1.f, 0.f, 1.f));
-
-    renderer->getLightingManager()->beginLightPass();
-    _model->drawModel(renderer, _projMx, glm::translate(mat4(), -glm::vec3(0.f, 0.f, 5.f)), _modelMx);
-    renderer->getLightingManager()->endLightPass();
-
-    renderer->getRenderTargetManager()->useRenderTarget(nullptr);
-
-    _renderTarget->copyToTexture(_copyTexture.get());
 }
 
 Application::~Application() {
 }
 
 void Application::render(Renderer *renderer) {
-    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
-
     float radius = 5.0f;
     float camX = sin(_timing->getTotalTime()) * radius;
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
+    _quadDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _copyTexture.get());
+
+    /*
+    renderer->getRenderTargetManager()->useRenderTarget(_renderTarget.get());
+    renderer->clear(glm::vec4(0.f, 1.f, 0.f, 1.f));
+
+    renderer->getLightingManager()->beginLightPass();
+    _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
+    renderer->getLightingManager()->endLightPass();
+
+    renderer->getRenderTargetManager()->useRenderTarget(nullptr);
+
+    _renderTarget->copyToTexture(_copyTexture.get());
+     */
+
+    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
     _quadDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
@@ -139,9 +141,9 @@ void Application::handleEvent(SDL_Event *event) {
         case SDL_KEYUP:
             switch (event->key.keysym.scancode) {
                 case SDL_SCANCODE_R:
-                    resolution_index = (resolution_index + 1) % 2;
+                    _resolution_index = (_resolution_index + 1) % 2;
 
-                    if (resolution_index == 0) {
+                    if (_resolution_index == 0) {
                         changeResolution(1680, 1050);
                     } else {
                         changeResolution(1920, 1200);
@@ -158,32 +160,17 @@ void Application::handleEvent(SDL_Event *event) {
                     SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
                     SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_TRUE);
                     break;
+                case SDL_SCANCODE_V:
+                    _last_vsync = !_last_vsync;
+                    _renderer->getSettings()->setOption(SettingsParameter::VerticalSync, &_last_vsync);
+                    break;
             }
             break;
     }
 }
 
 void Application::changeResolution(uint32_t width, uint32_t height) {
-    SDL_Window *window = SDL_GL_GetCurrentWindow();
-    SDL_SetWindowSize(window, width, height);
-    if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
-        // In fullscreen mode the normal method doesn't work
-        SDL_DisplayMode target;
-        target.w = width;
-        target.h = height;
-        target.format = 0; // don't care
-        target.refresh_rate = 0; // dont't care
-        target.driverdata   = 0; // initialize to 0
-
-        SDL_DisplayMode closest;
-
-        if (SDL_GetClosestDisplayMode(0, &target, &closest) != nullptr) {
-            // First we have to exit fullscreen mode to change the display mode
-            SDL_SetWindowDisplayMode(window, &closest);
-        }
-    }
-
-    _renderer->resolutionChanged(width, height);
+    _renderer->getSettings()->changeResolution(width, height);
 
     _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
 }
