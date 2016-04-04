@@ -314,9 +314,8 @@ GL3Renderer::GL3RenderSettings::GL3RenderSettings(GL3Renderer *renderer) : GL3Ob
 }
 
 void GL3Renderer::GL3RenderSettings::changeResolution(uint32_t width, uint32_t height) {
-    SDL_Window *window = SDL_GL_GetCurrentWindow();
-    SDL_SetWindowSize(window, width, height);
-    if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
+    SDL_SetWindowSize(_renderer->getWindow(), width, height);
+    if (SDL_GetWindowFlags(_renderer->getWindow()) & SDL_WINDOW_FULLSCREEN) {
         // In fullscreen mode the normal method doesn't work
         SDL_DisplayMode target;
         target.w = width;
@@ -328,7 +327,17 @@ void GL3Renderer::GL3RenderSettings::changeResolution(uint32_t width, uint32_t h
         SDL_DisplayMode closest;
 
         if (SDL_GetClosestDisplayMode(0, &target, &closest) != nullptr) {
-            SDL_SetWindowDisplayMode(window, &closest);
+            // I haven't found a perfect solution for changing resolution when in fullscreen mode
+            // On Windows simply calling SDL_SetWindowDisplayMode is enough but on Linux (with GNOME) it just doesn't work
+            // This workaround works for linux but is suboptimal for Windows
+
+            SDL_SetWindowFullscreen(_renderer->getWindow(), 0);
+
+            SDL_SetWindowDisplayMode(_renderer->getWindow(), &closest);
+
+            SDL_Delay(250);
+
+            SDL_SetWindowFullscreen(_renderer->getWindow(), SDL_WINDOW_FULLSCREEN);
         }
     }
 
