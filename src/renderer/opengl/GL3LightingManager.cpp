@@ -110,6 +110,7 @@ void GL3LightingManager::beginLightPass() {
     GLState->Framebuffer.bind(_renderFrameBuffer);
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
+    GLState->setDepthMask(true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
