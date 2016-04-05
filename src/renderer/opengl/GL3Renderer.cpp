@@ -312,8 +312,14 @@ SDL_Window *GL3Renderer::getWindow() {
 }
 
 bool GL3Renderer::hasCapability(GraphicsCapability capability) {
-    // Currently nothing is supported
-    return false;
+    switch (capability) {
+    case GraphicsCapability::PointSprites:
+        return true; // Supported through geometry shaders
+    case GraphicsCapability::S3TC:
+        return GLAD_GL_EXT_texture_compression_s3tc != 0; // Supported if the extension is present
+    default:
+        return false; // Everything else is not supported
+    }
 }
 
 GL3Renderer::GL3RenderSettings::GL3RenderSettings(GL3Renderer *renderer) : GL3Object(renderer) {

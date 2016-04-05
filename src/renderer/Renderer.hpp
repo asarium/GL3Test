@@ -19,7 +19,8 @@
 #include "Exceptions.hpp"
 
 enum class GraphicsCapability {
-    PointSprites
+    PointSprites,
+    S3TC
 };
 
 enum class SettingsParameterType {
