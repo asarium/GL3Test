@@ -78,17 +78,17 @@ Application::Application(Renderer *renderer, Timing *time) {
     _quadLayout = renderer->createVertexLayout();
     auto index = _quadLayout->attachBufferObject(_quadObject.get());
     _quadLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), index,
-        offsetof(VertexData, position));
+                              offsetof(VertexData, position));
     _quadLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), index,
-        offsetof(VertexData, normal));
+                              offsetof(VertexData, normal));
     _quadLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), index,
-        offsetof(VertexData, tex_coord));
+                              offsetof(VertexData, tex_coord));
     _quadLayout->finalize();
 
     PipelineProperties pipeline_props;
     pipeline_props.blendFunction = BlendFunction::None;
     pipeline_props.blending = false;
-    pipeline_props.depth_test = false;
+    pipeline_props.depthMode = DepthMode::None;
     pipeline_props.depthFunction = DepthFunction::Always;
     pipeline_props.shaderType = ShaderType::Mesh;
     _quadPipelineState = renderer->createPipelineState(pipeline_props);

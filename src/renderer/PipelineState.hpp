@@ -7,6 +7,13 @@ enum class BlendFunction {
     Additive
 };
 
+enum class DepthMode {
+    None,
+    Read,
+    Write,
+    ReadWrite
+};
+
 enum class DepthFunction {
 	Never,
 	Always,
@@ -21,7 +28,7 @@ enum class DepthFunction {
 struct PipelineProperties {
     ShaderType shaderType;
 
-    bool depth_test;
+    DepthMode depthMode;
     DepthFunction depthFunction;
 
     bool blending;

@@ -138,6 +138,12 @@ void GL3StateTracker::setBlendFunc(BlendFunction mode) {
     }
 }
 
+void GL3StateTracker::setDepthMask(bool flag) {
+    if (_depthMask.setIfChanged(flag)) {
+        glDepthMask(flag ? GL_TRUE : GL_FALSE);
+    }
+}
+
 void GL3ProgramState::use(GLuint handle) {
     if (_activeProgram.setIfChanged(handle)) {
         glUseProgram(handle);
