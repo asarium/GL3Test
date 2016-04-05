@@ -42,7 +42,7 @@ class GL3LightingManager : GL3Object, public LightingManager {
         NUM_GBUFFERS
     };
 
-    glm::ivec2 _framebufferSize;
+    glm::uvec2 _framebufferSize;
 
     std::vector<std::unique_ptr<GL3Light>> _lights;
 
