@@ -18,6 +18,10 @@
 #include "RenderTargetManager.hpp"
 #include "Exceptions.hpp"
 
+enum class GraphicsCapability {
+    PointSprites
+};
+
 enum class SettingsParameterType {
     Boolean
 };
@@ -58,6 +62,8 @@ public:
     virtual std::unique_ptr<Texture2D> createTexture() = 0;
 
     virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties &props) = 0;
+
+    virtual bool hasCapability(GraphicsCapability capability) = 0;
 
     virtual void clear(const glm::vec4 &color) = 0;
 

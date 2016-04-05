@@ -310,6 +310,11 @@ SDL_Window *GL3Renderer::getWindow() {
     return _window;
 }
 
+bool GL3Renderer::hasCapability(GraphicsCapability capability) {
+    // Currently nothing is supported
+    return false;
+}
+
 GL3Renderer::GL3RenderSettings::GL3RenderSettings(GL3Renderer *renderer) : GL3Object(renderer) {
 }
 
