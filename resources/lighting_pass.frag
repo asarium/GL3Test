@@ -31,6 +31,17 @@ void main()
         float intens = max(dot(L, normal), 0.f);
         lighting = (light_intensity * light_color * color * intens) / (dot(diff, diff));
     }
+    else if (light_type == 1)
+    {
+        // Directional light
+        float intens = max(dot(light_vector, normal), 0.f);
+        lighting = light_intensity * light_color * color * intens;
+    }
+    else if (light_type == 2)
+    {
+        // Ambient light
+        lighting = light_intensity * light_color * color;
+    }
     frag_color = vec4(lighting, 1.f);
 
 /*

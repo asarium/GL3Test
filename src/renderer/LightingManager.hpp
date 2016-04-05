@@ -6,7 +6,8 @@
 
 enum class LightType {
     Directional,
-    Point
+    Point,
+    Ambient
 };
 
 class Light {

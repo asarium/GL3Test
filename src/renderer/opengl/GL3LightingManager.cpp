@@ -133,9 +133,20 @@ void GL3LightingManager::endLightPass() {
     _lightingPassParameters.setVec2(GL3ShaderParameterType::UVScale, uv_scale);
 
     for (auto &light : _lights) {
-        _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, light->type == LightType::Point ? 0 : 1);
-        _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter,
-                                        light->type == LightType::Point ? light->position : light->direction);
+        switch (light->type) {
+        case LightType::Point:
+            _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 0);
+            _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->position);
+            break;
+        case LightType::Directional:
+            _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 1);
+            _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->direction);
+            break;
+        case LightType::Ambient:
+            _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 2);
+            break;
+        }
+
         _lightingPassParameters.setVec3(GL3ShaderParameterType::LightColor, light->color);
         _lightingPassParameters.setFloat(GL3ShaderParameterType::LightIntensitiy, light->intensity);
 
@@ -163,7 +174,7 @@ void GL3Light::setPosition(const glm::vec3 &pos) {
 }
 
 void GL3Light::setDirection(const glm::vec3 &dir) {
-    direction = dir;
+    direction = glm::normalize(dir);
 }
 
 void GL3Light::setColor(const glm::vec3 &color) {

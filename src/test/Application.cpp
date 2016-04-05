@@ -70,15 +70,14 @@ Application::Application(Renderer *renderer, Timing *time) {
 
     _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
 
-    auto light = renderer->getLightingManager()->addLight(LightType::Point);
+    auto light = renderer->getLightingManager()->addLight(LightType::Directional);
     light->setColor(glm::vec3(1.f, 1.f, 1.f));
-    light->setPosition(glm::vec3(10.f, 0.f, 0.f));
-    light->setIntesity(200.f);
+    light->setDirection(glm::vec3(1.f, 0.f, 0.f));
+    light->setIntesity(2.f);
 
-    light = renderer->getLightingManager()->addLight(LightType::Point);
+    light = renderer->getLightingManager()->addLight(LightType::Ambient);
     light->setColor(glm::vec3(0.f, 1.f, 1.f));
-    light->setPosition(glm::vec3(-10.f, 0.f, 0.f));
-    light->setIntesity(200.f);
+    light->setIntesity(0.2f);
 }
 
 Application::~Application() {
