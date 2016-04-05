@@ -4,7 +4,8 @@
 
 enum class BlendFunction {
     None,
-    Additive
+    Additive,
+    AdditiveAlpha
 };
 
 enum class DepthMode {
@@ -15,14 +16,14 @@ enum class DepthMode {
 };
 
 enum class DepthFunction {
-	Never,
-	Always,
-	Less,
-	Greater,
-	Equal,
-	NotEqual,
-	LessOrEqual,
-	GreaterOrEqual
+    Never,
+    Always,
+    Less,
+    Greater,
+    Equal,
+    NotEqual,
+    LessOrEqual,
+    GreaterOrEqual
 };
 
 struct PipelineProperties {
@@ -33,6 +34,10 @@ struct PipelineProperties {
 
     bool blending;
     BlendFunction blendFunction;
+
+
+    PipelineProperties() : shaderType(ShaderType::Mesh), depthMode(DepthMode::None), depthFunction(DepthFunction::Less),
+                           blending(false), blendFunction(BlendFunction::None) { }
 };
 
 class PipelineState {

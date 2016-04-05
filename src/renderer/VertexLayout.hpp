@@ -14,12 +14,14 @@ enum class AttributeType {
     Normal,
     Color,
     Tangent,
+    Radius
 };
 
 enum class DataFormat {
     Vec4,
     Vec3,
-    Vec2
+    Vec2,
+    Float
 };
 
 class VertexLayout {

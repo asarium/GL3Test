@@ -69,8 +69,9 @@ bool GL3LightingManager::initialize() {
     PipelineProperties pipelineProperties;
     pipelineProperties.shaderType = ShaderType::LightedMesh;
 
-    pipelineProperties.depth_test = true;
+    pipelineProperties.depthMode = DepthMode::ReadWrite;
     pipelineProperties.depthFunction = DepthFunction::Less;
+
     pipelineProperties.blending = false;
     pipelineProperties.blendFunction = BlendFunction::None;
 
@@ -119,7 +120,8 @@ void GL3LightingManager::endLightPass() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLState->setBlendMode(true);
-    GLState->setBlendFunc(BlendFunction::Additive);
+    GLState->setBlendFunc(BlendFunction::AdditiveAlpha);
+
     GLState->setDepthTest(false);
 
     auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();

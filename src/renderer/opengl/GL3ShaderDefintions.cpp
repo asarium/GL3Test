@@ -45,6 +45,23 @@ namespace {
                     "lighting_pass.frag"
                 }
             }
+        },
+        {
+            GL3ShaderType::PointSprite,
+            {
+                {
+                    GL_VERTEX_SHADER,
+                    "point_sprite.vert"
+                },
+                {
+                    GL_GEOMETRY_SHADER,
+                    "point_sprite.geom"
+                },
+                {
+                    GL_FRAGMENT_SHADER,
+                    "point_sprite.frag"
+                }
+            }
         }
     };
 
@@ -128,6 +145,11 @@ namespace {
             AttributeType::Tangent,
             "in_tangent",
             mapAttributeLocation(AttributeType::Tangent)
+        },
+        {
+            AttributeType::Position,
+            "in_radius",
+            mapAttributeLocation(AttributeType::Radius)
         }
     };
 }

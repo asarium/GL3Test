@@ -11,7 +11,8 @@ class PipelineState;
 
 enum class ShaderType {
     Mesh,
-    LightedMesh
+    LightedMesh,
+    PointSprite
 };
 
 struct DrawCallProperties {
@@ -20,6 +21,7 @@ struct DrawCallProperties {
 };
 
 enum class PrimitiveType {
+    Point,
     Triangle
 };
 
@@ -37,4 +39,11 @@ public:
 
     virtual std::unique_ptr<DrawCall> createIndexedCall(const DrawCallProperties &props, PrimitiveType type,
                                                         size_t offset, size_t count, IndexType indexType) = 0;
+
+    virtual std::unique_ptr<VariableDrawCall> createVariableDrawCall(const DrawCallProperties &props,
+                                                                     PrimitiveType type) = 0;
+
+    virtual std::unique_ptr<VariableDrawCall> createVariableIndexedCall(const DrawCallProperties &props,
+                                                                        PrimitiveType type,
+                                                                        IndexType indexType) = 0;
 };

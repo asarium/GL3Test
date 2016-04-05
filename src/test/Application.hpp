@@ -5,16 +5,23 @@
 #include <SDL_events.h>
 #include "AssimpModel.hpp"
 
+#include <glm/glm.hpp>
+
+struct Particle {
+    glm::vec3 position;
+    float radius;
+};
+
 class Application {
     std::unique_ptr<AssimpModel> _model;
 
-    std::unique_ptr<RenderTarget> _renderTarget;
-    std::unique_ptr<BufferObject> _quadObject;
-    std::unique_ptr<VertexLayout> _quadLayout;
-    std::unique_ptr<PipelineState> _quadPipelineState;
-    std::unique_ptr<DrawCall> _quadDrawCall;
+    std::unique_ptr<Texture2D> _particleTexture;
+    std::vector<Particle> _particles;
 
-    std::unique_ptr<Texture2D> _copyTexture;
+    std::unique_ptr<PipelineState> _particlePipelineState;
+    std::unique_ptr<BufferObject> _particleBuffer;
+    std::unique_ptr<VertexLayout> _particleLayout;
+    std::unique_ptr<VariableDrawCall> _particleDrawCall;
 
     Timing *_timing;
     Renderer *_renderer;
@@ -28,6 +35,7 @@ class Application {
 
     void changeResolution(uint32_t width, uint32_t height);
 
+    void updateParticles();
 public:
     Application(Renderer *renderer, Timing *timimg);
 
@@ -36,9 +44,6 @@ public:
     void render(Renderer *renderer);
 
     void handleEvent(SDL_Event *event);
-
-    void deinitialize(Renderer *renderer);
-
 };
 
 

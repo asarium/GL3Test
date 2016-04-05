@@ -16,6 +16,7 @@ namespace {
         compiled_parts.reserve(parts.size());
 
         for (auto &filename : parts) {
+            printf("Compiling %s...\n", filename.filename);
             auto handle = glCreateShader(filename.type);
 
             auto content = loader->getFileContents(filename.filename);

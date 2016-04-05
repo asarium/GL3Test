@@ -30,16 +30,25 @@ void GL3DrawCall::setGLState() {
 }
 
 void GL3DrawCall::draw() {
+    actualDraw(_properties.count, _properties.offset);
+}
+
+void GL3DrawCall::draw(size_t count, size_t offset) {
+    actualDraw((GLsizei) count, (GLint) offset);
+}
+
+void GL3DrawCall::actualDraw(GLsizei count, GLint offset) {
     setGLState();
 
     if (_properties.indexed) {
-        glDrawElements(_properties.primitive_type, _properties.count, _properties.index.type,
-                       reinterpret_cast<void *>(_properties.offset * getTypeSize(_properties.index.type)));
+        glDrawElements(_properties.primitive_type, count, _properties.index.type,
+                       reinterpret_cast<void *>(offset * getTypeSize(_properties.index.type)));
     } else {
-        glDrawArrays(_properties.primitive_type, _properties.offset, _properties.count);
+        glDrawArrays(_properties.primitive_type, offset, count);
     }
 }
 
 ShaderParameters *GL3DrawCall::getParameters() {
     return &_parameters;
 }
+

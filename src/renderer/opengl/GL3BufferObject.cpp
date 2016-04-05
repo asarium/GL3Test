@@ -1,6 +1,7 @@
 //
 //
 
+#include <cstring>
 #include "GL3BufferObject.hpp"
 #include "GL3State.hpp"
 
@@ -75,3 +76,21 @@ void GL3BufferObject::setData(const void *data, size_t size, BufferUsage usage) 
             break;
     }
 }
+
+void GL3BufferObject::updateData(const void *data, size_t size, size_t offset, UpdateFlags flags) {
+    if (flags & UpdateFlags::DiscardOldData) {
+        auto ptr = glMapBufferRange(getGLType(_type), offset, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+
+        std::memcpy(ptr, data, size);
+
+        if (glUnmapBuffer(getGLType(_type)) == GL_TRUE) {
+            // Unmap successful
+            return;
+        }
+        // If we are still here then the unmap was not successful, try using glBufferSubData
+    }
+    // Just use bufferSubData
+    glBufferSubData(getGLType(_type), offset, size, data);
+}
+
+

@@ -38,6 +38,10 @@ void GL3VertexLayout::addComponent(AttributeType type, DataFormat format, size_t
             comp.data_type = GL_FLOAT;
             comp.size = 2;
             break;
+        case DataFormat::Float:
+            comp.data_type = GL_FLOAT;
+            comp.size = 1;
+            break;
     }
 
     comp.stride = static_cast<GLsizei>(stride);

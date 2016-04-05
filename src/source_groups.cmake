@@ -60,13 +60,16 @@ set(file_test
         test/Application.hpp
         test/AssimpModel.cpp
         test/AssimpModel.hpp
-        test/stb_image.h
+        util/stb_image.h
         )
 
 set(file_util
+        util/Assertion.hpp
         util/DefaultFileLoader.hpp
         util/DefaultFileLoader.cpp
         util/FileLoader.hpp
+        util/textures.hpp
+        util/textures.cpp
         util/Timing.hpp
         util/Timing.cpp
         )

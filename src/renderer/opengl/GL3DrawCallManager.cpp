@@ -10,6 +10,8 @@ namespace {
         switch (type) {
             case PrimitiveType::Triangle:
                 return GL_TRIANGLES;
+            case PrimitiveType::Point:
+                return GL_POINTS;
         }
         return GL_TRIANGLES;
     }
@@ -23,6 +25,14 @@ namespace {
         }
         return GL_UNSIGNED_INT;
     }
+}
+
+GL3DrawCallProperties GL3DrawCallManager::convertProperties(const DrawCallProperties &props) {
+    GL3DrawCallProperties gl_props;
+    gl_props.state = static_cast<GL3PipelineState *>(props.state);
+    gl_props.vertexLayout = static_cast<GL3VertexLayout *>(props.vertexLayout);
+
+    return gl_props;
 }
 
 std::unique_ptr<DrawCall> GL3DrawCallManager::createDrawCall(const DrawCallProperties &props, PrimitiveType type,
@@ -51,12 +61,35 @@ std::unique_ptr<DrawCall> GL3DrawCallManager::createIndexedCall(const DrawCallPr
     return std::unique_ptr<DrawCall>(new GL3DrawCall(gl_props));
 }
 
-GL3DrawCallProperties GL3DrawCallManager::convertProperties(const DrawCallProperties &props) {
-    GL3DrawCallProperties gl_props;
-    gl_props.state = static_cast<GL3PipelineState*>(props.state);
-    gl_props.vertexLayout = static_cast<GL3VertexLayout *>(props.vertexLayout);
+std::unique_ptr<VariableDrawCall> GL3DrawCallManager::createVariableDrawCall(const DrawCallProperties &props,
+                                                                             PrimitiveType type) {
+    GL3DrawCallProperties gl_props = convertProperties(props);
 
-    return gl_props;
+    gl_props.primitive_type = getPrimitiveType(type);
+    gl_props.count = 0;
+    gl_props.offset = 0;
+    gl_props.indexed = false;
+
+    return std::unique_ptr<VariableDrawCall>(new GL3DrawCall(gl_props));
 }
+
+std::unique_ptr<VariableDrawCall> GL3DrawCallManager::createVariableIndexedCall(const DrawCallProperties &props,
+                                                                                PrimitiveType type,
+                                                                                IndexType indexType) {
+    GL3DrawCallProperties gl_props = convertProperties(props);
+
+    gl_props.primitive_type = getPrimitiveType(type);
+    gl_props.count = 0;
+    gl_props.offset = 0;
+
+    gl_props.indexed = true;
+    gl_props.index.type = getIndexType(indexType);
+
+    return std::unique_ptr<VariableDrawCall>(new GL3DrawCall(gl_props));
+}
+
+
+
+
 
 

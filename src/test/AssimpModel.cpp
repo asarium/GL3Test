@@ -3,16 +3,14 @@
 
 #include "AssimpModel.hpp"
 
+#include "util/textures.hpp"
+
 #include <assimp/postprocess.h>
 #include <assimp/DefaultLogger.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 #include <glm/gtx/string_cast.hpp>
-
-#define STB_IMAGE_IMPLEMENTATION
-
-#include "stb_image.h"
 
 namespace {
     struct VertexData {
@@ -60,27 +58,7 @@ bool AssimpModel::loadModel(Renderer *renderer, const std::string &path) {
         return false;
     }
 
-    _texture = renderer->createTexture();
-    int width, height, components;
-    auto texture_data = stbi_load("resources/duckCM.tga", &width, &height, &components, 0);
-    if (texture_data) {
-        auto stride = width * components;
-        std::unique_ptr<uint8_t[]> buffer(new uint8_t[stride]);
-        size_t height_half = width / 2;
-        for (size_t y = 0; y < height_half; ++y) {
-            uint8_t *top = texture_data + y * stride;
-            uint8_t *bottom = texture_data + (height - y - 1) * stride;
-
-            memcpy(buffer.get(), top, stride);
-            memcpy(top, bottom, stride);
-            memcpy(bottom, buffer.get(), stride);
-        }
-
-        _texture->initialize(width, height, components == 3 ? TextureFormat::R8G8B8 : TextureFormat::R8G8B8A8,
-                             texture_data);
-
-        stbi_image_free(texture_data);
-    }
+    _texture = util::load_texture(renderer, "resources/duckCM.tga");
 
     if (!createVertexLayouts(renderer)) {
         return false;

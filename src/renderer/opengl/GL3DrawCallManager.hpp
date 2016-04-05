@@ -8,7 +8,7 @@
 
 struct GL3DrawCallProperties {
     GL3VertexLayout *vertexLayout;
-    GL3PipelineState* state;
+    GL3PipelineState *state;
 
     GLenum primitive_type;
     GLsizei count;
@@ -21,19 +21,28 @@ struct GL3DrawCallProperties {
 };
 
 class GL3DrawCallManager : public DrawCallManager {
-    GL3ShaderManager* _manager;
+    GL3ShaderManager *_manager;
 
-    GL3DrawCallProperties convertProperties(const DrawCallProperties& props);
+    GL3DrawCallProperties convertProperties(const DrawCallProperties &props);
+
 public:
     GL3DrawCallManager(GL3ShaderManager *_manager) : _manager(_manager) { }
 
-    virtual ~GL3DrawCallManager() {};
+    virtual ~GL3DrawCallManager() { };
 
     virtual std::unique_ptr<DrawCall> createDrawCall(const DrawCallProperties &props, PrimitiveType type,
                                                      size_t offset, size_t count) override;
 
     virtual std::unique_ptr<DrawCall> createIndexedCall(const DrawCallProperties &props, PrimitiveType type,
                                                         size_t offset, size_t count, IndexType indexType) override;
+
+    virtual std::unique_ptr<VariableDrawCall> createVariableDrawCall(const DrawCallProperties &props,
+                                                                     PrimitiveType type) override;
+
+    virtual std::unique_ptr<VariableDrawCall> createVariableIndexedCall(const DrawCallProperties &props,
+                                                                        PrimitiveType type,
+
+                                                                        IndexType indexType) override;
 };
 
 

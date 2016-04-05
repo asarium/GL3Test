@@ -70,39 +70,45 @@ void GL3StateTracker::setDepthTest(bool enable) {
     }
 }
 
+void GL3StateTracker::setDepthMask(bool flag) {
+    if (_depthMask.setIfChanged(flag)) {
+        glDepthMask(flag ? GL_TRUE : GL_FALSE);
+    }
+}
+
 void GL3StateTracker::setDepthFunc(DepthFunction mode) {
-	if (_depthFunction.setIfChanged(mode)) {
-		GLint depthMode;
+    if (_depthFunction.setIfChanged(mode)) {
+        GLint depthMode;
 
-		switch (mode) {
-		case DepthFunction::Always:
-			depthMode = GL_ALWAYS;
-			break;
-		case DepthFunction::Equal:
-			depthMode = GL_EQUAL;
-			break;
-		case DepthFunction::Greater:
-			depthMode = GL_GREATER;
-			break;
-		case DepthFunction::GreaterOrEqual:
-			depthMode = GL_GEQUAL;
-			break;
-		case DepthFunction::Less:
-			depthMode = GL_LESS;
-			break;
-		case DepthFunction::LessOrEqual:
-			depthMode = GL_LEQUAL;
-			break;
-		case DepthFunction::Never:
-			depthMode = GL_NEVER;
-			break;
-		case DepthFunction::NotEqual:
-			depthMode = GL_NOTEQUAL;
-			break;
-		}
+        switch (mode) {
+            case DepthFunction::Always:
+                depthMode = GL_ALWAYS;
+                break;
+            case DepthFunction::Equal:
+                depthMode = GL_EQUAL;
+                break;
+            case DepthFunction::Greater:
+                depthMode = GL_GREATER;
+                break;
+            case DepthFunction::GreaterOrEqual:
+                depthMode = GL_GEQUAL;
+                break;
+            case DepthFunction::Less:
+                depthMode = GL_LESS;
+                break;
+            case DepthFunction::LessOrEqual:
+                depthMode = GL_LEQUAL;
+                break;
+            case DepthFunction::Never:
+                depthMode = GL_NEVER;
+                break;
+            case DepthFunction::NotEqual:
+                depthMode = GL_NOTEQUAL;
+                break;
+        }
 
-		glDepthFunc(depthMode);
-	}
+        glDepthFunc(depthMode);
+    }
 }
 
 void GL3StateTracker::bindVertexArray(GLuint handle) {
@@ -131,16 +137,15 @@ void GL3StateTracker::setBlendMode(bool enable) {
 void GL3StateTracker::setBlendFunc(BlendFunction mode) {
     if (_blendFunc.setIfChanged(mode)) {
         switch (mode) {
+            case BlendFunction::None:
+                break;
             case BlendFunction::Additive:
                 glBlendFunc(GL_ONE, GL_ONE);
                 break;
+            case BlendFunction::AdditiveAlpha:
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+                break;
         }
-    }
-}
-
-void GL3StateTracker::setDepthMask(bool flag) {
-    if (_depthMask.setIfChanged(flag)) {
-        glDepthMask(flag ? GL_TRUE : GL_FALSE);
     }
 }
 
@@ -151,8 +156,7 @@ void GL3ProgramState::use(GLuint handle) {
 }
 
 
-GL3FramebufferState::GL3FramebufferState()
-{
+GL3FramebufferState::GL3FramebufferState() {
     _activeDrawBuffer = 0;
     _activeReadBuffer = 0;
 }

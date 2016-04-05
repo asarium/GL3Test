@@ -218,6 +218,7 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height) {
     // Preload some shaders
     _shaderManager->getShader(GL3ShaderType::Mesh);
     _shaderManager->getShader(GL3ShaderType::DeferredMesh);
+    _shaderManager->getShader(GL3ShaderType::PointSprite);
 
     _drawCallManager.reset(new GL3DrawCallManager(_shaderManager.get()));
     _lightingManager.reset(new GL3LightingManager(this));
@@ -280,7 +281,7 @@ std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelinePr
 
     gl_props.blending = props.blending;
     gl_props.blendFunction = props.blendFunction;
-    gl_props.depth_test = props.depth_test;
+    gl_props.depthMode = props.depthMode;
     gl_props.depthFunction = props.depthFunction;
 
     return std::unique_ptr<PipelineState>(new GL3PipelineState(gl_props));
