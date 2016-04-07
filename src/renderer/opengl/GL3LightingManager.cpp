@@ -110,7 +110,7 @@ void GL3LightingManager::beginLightPass() {
     GLState->Framebuffer.bind(_renderFrameBuffer);
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
-    GLState->setDepthMask(true);
+    GLState->flushStateChanges();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -118,12 +118,9 @@ void GL3LightingManager::endLightPass() {
     GLState->Framebuffer.popBinding();
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    GLState->flushStateChanges();
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLState->setBlendMode(true);
-    GLState->setBlendFunc(BlendFunction::AdditiveAlpha);
-
-    GLState->setDepthTest(false);
 
     auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();
     auto width = currentRenderTarget->getWidth();
@@ -152,6 +149,10 @@ void GL3LightingManager::endLightPass() {
 
         _lightingPassProgram->bindAndSetParameters(&_lightingPassParameters);
         _quadVertexLayout->bind();
+        GLState->setBlendMode(true);
+        GLState->setBlendFunc(BlendFunction::AdditiveAlpha);
+        GLState->setDepthTest(false);
+        GLState->flushStateChanges();
         glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 
@@ -213,7 +214,8 @@ void GL3LightingManager::createFrameBuffer(int width, int height) {
 
     glGenTextures(NUM_GBUFFERS, _gBufferTextures);
 
-    GLState->Texture.bindTexture(GL_TEXTURE_2D, _gBufferTextures[POSITION_BUFFER]);
+    GLState->Texture.bindTexture(0, GL_TEXTURE_2D, _gBufferTextures[POSITION_BUFFER]);
+    GLState->flushStateChanges();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, _framebufferSize.x, _framebufferSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -221,7 +223,8 @@ void GL3LightingManager::createFrameBuffer(int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    GLState->Texture.bindTexture(GL_TEXTURE_2D, _gBufferTextures[NORMAL_BUFFER]);
+    GLState->Texture.bindTexture(0, GL_TEXTURE_2D, _gBufferTextures[NORMAL_BUFFER]);
+    GLState->flushStateChanges();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, _framebufferSize.x, _framebufferSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -229,7 +232,8 @@ void GL3LightingManager::createFrameBuffer(int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    GLState->Texture.bindTexture(GL_TEXTURE_2D, _gBufferTextures[ALBEDO_BUFFER]);
+    GLState->Texture.bindTexture(0, GL_TEXTURE_2D, _gBufferTextures[ALBEDO_BUFFER]);
+    GLState->flushStateChanges();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _framebufferSize.x, _framebufferSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -237,10 +241,10 @@ void GL3LightingManager::createFrameBuffer(int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    GLState->Texture.bindTexture(GL_TEXTURE_2D, 0);
 
     glGenRenderbuffers(1, &_depthRenderBuffer);
     GLState->bindRenderBuffer(_depthRenderBuffer);
+    GLState->flushStateChanges();
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, _framebufferSize.x, _framebufferSize.y);
     GLState->bindRenderBuffer(0);
 

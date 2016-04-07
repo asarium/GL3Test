@@ -3,16 +3,18 @@
 thread_local std::unique_ptr<GL3StateTracker> GLState;
 
 void GL3BufferState::bindArrayBuffer(GLuint buffer) {
-    if (_arrayBuffer.setIfChanged(buffer)) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    }
+    _arrayBuffer.setWanted(buffer);
 }
 
 void GL3BufferState::bindElementBuffer(GLuint buffer) {
-    if (_elementBuffer.setIfChanged(buffer)) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
-    }
+    _elementBuffer.setWanted(buffer);
 }
+
+void GL3BufferState::flushStateChanges(bool reset) {
+    _arrayBuffer.apply(reset);
+    _elementBuffer.apply(reset);
+}
+
 
 GL3TextureState::GL3TextureState() {
     GLint units;
@@ -20,139 +22,83 @@ GL3TextureState::GL3TextureState() {
     _textureUnits.resize(static_cast<size_t>(units));
 }
 
-void GL3TextureState::bindTexture(int tex_unit, GLenum target, GLuint handle) {
-    auto &texunit = _textureUnits[tex_unit];
-
-    if (texunit.textureTarget.isNewValue(target) || texunit.boundTexture.isNewValue(handle)) {
-        texunit.textureTarget.setIfChanged(target);
-        texunit.boundTexture.setIfChanged(handle);
-
-        // Only set texture unit if it will actually change something
-        setActiveUnit(tex_unit);
-
-        glBindTexture(target, handle);
+void GL3TextureState::setActiveUnit(uint32_t unit) {
+    if (_activeTextureUnit.setIfChanged(unit)) {
+        glActiveTexture(GL_TEXTURE0 + unit);
     }
+}
+
+void GL3TextureState::bindTexture(int tex_unit, GLenum target, GLuint handle) {
+    _textureUnits[tex_unit].boundTexture.setWanted(std::make_pair(target, handle));
 }
 
 void GL3TextureState::unbindAll() {
     for (size_t i = 0; i < _textureUnits.size(); ++i) {
-        auto &targetState = _textureUnits[i].textureTarget;
-        auto target = targetState.isDirty() ? GL_TEXTURE_2D : *targetState;
-        bindTexture(static_cast<int>(i), target, 0);
+        _textureUnits[i].boundTexture.reset();
     }
 }
 
-void GL3TextureState::setActiveUnit(int tex_unit) {
-    if (_activeTextureUnit.setIfChanged(tex_unit)) {
-        glActiveTexture(GL_TEXTURE0 + tex_unit);
-    }
-}
+void GL3TextureState::flushStateChanges(bool reset) {
+    for (size_t i = 0; i < _textureUnits.size(); ++i) {
+        if (_textureUnits[i].boundTexture.needsChange()) {
+            setActiveUnit((uint32_t) i);
 
-void GL3TextureState::bindTexture(GLenum target, GLuint handle) {
-    auto &texunit = _textureUnits[*_activeTextureUnit];
-
-    if (texunit.textureTarget.isNewValue(target) || texunit.boundTexture.isNewValue(handle)) {
-        texunit.textureTarget.setIfChanged(target);
-        texunit.boundTexture.setIfChanged(handle);
-
-        glBindTexture(target, handle);
+            _textureUnits[i].boundTexture.apply(reset);
+        }
     }
 }
 
 
 void GL3StateTracker::setDepthTest(bool enable) {
-    if (_depthTest.setIfChanged(enable)) {
-        if (enable) {
-            glEnable(GL_DEPTH_TEST);
-        } else {
-            glDisable(GL_DEPTH_TEST);
-        }
-    }
+    _depthTest.setWanted(enable);
 }
 
 void GL3StateTracker::setDepthMask(bool flag) {
-    if (_depthMask.setIfChanged(flag)) {
-        glDepthMask(flag ? GL_TRUE : GL_FALSE);
-    }
+    _depthMask.setWanted(flag);
 }
 
 void GL3StateTracker::setDepthFunc(DepthFunction mode) {
-    if (_depthFunction.setIfChanged(mode)) {
-        GLint depthMode;
-
-        switch (mode) {
-            case DepthFunction::Always:
-                depthMode = GL_ALWAYS;
-                break;
-            case DepthFunction::Equal:
-                depthMode = GL_EQUAL;
-                break;
-            case DepthFunction::Greater:
-                depthMode = GL_GREATER;
-                break;
-            case DepthFunction::GreaterOrEqual:
-                depthMode = GL_GEQUAL;
-                break;
-            case DepthFunction::Less:
-                depthMode = GL_LESS;
-                break;
-            case DepthFunction::LessOrEqual:
-                depthMode = GL_LEQUAL;
-                break;
-            case DepthFunction::Never:
-                depthMode = GL_NEVER;
-                break;
-            case DepthFunction::NotEqual:
-                depthMode = GL_NOTEQUAL;
-                break;
-        }
-
-        glDepthFunc(depthMode);
-    }
+    _depthFunction.setWanted(mode);
 }
 
 void GL3StateTracker::bindVertexArray(GLuint handle) {
-    if (_vertexArray.setIfChanged(handle)) {
-        glBindVertexArray(handle);
-    }
+    _vertexArray.setWanted(handle);
 }
 
 void GL3StateTracker::bindRenderBuffer(GLuint renderbuffer) {
-    if (_boundRenderbuffer.setIfChanged(renderbuffer)) {
-        glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-    }
+    _boundRenderbuffer.setWanted(renderbuffer);
 }
 
 void GL3StateTracker::setBlendMode(bool enable) {
-    if (_blendEnabled.setIfChanged(enable)) {
-        if (enable) {
-            glEnable(GL_BLEND);
-        } else {
-            glDisable(GL_BLEND);
-        }
-    }
+    _blendEnabled.setWanted(enable);
 }
 
 
 void GL3StateTracker::setBlendFunc(BlendFunction mode) {
-    if (_blendFunc.setIfChanged(mode)) {
-        switch (mode) {
-            case BlendFunction::None:
-                break;
-            case BlendFunction::Additive:
-                glBlendFunc(GL_ONE, GL_ONE);
-                break;
-            case BlendFunction::AdditiveAlpha:
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-                break;
-        }
-    }
+    _blendFunc.setWanted(mode);
 }
 
+void GL3StateTracker::flushStateChanges(bool reset) {
+    Texture.flushStateChanges(reset);
+    Program.flushStateChanges(reset);
+    Buffer.flushStateChanges(reset);
+
+    _depthTest.apply(reset);
+    _depthMask.apply(reset);
+    _depthFunction.apply(reset);
+    _vertexArray.apply(reset);
+    _boundRenderbuffer.apply(reset);
+    _blendEnabled.apply(reset);
+    _blendFunc.apply(reset);
+}
+
+
 void GL3ProgramState::use(GLuint handle) {
-    if (_activeProgram.setIfChanged(handle)) {
-        glUseProgram(handle);
-    }
+    _activeProgram.setWanted(handle);
+}
+
+void GL3ProgramState::flushStateChanges(bool reset) {
+    _activeProgram.apply(reset);
 }
 
 

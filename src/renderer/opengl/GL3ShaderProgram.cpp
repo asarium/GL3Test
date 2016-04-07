@@ -118,6 +118,7 @@ void GL3ShaderProgram::bind() {
 
 void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters *parameters) {
     this->bind();
+    GLState->flushStateChanges(false);
     GLint texture_unit = 0;
 
     GLState->Texture.unbindAll();

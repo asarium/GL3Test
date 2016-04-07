@@ -248,6 +248,7 @@ void GL3Renderer::presentNextFrame() {
 
 void GL3Renderer::clear(const glm::vec4 &color) {
     glClearColor(color.r, color.g, color.b, color.a);
+    GLState->flushStateChanges();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 

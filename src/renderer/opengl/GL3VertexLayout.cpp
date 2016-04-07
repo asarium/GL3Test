@@ -61,6 +61,7 @@ void GL3VertexLayout::finalize() {
     GLState->bindVertexArray(_vaoHandle);
     for (auto& comp : _components) {
         comp.buffer->bind();
+        GLState->flushStateChanges(false);
 
         glEnableVertexAttribArray(comp.attribute_location);
         glVertexAttribPointer(comp.attribute_location, comp.size, comp.data_type, GL_FALSE, comp.stride, comp.offset);
@@ -70,7 +71,7 @@ void GL3VertexLayout::finalize() {
         _attachedBuffers[_indexBuffer]->bind();
     }
 
-    GLState->bindVertexArray(0);
+    GLState->flushStateChanges();
 }
 
 void GL3VertexLayout::bind() {

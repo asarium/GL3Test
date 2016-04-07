@@ -48,6 +48,7 @@ void GL3BufferObject::bind() {
 
 void GL3BufferObject::setData(const void *data, size_t size, BufferUsage usage) {
     this->bind();
+    GLState->flushStateChanges();
 
     GLenum gl_usage;
     switch (usage) {
@@ -78,6 +79,8 @@ void GL3BufferObject::setData(const void *data, size_t size, BufferUsage usage) 
 }
 
 void GL3BufferObject::updateData(const void *data, size_t size, size_t offset, UpdateFlags flags) {
+    this->bind();
+    GLState->flushStateChanges();
     if (flags & UpdateFlags::DiscardOldData) {
         auto ptr = glMapBufferRange(getGLType(_type), offset, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 

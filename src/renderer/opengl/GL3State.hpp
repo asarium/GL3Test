@@ -7,6 +7,8 @@
 #include <stack>
 #include <renderer/PipelineState.hpp>
 
+#include "GL3StateFunctors.hpp"
+
 template<typename T>
 class SavedState {
 public:
@@ -50,40 +52,94 @@ public:
     }
 };
 
+template<typename T, typename ApplyFunc>
+class DeferredState {
+public:
+    typedef T saved_type;
+    typedef ApplyFunc apply_type;
+
+private:
+    saved_type _saved;
+    saved_type _wanted;
+
+    apply_type _applyFunc;
+
+    bool _dirty; // true if the saved value is not up to date
+public:
+    DeferredState() : _dirty(true), _wanted(apply_type::default_value()) { }
+
+    void setWanted(const saved_type &values) {
+        _wanted = values;
+    }
+
+    void markDirty() {
+        _dirty = true;
+    }
+
+    void apply(bool reset) {
+        if (needsChange()) {
+            _applyFunc(_wanted);
+
+            _saved = _wanted;
+            _dirty = false;
+        }
+
+        if (reset) {
+            // Always reset back to default so every code uses the same default OpenGL State
+            this->reset();
+        }
+    }
+
+    bool needsChange() {
+        return _dirty || _wanted != _saved;
+    }
+
+    void reset() {
+        _wanted = apply_type::default_value();
+    }
+
+    const saved_type &operator*() {
+        return _wanted;
+    }
+};
+
 class GL3BufferState {
-    SavedState<GLuint> _arrayBuffer;
-    SavedState<GLuint> _elementBuffer;
+    DeferredState<GLuint, BindArrayBuffer> _arrayBuffer;
+    DeferredState<GLuint, BindElementBuffer> _elementBuffer;
 public:
     void bindArrayBuffer(GLuint buffer);
 
     void bindElementBuffer(GLuint buffer);
+
+    void flushStateChanges(bool reset);
 };
 
 class GL3TextureState {
     struct GL3TextureUnit {
-        SavedState<GLuint> boundTexture;
-        SavedState<GLenum> textureTarget;
+        DeferredState<std::pair<GLenum, GLuint>, BindTexture> boundTexture;
     };
 
-    SavedState<int> _activeTextureUnit;
+    SavedState<uint32_t> _activeTextureUnit;
     std::vector<GL3TextureUnit> _textureUnits;
 
 public:
     GL3TextureState();
 
-    void setActiveUnit(int tex_unit);
-
-    void bindTexture(GLenum target, GLuint handle);
+    void setActiveUnit(uint32_t unit);
 
     void bindTexture(int tex_unit, GLenum target, GLuint handle);
 
     void unbindAll();
+
+    void flushStateChanges(bool reset);
 };
 
 class GL3ProgramState {
-    SavedState<GLuint> _activeProgram;
+    DeferredState<GLuint, UseProgram> _activeProgram;
 public:
     void use(GLuint program);
+
+    void flushStateChanges(bool reset);
 };
 
 class GL3FramebufferState {
@@ -111,15 +167,15 @@ public:
 };
 
 class GL3StateTracker {
-    SavedState<bool> _depthTest;
-    SavedState<bool> _depthMask;
-    SavedState<DepthFunction> _depthFunction;
+    DeferredState<bool, SetDepthTest> _depthTest;
+    DeferredState<bool, SetDepthMask> _depthMask;
+    DeferredState<DepthFunction, SetDepthFunction> _depthFunction;
 
-    SavedState<GLuint> _vertexArray;
-    SavedState<GLuint> _boundRenderbuffer;
+    DeferredState<GLuint, BindVertexArray> _vertexArray;
+    DeferredState<GLuint, BindRenderBuffer> _boundRenderbuffer;
 
-    SavedState<bool> _blendEnabled;
-    SavedState<BlendFunction> _blendFunc;
+    DeferredState<bool, SetBlendMode> _blendEnabled;
+    DeferredState<BlendFunction, SetBlendFunc> _blendFunc;
 
 public:
     GL3BufferState Buffer;
@@ -140,6 +196,8 @@ public:
     void setBlendMode(bool enable);
 
     void setBlendFunc(BlendFunction mode);
+
+    void flushStateChanges(bool reset = true);
 };
 
 extern thread_local std::unique_ptr<GL3StateTracker> GLState;

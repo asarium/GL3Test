@@ -31,7 +31,8 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
     GLState->Framebuffer.bind(framebuffer);
 
     glGenTextures(1, &colorTexture);
-    GLState->Texture.bindTexture(GL_TEXTURE_2D, colorTexture);
+    GLState->Texture.bindTexture(0, GL_TEXTURE_2D, colorTexture);
+    GLState->flushStateChanges(); // The following functions need the texture to be bound
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLint) width, (GLint) height, 0, GL_RGB, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -40,10 +41,9 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
 
-    GLState->Texture.bindTexture(GL_TEXTURE_2D, 0);
-
     glGenRenderbuffers(1, &depthRenderBuffer);
     GLState->bindRenderBuffer(depthRenderBuffer);
+    GLState->flushStateChanges();
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, (GLint) width, (GLint) height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
     GLState->bindRenderBuffer(0);
