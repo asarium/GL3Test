@@ -42,6 +42,8 @@ std::unique_ptr<DrawCall> GL3DrawCallManager::createDrawCall(const DrawCallPrope
     gl_props.primitive_type = getPrimitiveType(type);
     gl_props.count = static_cast<GLsizei>(count);
     gl_props.offset = static_cast<GLint>(offset);
+    gl_props.instanced = false;
+
     gl_props.indexed = false;
 
     return std::unique_ptr<DrawCall>(new GL3DrawCall(gl_props));
@@ -54,6 +56,7 @@ std::unique_ptr<DrawCall> GL3DrawCallManager::createIndexedCall(const DrawCallPr
     gl_props.primitive_type = getPrimitiveType(type);
     gl_props.count = static_cast<GLsizei>(count);
     gl_props.offset = static_cast<GLint>(offset);
+    gl_props.instanced = false;
 
     gl_props.indexed = true;
     gl_props.index.type = getIndexType(indexType);
@@ -68,6 +71,8 @@ std::unique_ptr<VariableDrawCall> GL3DrawCallManager::createVariableDrawCall(con
     gl_props.primitive_type = getPrimitiveType(type);
     gl_props.count = 0;
     gl_props.offset = 0;
+    gl_props.instanced = false;
+
     gl_props.indexed = false;
 
     return std::unique_ptr<VariableDrawCall>(new GL3DrawCall(gl_props));
@@ -81,6 +86,7 @@ std::unique_ptr<VariableDrawCall> GL3DrawCallManager::createVariableIndexedCall(
     gl_props.primitive_type = getPrimitiveType(type);
     gl_props.count = 0;
     gl_props.offset = 0;
+    gl_props.instanced = false;
 
     gl_props.indexed = true;
     gl_props.index.type = getIndexType(indexType);
@@ -88,8 +94,61 @@ std::unique_ptr<VariableDrawCall> GL3DrawCallManager::createVariableIndexedCall(
     return std::unique_ptr<VariableDrawCall>(new GL3DrawCall(gl_props));
 }
 
+std::unique_ptr<InstancedDrawCall> GL3DrawCallManager::createInstancedDrawCall(const DrawCallProperties &props, PrimitiveType type,
+                                                             size_t offset, size_t count) {
+    GL3DrawCallProperties gl_props = convertProperties(props);
 
+    gl_props.primitive_type = getPrimitiveType(type);
+    gl_props.count = static_cast<GLsizei>(count);
+    gl_props.offset = static_cast<GLint>(offset);
+    gl_props.instanced = true;
 
+    gl_props.indexed = false;
 
+    return std::unique_ptr<InstancedDrawCall>(new GL3DrawCall(gl_props));
+}
 
+std::unique_ptr<InstancedDrawCall> GL3DrawCallManager::createInstancedIndexedCall(const DrawCallProperties &props, PrimitiveType type,
+                                                                size_t offset, size_t count, IndexType indexType) {
+    GL3DrawCallProperties gl_props = convertProperties(props);
 
+    gl_props.primitive_type = getPrimitiveType(type);
+    gl_props.count = static_cast<GLsizei>(count);
+    gl_props.offset = static_cast<GLint>(offset);
+    gl_props.instanced = true;
+
+    gl_props.indexed = true;
+    gl_props.index.type = getIndexType(indexType);
+
+    return std::unique_ptr<InstancedDrawCall>(new GL3DrawCall(gl_props));
+}
+
+std::unique_ptr<InstancedVariableDrawCall> GL3DrawCallManager::createInstancedVariableDrawCall(const DrawCallProperties &props,
+                                                                             PrimitiveType type) {
+    GL3DrawCallProperties gl_props = convertProperties(props);
+
+    gl_props.primitive_type = getPrimitiveType(type);
+    gl_props.count = 0;
+    gl_props.offset = 0;
+    gl_props.instanced = true;
+
+    gl_props.indexed = false;
+
+    return std::unique_ptr<InstancedVariableDrawCall>(new GL3DrawCall(gl_props));
+}
+
+std::unique_ptr<InstancedVariableDrawCall> GL3DrawCallManager::createInstancedVariableIndexedCall(const DrawCallProperties &props,
+                                                                                PrimitiveType type,
+                                                                                IndexType indexType) {
+    GL3DrawCallProperties gl_props = convertProperties(props);
+
+    gl_props.primitive_type = getPrimitiveType(type);
+    gl_props.count = 0;
+    gl_props.offset = 0;
+    gl_props.instanced = true;
+
+    gl_props.indexed = true;
+    gl_props.index.type = getIndexType(indexType);
+
+    return std::unique_ptr<InstancedVariableDrawCall>(new GL3DrawCall(gl_props));
+}

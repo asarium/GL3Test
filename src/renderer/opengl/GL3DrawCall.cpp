@@ -1,6 +1,7 @@
 //
 //
 
+#include <util/Assertion.hpp>
 #include "GL3DrawCall.hpp"
 #include "GL3DrawCallManager.hpp"
 
@@ -38,6 +39,8 @@ void GL3DrawCall::draw(size_t count, size_t offset) {
 }
 
 void GL3DrawCall::actualDraw(GLsizei count, GLint offset) {
+    Assertion(!_properties.instanced, "Instanced draw call executed without instancing!");
+
     setGLState();
 
     if (_properties.indexed) {
@@ -48,7 +51,28 @@ void GL3DrawCall::actualDraw(GLsizei count, GLint offset) {
     }
 }
 
+void GL3DrawCall::drawInstanced(size_t num_instances) {
+    actualDrawInstanced(static_cast<GLsizei>(num_instances), _properties.count, _properties.offset);
+}
+
+void GL3DrawCall::drawInstanced(size_t num_instances, size_t count, size_t offset) {
+    actualDrawInstanced(static_cast<GLsizei>(num_instances), (GLsizei) count, (GLint) offset);
+}
+
 ShaderParameters *GL3DrawCall::getParameters() {
     return &_parameters;
 }
+
+void GL3DrawCall::actualDrawInstanced(GLsizei instances, GLsizei count, GLint offset) {
+    Assertion(_properties.instanced, "Non-Instanced draw call executed with instancing!");
+    setGLState();
+
+    if (_properties.indexed) {
+        glDrawElementsInstanced(_properties.primitive_type, count, _properties.index.type,
+                                reinterpret_cast<void *>(offset * getTypeSize(_properties.index.type)), instances);
+    } else {
+        glDrawArraysInstanced(_properties.primitive_type, offset, count, instances);
+    }
+}
+
 

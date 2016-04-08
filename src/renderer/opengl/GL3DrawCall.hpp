@@ -6,7 +6,8 @@
 #include "GL3DrawCallManager.hpp"
 
 
-class GL3DrawCall : public DrawCall, public VariableDrawCall {
+class GL3DrawCall : public DrawCall, public VariableDrawCall,
+                    public InstancedDrawCall, public InstancedVariableDrawCall {
     GL3DrawCallProperties _properties;
 
     GL3ShaderParameters _parameters;
@@ -14,6 +15,9 @@ class GL3DrawCall : public DrawCall, public VariableDrawCall {
     void setGLState();
 
     void actualDraw(GLsizei count, GLint offset);
+
+    void actualDrawInstanced(GLsizei instances, GLsizei count, GLint offset);
+
 public:
     GL3DrawCall(const GL3DrawCallProperties &);
 
@@ -23,7 +27,11 @@ public:
 
     virtual void draw(size_t count, size_t offset) override;
 
-    virtual ShaderParameters* getParameters() override;
+    virtual void drawInstanced(size_t num_instances) override;
+
+    virtual void drawInstanced(size_t num_instances, size_t count, size_t offset) override;
+
+    virtual ShaderParameters *getParameters() override;
 };
 
 

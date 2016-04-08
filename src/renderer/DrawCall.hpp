@@ -22,3 +22,18 @@ public:
 
     virtual void draw(size_t count, size_t offset) = 0;
 };
+
+class InstancedDrawCall : public GenericDrawCall {
+public:
+    virtual ~InstancedDrawCall() { }
+
+    virtual void drawInstanced(size_t num_instances) = 0;
+};
+
+class InstancedVariableDrawCall : public GenericDrawCall {
+public:
+    virtual ~InstancedVariableDrawCall() { }
+
+    virtual void drawInstanced(size_t num_instances, size_t count, size_t offset) = 0;
+};
+
