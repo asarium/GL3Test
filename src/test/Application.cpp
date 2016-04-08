@@ -122,7 +122,7 @@ Application::~Application() {
 void Application::render(Renderer *renderer) {
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-    float radius = 100.0f;
+    float radius = 10.0f;
     float camX = sin(_timing->getTotalTime()) * radius;
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));

@@ -51,7 +51,7 @@ void GL3LightingManager::clearLights() {
     _lights.clear();
 }
 
-void GL3LightingManager::beginLightPass(const glm::mat4& projection, const glm::mat4& view) {
+void GL3LightingManager::beginLightPass(const glm::mat4 &projection, const glm::mat4 &view) {
     _projectionMatrix = projection;
     _viewMatrix = view;
 
@@ -92,16 +92,18 @@ void GL3LightingManager::endLightPass() {
 
     for (auto &light : _lights) {
         switch (light->type) {
-            case LightType::Point:
-            {
+            case LightType::Point: {
                 _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 0);
                 _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->position);
                 _lightingPassParameters.setVec2(GL3ShaderParameterType::WindowSize, glm::vec2(width, height));
 
-                const float cutoff = 0.001f; // Cutoff value after which this light does not affect anything anymore
-                auto scale = sqrtf(light->intensity / cutoff - 1.f) * 1.2f;
-                _lightingPassParameters.setMat4(GL3ShaderParameterType::ModelMatrix,
-                                                glm::scale(glm::mat4(), glm::vec3(scale)));
+                const float cutoff = 0.01f; // Cutoff value after which this light does not affect anything anymore
+                auto scale = sqrtf((light->intensity / cutoff) - 1.f) * 1.2f;
+                glm::mat4 lightSphere;
+                lightSphere = glm::translate(lightSphere, light->position);
+                lightSphere = glm::scale(lightSphere, glm::vec3(scale));
+
+                _lightingPassParameters.setMat4(GL3ShaderParameterType::ModelMatrix, lightSphere);
                 break;
             }
             case LightType::Directional:
