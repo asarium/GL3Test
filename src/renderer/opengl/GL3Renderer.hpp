@@ -5,6 +5,7 @@
 #include "GL3LightingManager.hpp"
 #include "GL3ShaderManager.hpp"
 #include "GL3RenderTargetManager.hpp"
+#include "GL3Util.hpp"
 
 #include <SDL_video.h>
 
@@ -36,6 +37,7 @@ private:
     std::unique_ptr<GL3LightingManager> _lightingManager;
     std::unique_ptr<GL3ShaderManager> _shaderManager;
     std::unique_ptr<GL3RenderTargetManager> _renderTargetManager;
+    std::unique_ptr<GL3Util> _util;
 public:
     GL3Renderer(std::unique_ptr<FileLoader> &&fileLoader);
 
@@ -78,6 +80,10 @@ public:
     GL3RenderTargetManager *getGLRenderTargetManager();
 
     GL3ShaderManager *getShaderManager();
+
+    GL3Util *getGLUtil() {
+        return _util.get();
+    }
 };
 
 

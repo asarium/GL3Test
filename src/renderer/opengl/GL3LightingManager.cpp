@@ -7,40 +7,6 @@
 
 #include <iostream>
 
-namespace {
-    struct VertexData {
-        glm::vec3 position;
-        glm::vec2 tex_coord;
-    };
-
-    std::vector<VertexData> getQuadVertexData() {
-        std::vector<VertexData> data;
-        data.push_back({glm::vec3(-1.0f, -1.0f, 0.f),
-                        glm::vec2(0.f, 0.f)
-                       });
-        data.push_back({glm::vec3(3.0f, -1.0f, 0.f),
-                        glm::vec2(2.f, 0.f)
-                       });
-        data.push_back({glm::vec3(-1.0f, 3.0f, 0.f),
-                        glm::vec2(0.f, 2.f)
-                       });
-
-        return data;
-    }
-
-    int next_power_of_two(int x) {
-        if (x < 0)
-            return 0;
-        --x;
-        x |= x >> 1;
-        x |= x >> 2;
-        x |= x >> 4;
-        x |= x >> 8;
-        x |= x >> 16;
-        return x + 1;
-    }
-}
-
 GL3LightingManager::GL3LightingManager(GL3Renderer *renderer) : GL3Object(renderer), _renderFrameBuffer(0),
                                                                 _gBufferTextures{0} {
 }
@@ -50,20 +16,6 @@ GL3LightingManager::~GL3LightingManager() {
 }
 
 bool GL3LightingManager::initialize() {
-    _quadVertexBuffer = _renderer->createBuffer(BufferType::Vertex);
-    auto quadData = getQuadVertexData();
-    _quadVertexBuffer->setData(quadData.data(), quadData.size() * sizeof(VertexData), BufferUsage::Static);
-
-    auto layout = _renderer->createVertexLayout();
-    auto vertexBufferIndex = layout->attachBufferObject(_quadVertexBuffer.get());
-    layout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), vertexBufferIndex,
-                         offsetof(VertexData, position));
-    layout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), vertexBufferIndex,
-                         offsetof(VertexData, tex_coord));
-    layout->finalize();
-
-    _quadVertexLayout.reset(static_cast<GL3VertexLayout *>(layout.release()));
-
     _lightingPassProgram = _renderer->getShaderManager()->getShader(GL3ShaderType::LightingPass);
 
     PipelineProperties pipelineProperties;
@@ -151,8 +103,7 @@ void GL3LightingManager::endLightPass() {
         _lightingPassParameters.setFloat(GL3ShaderParameterType::LightIntensitiy, light->intensity);
 
         _lightingPassProgram->bindAndSetParameters(&_lightingPassParameters);
-        _quadVertexLayout->bind();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        _renderer->getGLUtil()->drawFullScreenTri();
     }
 
     // Now copy the depth component back to the screen

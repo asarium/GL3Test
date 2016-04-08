@@ -142,6 +142,7 @@ void GL3Renderer::deinitialize() {
     _lightingManager.reset();
     _shaderManager.reset();
     _renderTargetManager.reset();
+    _util.reset();
 
     SDL_GL_DeleteContext(_context);
     _context = nullptr;
@@ -213,6 +214,7 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height) {
     }
 #endif
     GLState.reset(new GL3StateTracker());
+    _util.reset(new GL3Util(this));
 
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
     // Preload some shaders

@@ -52,9 +52,6 @@ class GL3LightingManager : GL3Object, public LightingManager {
 
     GLuint _depthRenderBuffer;
 
-    std::unique_ptr<BufferObject> _quadVertexBuffer;
-    std::unique_ptr<GL3VertexLayout> _quadVertexLayout;
-
     std::unique_ptr<PipelineState> _geometryPipelineState;
 
     GL3ShaderProgram *_lightingPassProgram;

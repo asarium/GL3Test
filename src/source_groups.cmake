@@ -51,6 +51,8 @@ set(file_renderer_opengl
         renderer/opengl/GL3State.hpp
         renderer/opengl/GL3Texture2D.cpp
         renderer/opengl/GL3Texture2D.hpp
+        renderer/opengl/GL3Util.cpp
+        renderer/opengl/GL3Util.hpp
         renderer/opengl/GL3VertexLayout.cpp
         renderer/opengl/GL3VertexLayout.hpp
         )
