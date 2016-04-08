@@ -98,6 +98,7 @@ void GL3LightingManager::endLightPass() {
                 _lightingPassParameters.setVec2(GL3ShaderParameterType::WindowSize, glm::vec2(width, height));
 
                 const float cutoff = 0.01f; // Cutoff value after which this light does not affect anything anymore
+                // This depends on the formula in the shader!
                 auto scale = sqrtf((light->intensity / cutoff) - 1.f) * 1.2f;
                 glm::mat4 lightSphere;
                 lightSphere = glm::translate(lightSphere, light->position);
