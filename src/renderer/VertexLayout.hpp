@@ -14,7 +14,8 @@ enum class AttributeType {
     Normal,
     Color,
     Tangent,
-    Radius
+    Radius,
+    PositionOffset
 };
 
 enum class DataFormat {
@@ -28,11 +29,15 @@ class VertexLayout {
 public:
     typedef size_t BufferIndex;
 
-    virtual ~VertexLayout() {}
+    virtual ~VertexLayout() { }
 
     virtual BufferIndex attachBufferObject(BufferObject *buffer) = 0;
 
-    virtual void addComponent(AttributeType type, DataFormat format, size_t stride, BufferIndex source, size_t offset) = 0;
+    virtual void addComponent(AttributeType type, DataFormat format, size_t stride, BufferIndex source,
+                              size_t offset) = 0;
+
+    virtual void addInstanceComponent(AttributeType type, DataFormat format, size_t instanceDivisor, size_t stride,
+                                      BufferIndex source, size_t offset) = 0;
 
     virtual void setIndexBuffer(BufferIndex source) = 0;
 

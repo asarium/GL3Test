@@ -217,10 +217,10 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height) {
     _util.reset(new GL3Util(this));
 
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
-    // Preload some shaders
-    _shaderManager->getShader(GL3ShaderType::Mesh);
-    _shaderManager->getShader(GL3ShaderType::DeferredMesh);
-    _shaderManager->getShader(GL3ShaderType::PointSprite);
+    // Preload the shaders
+    for (auto type : getDefinedShaderTypes()) {
+        _shaderManager->getShader(type);
+    }
 
     _drawCallManager.reset(new GL3DrawCallManager(_shaderManager.get()));
     _lightingManager.reset(new GL3LightingManager(this));

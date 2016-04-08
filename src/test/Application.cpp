@@ -1,5 +1,5 @@
-
 #define _USE_MATH_DEFINES
+
 #include <math.h>
 
 #include "Application.hpp"
@@ -10,6 +10,31 @@
 #include "util/textures.hpp"
 
 using namespace glm;
+
+namespace {
+    struct VertexData {
+        glm::vec3 position;
+        glm::vec2 tex_coord;
+    };
+
+    std::vector<VertexData> getQuadData() {
+        std::vector<VertexData> data;
+        data.push_back({glm::vec3(-1.0f, -1.0f, 0.f),
+                        glm::vec2(0.f, 0.f)
+                       });
+        data.push_back({glm::vec3(-1.0f, 1.0f, 0.f),
+                        glm::vec2(0.f, 1.f)
+                       });
+        data.push_back({glm::vec3(1.0f, -1.0f, 0.f),
+                        glm::vec2(1.f, 0.f)
+                       });
+        data.push_back({glm::vec3(1.0f, 1.0f, 0.f),
+                        glm::vec2(1.f, 1.f)
+                       });
+
+        return data;
+    }
+}
 
 Application::Application(Renderer *renderer, Timing *time) {
     _timing = time;
@@ -37,30 +62,44 @@ Application::Application(Renderer *renderer, Timing *time) {
     _particleBuffer = renderer->createBuffer(BufferType::Vertex);
     _particleBuffer->setData(_particles.data(), sizeof(Particle) * _particles.size(), BufferUsage::Streaming);
 
-    _particleLayout = renderer->createVertexLayout();
-    auto pBufferIdx = _particleLayout->attachBufferObject(_particleBuffer.get());
-    _particleLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(Particle), pBufferIdx,
-                                  offsetof(Particle, position));
-    _particleLayout->addComponent(AttributeType::Radius, DataFormat::Float, sizeof(Particle), pBufferIdx,
-                                  offsetof(Particle, radius));
-    _particleLayout->finalize();
+    _particleQuadBuffer = renderer->createBuffer(BufferType::Vertex);
+    auto quadData = getQuadData();
+    _particleQuadBuffer->setData(quadData.data(), quadData.size() * sizeof(VertexData), BufferUsage::Static);
+
+    _particleQuadLayout = renderer->createVertexLayout();
+    auto quadBufferIdx = _particleQuadLayout->attachBufferObject(_particleQuadBuffer.get());
+    _particleQuadLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), quadBufferIdx,
+                                      offsetof(VertexData, position));
+    _particleQuadLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), quadBufferIdx,
+                                      offsetof(VertexData, tex_coord));
+
+    auto infoBufferIdx = _particleQuadLayout->attachBufferObject(_particleBuffer.get());
+    _particleQuadLayout->addInstanceComponent(AttributeType::PositionOffset, DataFormat::Vec3, 1, sizeof(Particle),
+                                              infoBufferIdx,
+                                              offsetof(Particle, position));
+    _particleQuadLayout->addInstanceComponent(AttributeType::Radius, DataFormat::Float, 1, sizeof(Particle),
+                                              infoBufferIdx,
+                                              offsetof(Particle, radius));
+
+    _particleQuadLayout->finalize();
 
     PipelineProperties pipelineProperties;
-    pipelineProperties.shaderType = ShaderType::PointSprite;
+    pipelineProperties.shaderType = ShaderType::InstancedSprite;
 
     pipelineProperties.blendFunction = BlendFunction::Additive;
     pipelineProperties.blending = true;
 
     pipelineProperties.depthMode = DepthMode::Read;
     pipelineProperties.depthFunction = DepthFunction::Less;
-    _particlePipelineState = renderer->createPipelineState(pipelineProperties);
+    _particleQuadPipelineState = renderer->createPipelineState(pipelineProperties);
 
     DrawCallProperties drawCallProperties;
-    drawCallProperties.state = _particlePipelineState.get();
-    drawCallProperties.vertexLayout = _particleLayout.get();
-    _particleDrawCall = renderer->getDrawCallManager()->createVariableDrawCall(drawCallProperties,
-                                                                               PrimitiveType::Point);
-    _particleDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _particleTexture.get());
+    drawCallProperties.state = _particleQuadPipelineState.get();
+    drawCallProperties.vertexLayout = _particleQuadLayout.get();
+    _particleQuadDrawCall = renderer->getDrawCallManager()->createInstancedDrawCall(drawCallProperties,
+                                                                                    PrimitiveType::TriangleStrip, 0,
+                                                                                    quadData.size());
+    _particleQuadDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _particleTexture.get());
 
     int width, height;
     SDL_GL_GetDrawableSize(SDL_GL_GetCurrentWindow(), &width, &height);
@@ -91,14 +130,14 @@ void Application::render(Renderer *renderer) {
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
-    renderer->clear(glm::vec4(0.f, 1.f, 0.f, 1.f));
+    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     renderer->getLightingManager()->beginLightPass();
     _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
     renderer->getLightingManager()->endLightPass();
 
     updateParticles();
-    _particleDrawCall->draw(_particles.size(), 0);
+    _particleQuadDrawCall->drawInstanced(_particles.size());
 
     renderer->presentNextFrame();
 }
@@ -152,7 +191,7 @@ void Application::updateParticles() {
     _particleBuffer->updateData(_particles.data(), sizeof(Particle) * _particles.size(), 0,
                                 UpdateFlags::DiscardOldData);
 
-    _particleDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
-    _particleDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
+    _particleQuadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
+    _particleQuadDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
 }
 

@@ -12,7 +12,8 @@ class PipelineState;
 enum class ShaderType {
     Mesh,
     LightedMesh,
-    PointSprite
+    PointSprite,
+    InstancedSprite
 };
 
 struct DrawCallProperties {
@@ -22,7 +23,8 @@ struct DrawCallProperties {
 
 enum class PrimitiveType {
     Point,
-    Triangle
+    Triangle,
+    TriangleStrip
 };
 
 enum class IndexType {

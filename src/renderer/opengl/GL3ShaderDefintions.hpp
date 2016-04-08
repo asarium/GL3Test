@@ -34,3 +34,5 @@ struct GL3ShaderDefinition {
 };
 
 GL3ShaderDefinition getShaderDefinition(GL3ShaderType type);
+
+std::vector<GL3ShaderType> getDefinedShaderTypes();

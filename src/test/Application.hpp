@@ -16,12 +16,13 @@ class Application {
     std::unique_ptr<AssimpModel> _model;
 
     std::unique_ptr<Texture2D> _particleTexture;
+    std::unique_ptr<BufferObject> _particleBuffer;
     std::vector<Particle> _particles;
 
-    std::unique_ptr<PipelineState> _particlePipelineState;
-    std::unique_ptr<BufferObject> _particleBuffer;
-    std::unique_ptr<VertexLayout> _particleLayout;
-    std::unique_ptr<VariableDrawCall> _particleDrawCall;
+    std::unique_ptr<PipelineState> _particleQuadPipelineState;
+    std::unique_ptr<BufferObject> _particleQuadBuffer;
+    std::unique_ptr<VertexLayout> _particleQuadLayout;
+    std::unique_ptr<InstancedDrawCall> _particleQuadDrawCall;
 
     Timing *_timing;
     Renderer *_renderer;

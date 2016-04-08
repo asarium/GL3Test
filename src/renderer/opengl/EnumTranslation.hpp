@@ -29,6 +29,8 @@ inline GL3ShaderType convertShaderType(ShaderType type) {
             return GL3ShaderType::DeferredMesh;
         case ShaderType::PointSprite:
             return GL3ShaderType::PointSprite;
+        case ShaderType::InstancedSprite:
+            return GL3ShaderType::InstancedSprite;
         default:
             return GL3ShaderType::Mesh;
     }
@@ -48,6 +50,8 @@ inline GLint mapAttributeLocation(AttributeType type) {
             return 4;
         case AttributeType::Radius:
             return 5;
+        case AttributeType::PositionOffset:
+            return 6;
         default:
             return 0;
     }

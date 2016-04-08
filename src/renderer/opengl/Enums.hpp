@@ -35,6 +35,7 @@ enum class GL3ShaderType {
     DeferredMesh,
     LightingPass,
     PointSprite,
+    InstancedSprite,
 
     NUM_VALUES
 };

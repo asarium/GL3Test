@@ -59,7 +59,20 @@ namespace {
                 },
                 {
                     GL_FRAGMENT_SHADER,
-                    "point_sprite.frag"
+                    "2d_sprite.frag"
+                }
+            }
+        },
+        {
+            GL3ShaderType::InstancedSprite,
+            {
+                {
+                    GL_VERTEX_SHADER,
+                    "2d_sprite.vert"
+                },
+                {
+                    GL_FRAGMENT_SHADER,
+                    "2d_sprite.frag"
                 }
             }
         }
@@ -147,9 +160,14 @@ namespace {
             mapAttributeLocation(AttributeType::Tangent)
         },
         {
-            AttributeType::Position,
+            AttributeType::Radius,
             "in_radius",
             mapAttributeLocation(AttributeType::Radius)
+        },
+        {
+            AttributeType::PositionOffset,
+            "in_pos_offset",
+            mapAttributeLocation(AttributeType::PositionOffset)
         }
     };
 }
@@ -171,4 +189,12 @@ GL3ShaderDefinition getShaderDefinition(GL3ShaderType type) {
     }
 
     return def;
+}
+
+std::vector<GL3ShaderType> getDefinedShaderTypes() {
+    std::vector<GL3ShaderType> types;
+    for (auto &file:shader_definitions) {
+        types.push_back(file.type);
+    }
+    return types;
 }

@@ -11,6 +11,7 @@ struct Component {
     GLenum data_type;
     GLint size;
     GLsizei stride;
+    GLuint divisor;
     void* offset;
 
     GL3BufferObject* buffer;
@@ -32,6 +33,9 @@ public:
     virtual BufferIndex attachBufferObject(BufferObject *buffer) override;
 
     virtual void addComponent(AttributeType type, DataFormat format, size_t stride, BufferIndex source, size_t offset) override;
+
+    virtual void addInstanceComponent(AttributeType type, DataFormat format, size_t instanceDivisor, size_t stride,
+                                      BufferIndex source, size_t offset) override;
 
     virtual void setIndexBuffer(BufferIndex source) override;
 

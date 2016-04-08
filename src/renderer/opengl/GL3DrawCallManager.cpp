@@ -12,6 +12,8 @@ namespace {
                 return GL_TRIANGLES;
             case PrimitiveType::Point:
                 return GL_POINTS;
+            case PrimitiveType::TriangleStrip:
+                return GL_TRIANGLE_STRIP;
         }
         return GL_TRIANGLES;
     }
