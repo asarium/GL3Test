@@ -57,6 +57,12 @@ Application::Application(Renderer *renderer, Timing *time) {
         p.position.y = p.radius;
 
         _particles.push_back(p);
+
+        auto light = renderer->getLightingManager()->addLight(LightType::Point);
+        light->setIntesity(1.f);
+        light->setColor(glm::normalize(p.position));
+        light->setPosition(p.position);
+        _particleLights.push_back(light);
     }
 
     _particleBuffer = renderer->createBuffer(BufferType::Vertex);
@@ -108,15 +114,6 @@ Application::Application(Renderer *renderer, Timing *time) {
     _modelMx = mat4();
 
     _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
-
-    auto light = renderer->getLightingManager()->addLight(LightType::Directional);
-    light->setColor(glm::vec3(1.f, 1.f, 1.f));
-    light->setDirection(glm::vec3(1.f, 0.f, 0.f));
-    light->setIntesity(2.f);
-
-    light = renderer->getLightingManager()->addLight(LightType::Ambient);
-    light->setColor(glm::vec3(0.f, 1.f, 1.f));
-    light->setIntesity(0.2f);
 }
 
 Application::~Application() {
@@ -125,14 +122,14 @@ Application::~Application() {
 void Application::render(Renderer *renderer) {
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-    float radius = 5.0f;
+    float radius = 100.0f;
     float camX = sin(_timing->getTotalTime()) * radius;
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-    renderer->getLightingManager()->beginLightPass();
+    renderer->getLightingManager()->beginLightPass(_projMx, _viewMx);
     _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
     renderer->getLightingManager()->endLightPass();
 
@@ -182,11 +179,15 @@ void Application::changeResolution(uint32_t width, uint32_t height) {
 }
 
 void Application::updateParticles() {
+    size_t index = 0;
     for (auto &particle : _particles) {
         float time = _timing->getTotalTime() + particle.radius;
 
         float y = (float) std::sin(time * M_PI_2);
         particle.position.y = y;
+        _particleLights[index]->setPosition(particle.position);
+
+        ++index;
     }
     _particleBuffer->updateData(_particles.data(), sizeof(Particle) * _particles.size(), 0,
                                 UpdateFlags::DiscardOldData);

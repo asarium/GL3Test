@@ -35,7 +35,7 @@ public:
 
     virtual void clearLights() = 0;
 
-    virtual void beginLightPass() = 0;
+    virtual void beginLightPass(const glm::mat4& projection, const glm::mat4& view) = 0;
 
     virtual void endLightPass() = 0;
 };

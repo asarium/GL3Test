@@ -57,6 +57,9 @@ class GL3LightingManager : GL3Object, public LightingManager {
     GL3ShaderProgram *_lightingPassProgram;
     GL3ShaderParameters _lightingPassParameters;
 
+    glm::mat4 _projectionMatrix;
+    glm::mat4 _viewMatrix;
+
     void createFrameBuffer(int width, int height);
     void freeResources();
 public:
@@ -76,7 +79,7 @@ public:
 
     virtual void clearLights() override;
 
-    virtual void beginLightPass() override;
+    virtual void beginLightPass(const glm::mat4& projection, const glm::mat4& view) override;
 
     virtual void endLightPass() override;
 };

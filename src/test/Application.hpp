@@ -17,6 +17,8 @@ class Application {
 
     std::unique_ptr<Texture2D> _particleTexture;
     std::unique_ptr<BufferObject> _particleBuffer;
+
+    std::vector<Light*> _particleLights;
     std::vector<Particle> _particles;
 
     std::unique_ptr<PipelineState> _particleQuadPipelineState;

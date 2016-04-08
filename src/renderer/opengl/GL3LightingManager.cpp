@@ -6,6 +6,7 @@
 #include "GL3State.hpp"
 
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 GL3LightingManager::GL3LightingManager(GL3Renderer *renderer) : GL3Object(renderer), _renderFrameBuffer(0),
                                                                 _gBufferTextures{0} {
@@ -50,7 +51,10 @@ void GL3LightingManager::clearLights() {
     _lights.clear();
 }
 
-void GL3LightingManager::beginLightPass() {
+void GL3LightingManager::beginLightPass(const glm::mat4& projection, const glm::mat4& view) {
+    _projectionMatrix = projection;
+    _viewMatrix = view;
+
     auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();
     auto width = currentRenderTarget->getWidth();
     auto height = currentRenderTarget->getHeight();
@@ -83,27 +87,42 @@ void GL3LightingManager::endLightPass() {
 
     glm::vec2 uv_scale = glm::vec2((float) width, (float) height) / glm::vec2(_framebufferSize);
     _lightingPassParameters.setVec2(GL3ShaderParameterType::UVScale, uv_scale);
+    _lightingPassParameters.setMat4(GL3ShaderParameterType::ProjectionMatrix, _projectionMatrix);
+    _lightingPassParameters.setMat4(GL3ShaderParameterType::ViewMatrix, _viewMatrix);
 
     for (auto &light : _lights) {
         switch (light->type) {
-        case LightType::Point:
-            _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 0);
-            _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->position);
-            break;
-        case LightType::Directional:
-            _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 1);
-            _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->direction);
-            break;
-        case LightType::Ambient:
-            _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 2);
-            break;
+            case LightType::Point:
+            {
+                _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 0);
+                _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->position);
+                _lightingPassParameters.setVec2(GL3ShaderParameterType::WindowSize, glm::vec2(width, height));
+
+                const float cutoff = 0.001f; // Cutoff value after which this light does not affect anything anymore
+                auto scale = sqrtf(light->intensity / cutoff - 1.f) * 1.2f;
+                _lightingPassParameters.setMat4(GL3ShaderParameterType::ModelMatrix,
+                                                glm::scale(glm::mat4(), glm::vec3(scale)));
+                break;
+            }
+            case LightType::Directional:
+                _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 1);
+                _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->direction);
+                break;
+            case LightType::Ambient:
+                _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 2);
+                break;
         }
 
         _lightingPassParameters.setVec3(GL3ShaderParameterType::LightColor, light->color);
         _lightingPassParameters.setFloat(GL3ShaderParameterType::LightIntensitiy, light->intensity);
 
         _lightingPassProgram->bindAndSetParameters(&_lightingPassParameters);
-        _renderer->getGLUtil()->drawFullScreenTri();
+
+        if (light->type == LightType::Point) {
+            _renderer->getGLUtil()->drawSphere();
+        } else {
+            _renderer->getGLUtil()->drawFullScreenTri();
+        }
     }
 
     // Now copy the depth component back to the screen
