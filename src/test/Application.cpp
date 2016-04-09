@@ -6,6 +6,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <ctime>
 
 #include "util/textures.hpp"
 
@@ -45,13 +46,14 @@ Application::Application(Renderer *renderer, Timing *time) {
 
     _particleTexture = util::load_texture(renderer, "resources/Capparticles_0000.png");
 
-    for (size_t i = 0; i < 10; ++i) {
+    std::srand((unsigned int) std::time(nullptr));
+    for (size_t i = 0; i < 3; ++i) {
         float f1 = (float) rand() / (float) RAND_MAX;
         float f2 = (float) rand() / (float) RAND_MAX;
         float f3 = (float) rand() / (float) RAND_MAX;
 
         Particle p;
-        p.position = glm::vec3(f1 * 10.f - 5.f, 0.f, f2 * 10.f - 5.f);
+        p.position = glm::vec3(f1 * 8.f - 4.f, 0.f, f2 * 8.f - 4.f);
 
         p.radius = f3 * 5.f - 2.5f;
         p.position.y = p.radius;
@@ -59,7 +61,7 @@ Application::Application(Renderer *renderer, Timing *time) {
         _particles.push_back(p);
 
         auto light = renderer->getLightingManager()->addLight(LightType::Point);
-        light->setIntesity(1.f);
+        light->setIntesity(5.f);
         light->setColor(glm::normalize(p.position));
         light->setPosition(p.position);
         _particleLights.push_back(light);
