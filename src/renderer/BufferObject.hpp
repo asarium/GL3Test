@@ -49,7 +49,7 @@ class BufferObject {
 public:
     virtual ~BufferObject() { }
 
-    virtual BufferType getType() = 0;
+    virtual BufferType getType() const = 0;
 
     virtual void setData(const void *data, size_t size, BufferUsage usage) = 0;
 

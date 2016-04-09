@@ -29,7 +29,7 @@ GL3BufferObject::~GL3BufferObject() {
 }
 
 
-BufferType GL3BufferObject::getType() {
+BufferType GL3BufferObject::getType() const {
     return _type;
 }
 

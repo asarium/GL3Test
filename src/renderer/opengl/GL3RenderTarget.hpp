@@ -17,9 +17,9 @@ public:
 
     virtual ~GL3RenderTarget();
 
-    virtual size_t getWidth() override;
+    virtual size_t getWidth() const override;
 
-    virtual size_t getHeight() override;
+    virtual size_t getHeight() const override;
 
     virtual void copyToTexture(Texture2D* target) override;
 

@@ -69,7 +69,7 @@ public:
 
     virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties &props) override;
 
-    virtual bool hasCapability(GraphicsCapability capability) override;
+    virtual bool hasCapability(GraphicsCapability capability) const override;
 
     virtual void clear(const glm::vec4 &color) override;
 

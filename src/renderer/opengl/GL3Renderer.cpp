@@ -319,7 +319,7 @@ SDL_Window *GL3Renderer::getWindow() {
     return _window;
 }
 
-bool GL3Renderer::hasCapability(GraphicsCapability capability) {
+bool GL3Renderer::hasCapability(GraphicsCapability capability) const {
     switch (capability) {
         case GraphicsCapability::PointSprites:
             return true; // Supported through geometry shaders

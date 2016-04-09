@@ -27,11 +27,11 @@ GL3RenderTarget::~GL3RenderTarget() {
     }
 }
 
-size_t GL3RenderTarget::getHeight() {
+size_t GL3RenderTarget::getHeight() const {
     return (size_t) _heigth;
 }
 
-size_t GL3RenderTarget::getWidth() {
+size_t GL3RenderTarget::getWidth() const {
     return (size_t) _width;
 }
 

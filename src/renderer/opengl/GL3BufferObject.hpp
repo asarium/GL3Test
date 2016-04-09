@@ -14,7 +14,7 @@ public:
 
     void bind();
 
-    virtual BufferType getType();
+    virtual BufferType getType() const override;
 
     virtual void setData(const void *data, size_t size, BufferUsage usage);
 
