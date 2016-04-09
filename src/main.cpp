@@ -63,7 +63,12 @@ namespace {
     bool init() {
         renderer.reset(new GL3Renderer(std::unique_ptr<FileLoader>(new DefaultFileLoader())));
         try {
-            window = renderer->initialize(1680, 1050);
+            RendererSettings settings;
+            settings.resolution = glm::uvec2(1680, 1050);
+            settings.vertical_sync = true;
+            renderer->getSettingsManager()->changeSettings(settings);
+
+            window = renderer->initialize();
         } catch (const RendererException& e) {
             printf("Failed to initialize renderer: %s\n", e.what());
             return false;

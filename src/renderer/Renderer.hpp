@@ -28,27 +28,33 @@ enum class SettingsParameterType {
 };
 
 enum class SettingsParameter {
+    Resolution,
     VerticalSync
 };
 
-class RendererSettings {
+struct RendererSettings {
+    glm::uvec2 resolution;
+    bool vertical_sync;
+};
+
+class RendererSettingsManager {
 public:
-    virtual ~RendererSettings() { }
+    virtual ~RendererSettingsManager() { }
 
-    virtual void changeResolution(uint32_t width, uint32_t height) = 0;
+    virtual void changeSettings(const RendererSettings& settings) = 0;
 
-    virtual bool supportsOption(SettingsParameter param, SettingsParameterType *parameterType = nullptr) = 0;
+    virtual RendererSettings getCurrentSettings() const = 0;
 
-    virtual void setOption(SettingsParameter param, void *value) = 0;
+    virtual bool supportsSetting(SettingsParameter parameter) const = 0;
 };
 
 class Renderer {
 public:
     virtual ~Renderer() { }
 
-    virtual SDL_Window *initialize(uint32_t width, uint32_t height) = 0;
+    virtual SDL_Window *initialize() = 0;
 
-    virtual RendererSettings *getSettings() = 0;
+    virtual RendererSettingsManager *getSettingsManager() = 0;
 
     virtual DrawCallManager *getDrawCallManager() = 0;
 

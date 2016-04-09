@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include <renderer/Exceptions.hpp>
+#include <util/Assertion.hpp>
 
 namespace {
 
@@ -129,7 +130,8 @@ namespace {
 #endif
 }
 
-GL3Renderer::GL3Renderer(std::unique_ptr<FileLoader> &&fileLoader) : _fileLoader(std::move(fileLoader)), _settings(this) {
+GL3Renderer::GL3Renderer(std::unique_ptr<FileLoader> &&fileLoader) : _fileLoader(std::move(fileLoader)),
+                                                                     _settingsManager(this), _window(nullptr) {
 
 }
 
@@ -153,7 +155,7 @@ void GL3Renderer::deinitialize() {
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height) {
+SDL_Window *GL3Renderer::initialize() {
     SDL_InitSubSystem(SDL_INIT_VIDEO);
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -172,8 +174,12 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height) {
 #endif
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, context_flags);
 
-    _window = SDL_CreateWindow("OGL3 Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height,
-                               SDL_WINDOW_OPENGL);
+    RendererSettings settings;
+    auto haveSettings = _settingsManager.getSettings(settings);
+    Assertion(haveSettings, "Settings have not been initialized!");
+
+    _window = SDL_CreateWindow("OGL3 Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, settings.resolution.x,
+                               settings.resolution.y, SDL_WINDOW_OPENGL);
 
     if (!_window) {
         std::stringstream ss;
@@ -191,7 +197,7 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height) {
         throw RendererException(ss.str());
     }
     SDL_GL_MakeCurrent(_window, _context);
-    SDL_GL_SetSwapInterval(1);
+    SDL_GL_SetSwapInterval(settings.vertical_sync ? 1 : 0);
 
     if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
         deinitialize();
@@ -228,7 +234,7 @@ SDL_Window *GL3Renderer::initialize(uint32_t width, uint32_t height) {
 
     _renderTargetManager.reset(new GL3RenderTargetManager(this));
 
-    updateResolution(width, height);
+    updateResolution(settings.resolution.x, settings.resolution.y);
 
     return _window;
 }
@@ -240,8 +246,8 @@ void GL3Renderer::updateResolution(uint32_t width, uint32_t height) {
     _renderTargetManager->useRenderTarget(nullptr); // Setup correct view port
 }
 
-RendererSettings *GL3Renderer::getSettings() {
-    return &_settings;
+RendererSettingsManager *GL3Renderer::getSettingsManager() {
+    return &_settingsManager;
 }
 
 void GL3Renderer::presentNextFrame() {
@@ -315,19 +321,24 @@ SDL_Window *GL3Renderer::getWindow() {
 
 bool GL3Renderer::hasCapability(GraphicsCapability capability) {
     switch (capability) {
-    case GraphicsCapability::PointSprites:
-        return true; // Supported through geometry shaders
-    case GraphicsCapability::S3TC:
-        return GLAD_GL_EXT_texture_compression_s3tc != 0; // Supported if the extension is present
-    default:
-        return false; // Everything else is not supported
+        case GraphicsCapability::PointSprites:
+            return true; // Supported through geometry shaders
+        case GraphicsCapability::S3TC:
+            return GLAD_GL_EXT_texture_compression_s3tc != 0; // Supported if the extension is present
+        default:
+            return false; // Everything else is not supported
     }
 }
 
-GL3Renderer::GL3RenderSettings::GL3RenderSettings(GL3Renderer *renderer) : GL3Object(renderer) {
+GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer *renderer) : GL3Object(renderer),
+                                                                                         _settingsSet(false) {
 }
 
-void GL3Renderer::GL3RenderSettings::changeResolution(uint32_t width, uint32_t height) {
+void GL3Renderer::GL3RenderSettingsManager::changeResolution(uint32_t width, uint32_t height) {
+    if (_renderer->getWindow() == nullptr) {
+        return; // No window has been created yet
+    }
+
     SDL_SetWindowSize(_renderer->getWindow(), width, height);
     if (SDL_GetWindowFlags(_renderer->getWindow()) & SDL_WINDOW_FULLSCREEN) {
         // In fullscreen mode the normal method doesn't work
@@ -358,25 +369,41 @@ void GL3Renderer::GL3RenderSettings::changeResolution(uint32_t width, uint32_t h
     _renderer->updateResolution(width, height);
 }
 
-bool GL3Renderer::GL3RenderSettings::supportsOption(SettingsParameter param, SettingsParameterType *parameterType) {
-    switch (param) {
+bool GL3Renderer::GL3RenderSettingsManager::supportsSetting(SettingsParameter parameter) const {
+    switch (parameter) {
+        case SettingsParameter::Resolution:
+            return true; // Changing resolution is supported
         case SettingsParameter::VerticalSync:
-            if (parameterType != nullptr) {
-                *parameterType = SettingsParameterType::Boolean;
-            }
-            return true;
+            return true; // Changing vsync is supported
         default:
-            return false;
+            return false; // Unknown option is not supported
     }
 }
 
-void GL3Renderer::GL3RenderSettings::setOption(SettingsParameter param, void *value) {
-    switch (param) {
-        case SettingsParameter::VerticalSync:
-        {
-            bool val = *reinterpret_cast<bool*>(value);
-            SDL_GL_SetSwapInterval(val ? 1 : 0);
-            break;
-        }
+void GL3Renderer::GL3RenderSettingsManager::changeSettings(const RendererSettings &settings) {
+    auto previousSettings = _currentSettings;
+    _currentSettings = settings;
+
+    auto changeAll = !_settingsSet;
+    _settingsSet = true;
+
+    if (changeAll || _currentSettings.resolution != previousSettings.resolution) {
+        changeResolution(_currentSettings.resolution.x, _currentSettings.resolution.y);
     }
+
+    if (changeAll || _currentSettings.vertical_sync != previousSettings.vertical_sync) {
+        SDL_GL_SetSwapInterval(_currentSettings.vertical_sync ? 1 : 0);
+    }
+
+    _currentSettings = settings;
+}
+
+bool GL3Renderer::GL3RenderSettingsManager::getSettings(RendererSettings &settings) {
+    settings = _currentSettings;
+
+    return _settingsSet;
+}
+
+RendererSettings GL3Renderer::GL3RenderSettingsManager::getCurrentSettings() const {
+    return _currentSettings;
 }

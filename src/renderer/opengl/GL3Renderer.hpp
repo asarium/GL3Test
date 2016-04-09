@@ -11,22 +11,28 @@
 
 class GL3Renderer : public Renderer {
 public:
-    class GL3RenderSettings : GL3Object, public RendererSettings {
+    class GL3RenderSettingsManager : GL3Object, public RendererSettingsManager {
+        void changeResolution(uint32_t width, uint32_t height);
+
+        bool _settingsSet;
+        RendererSettings _currentSettings;
     public:
-        GL3RenderSettings(GL3Renderer* renderer);
+        GL3RenderSettingsManager(GL3Renderer *renderer);
 
-        virtual ~GL3RenderSettings() { }
+        virtual ~GL3RenderSettingsManager() { }
 
-        virtual void changeResolution(uint32_t width, uint32_t height) override;
+        bool getSettings(RendererSettings& settings);
 
-        virtual bool supportsOption(SettingsParameter param, SettingsParameterType *parameterType) override;
+        virtual void changeSettings(const RendererSettings &settings) override;
 
-        virtual void setOption(SettingsParameter param, void *value) override;
+        virtual bool supportsSetting(SettingsParameter parameter) const override;
+
+        virtual RendererSettings getCurrentSettings() const override;
     };
 
 private:
 
-    GL3RenderSettings _settings;
+    GL3RenderSettingsManager _settingsManager;
 
     SDL_GLContext _context;
     SDL_Window *_window;
@@ -43,11 +49,11 @@ public:
 
     virtual ~GL3Renderer();
 
-    virtual SDL_Window *initialize(uint32_t width, uint32_t height) override;
+    virtual SDL_Window *initialize() override;
 
     virtual void deinitialize() override;
 
-    virtual RendererSettings* getSettings() override;
+    virtual RendererSettingsManager *getSettingsManager() override;
 
     virtual DrawCallManager *getDrawCallManager() override;
 
@@ -71,7 +77,7 @@ public:
 
     void updateResolution(uint32_t width, uint32_t height);
 
-    SDL_Window* getWindow();
+    SDL_Window *getWindow();
 
     GL3DrawCallManager *getGLDrawCallManager();
 

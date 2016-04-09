@@ -165,7 +165,9 @@ void Application::handleEvent(SDL_Event *event) {
                     break;
                 case SDL_SCANCODE_V:
                     _last_vsync = !_last_vsync;
-                    _renderer->getSettings()->setOption(SettingsParameter::VerticalSync, &_last_vsync);
+                    auto settings = _renderer->getSettingsManager()->getCurrentSettings();
+                    settings.vertical_sync = _last_vsync;
+                    _renderer->getSettingsManager()->changeSettings(settings);
                     break;
             }
             break;
@@ -173,7 +175,9 @@ void Application::handleEvent(SDL_Event *event) {
 }
 
 void Application::changeResolution(uint32_t width, uint32_t height) {
-    _renderer->getSettings()->changeResolution(width, height);
+    auto settings = _renderer->getSettingsManager()->getCurrentSettings();
+    settings.resolution = glm::uvec2(width, height);
+    _renderer->getSettingsManager()->changeSettings(settings);
 
     _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
 }
