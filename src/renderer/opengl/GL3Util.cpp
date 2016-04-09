@@ -60,12 +60,12 @@ namespace {
         uint16_t wVerticeIndex = 0 ;
 
         // Generate the group of rings for the sphere
-        for( int ring = 0; ring <= rings; ring++ ) {
+        for( size_t ring = 0; ring <= rings; ring++ ) {
             auto r0 = sin(ring * fDeltaRingAngle);
             auto y0 = cos(ring * fDeltaRingAngle);
 
             // Generate the group of segments for the current ring
-            for(int seg = 0; seg <= segments; seg++) {
+            for(size_t seg = 0; seg <= segments; seg++) {
                 auto x0 = r0 * sin(seg * fDeltaSegAngle);
                 auto z0 = r0 * cos(seg * fDeltaSegAngle);
 
