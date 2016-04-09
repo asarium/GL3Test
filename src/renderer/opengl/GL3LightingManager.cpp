@@ -60,6 +60,8 @@ void GL3LightingManager::beginLightPass(const glm::mat4 &projection, const glm::
     auto height = currentRenderTarget->getHeight();
 
     // Make sure our framebuffer is big enough for the current render target
+    // This check might be a bit late but if someone uses a render target without lighting then changing the size when
+    // the render target is created would waste memory
     resizeFramebuffer((uint32_t) width, (uint32_t) height);
 
     GLState->Framebuffer.pushBinding();
