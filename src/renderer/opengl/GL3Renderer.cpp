@@ -236,6 +236,10 @@ SDL_Window *GL3Renderer::initialize() {
 
     updateResolution(settings.resolution.x, settings.resolution.y);
 
+    GLint max_samples;
+    glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
+    printf("%d\n", max_samples);
+
     return _window;
 }
 
