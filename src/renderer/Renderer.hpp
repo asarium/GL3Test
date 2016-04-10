@@ -23,7 +23,8 @@
 
 enum class GraphicsCapability {
     PointSprites,
-    S3TC
+    S3TC,
+    Instancing
 };
 
 enum class SettingsParameterType {

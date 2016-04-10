@@ -336,6 +336,8 @@ bool GL3Renderer::hasCapability(GraphicsCapability capability) const {
             return true; // Supported through geometry shaders
         case GraphicsCapability::S3TC:
             return GLAD_GL_EXT_texture_compression_s3tc != 0; // Supported if the extension is present
+        case GraphicsCapability::Instancing:
+            return true; // OpenGL 3 always supports instancing
         default:
             return false; // Everything else is not supported
     }
