@@ -46,6 +46,8 @@ private:
     std::unique_ptr<GL3RenderTargetManager> _renderTargetManager;
     std::unique_ptr<GL3Profiler> _profiler;
     std::unique_ptr<GL3Util> _util;
+
+    NVGcontext* _nvgContext;
 public:
     GL3Renderer(std::unique_ptr<FileLoader> &&fileLoader);
 
@@ -78,6 +80,10 @@ public:
     virtual void clear(const glm::vec4 &color) override;
 
     virtual void presentNextFrame() override;
+
+    virtual NVGcontext* getNanovgContext() override;
+
+    virtual void nanovgEndFrame() override;
 
     void updateResolution(uint32_t width, uint32_t height);
 

@@ -4,6 +4,7 @@
 #include "textures.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_STATIC
 
 #include "util/stb_image.h"
 

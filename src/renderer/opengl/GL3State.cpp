@@ -145,6 +145,9 @@ void GL3StateTracker::setBlendFunc(BlendFunction mode) {
             case BlendFunction::AdditiveAlpha:
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE);
                 break;
+            case BlendFunction::Alpha:
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                break;
         }
     }
 }

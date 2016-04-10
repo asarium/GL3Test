@@ -35,6 +35,64 @@ namespace {
 
         return data;
     }
+
+    void drawTimes(NVGcontext *ctx, const std::deque<float> &vals, size_t maxVals, int x, int y, int width, int height,
+                   const char *text) {
+        if (vals.empty()) {
+            return;
+        }
+
+        nvgSave(ctx);
+        nvgReset(ctx);
+        nvgFontFace(ctx, "sans");
+
+        nvgFontSize(ctx, 20.f);
+        nvgTextAlign(ctx, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+        nvgText(ctx, x + 5, y + 5, text, nullptr);
+
+        auto sum = std::accumulate(vals.begin(), vals.end(), 0.f);
+        auto avg = sum / vals.size();
+
+        char str[64];
+        sprintf(str, "%.2fms", avg);
+
+        nvgFontSize(ctx, 15.f);
+        nvgTextAlign(ctx, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+        nvgText(ctx, x + width - 3, y + 5, str, nullptr);
+
+        nvgTranslate(ctx, x, y);
+        nvgScale(ctx, width, height);
+
+        nvgBeginPath(ctx);
+        nvgRect(ctx, 0.f, 0.f, 1.f, 1.f);
+        nvgFillColor(ctx, nvgRGBA(128, 128, 128, 128));
+        nvgFill(ctx);
+
+        nvgBeginPath(ctx);
+        nvgMoveTo(ctx, 0.f, 1.f);
+
+        auto maxTime = *std::max_element(vals.begin(), vals.end());
+        if (maxTime < 60.f) {
+            // Make 30 ms the minimum scale
+            maxTime = 60.f;
+        }
+
+        size_t index = 0;
+        for (auto time : vals) {
+            auto xPos = (float) index / maxVals;
+            auto yPos = time / maxTime;
+
+            nvgLineTo(ctx, xPos, 1.f - yPos);
+
+            ++index;
+        }
+        auto endPos = (float) (vals.size() - 1) / maxVals;
+        nvgLineTo(ctx, endPos, 1.f);
+        nvgFillColor(ctx, nvgRGBA(255, 192, 0, 128));
+        nvgFill(ctx);
+
+        nvgReset(ctx);
+    }
 }
 
 Application::Application(Renderer *renderer, Timing *time) {
@@ -117,44 +175,47 @@ Application::Application(Renderer *renderer, Timing *time) {
 
     _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
 
-    _geometryCategory = _renderer->getProfiler()->createCategory("Geometry submit");
-    _endLightPassCategory = _renderer->getProfiler()->createCategory("End light pass");
-    _particleCategory = _renderer->getProfiler()->createCategory("Particles");
+    _wholeFrameCategory = _renderer->getProfiler()->createCategory("Whole frame");
+    nvgCreateFont(_renderer->getNanovgContext(), "sans", "resources/Roboto-Regular.ttf");
 }
 
 Application::~Application() {
 }
 
 void Application::render(Renderer *renderer) {
-    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
-
     float radius = 10.0f;
     float camX = sin(_timing->getTotalTime()) * radius;
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
+    _wholeFrameCategory->begin();
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
+
     renderer->getLightingManager()->beginLightPass(_projMx, _viewMx);
-    _geometryCategory->begin();
     _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
-    _geometryCategory->end();
-
-    _endLightPassCategory->begin();
     renderer->getLightingManager()->endLightPass();
-    _endLightPassCategory->end();
 
-    _particleCategory->begin();
     updateParticles();
     _particleQuadDrawCall->drawInstanced(_particles.size());
-    _particleCategory->end();
 
+    renderUI();
+
+    _wholeFrameCategory->end();
     renderer->presentNextFrame();
 
-    auto profileResults = _renderer->getProfiler()->getResults();
-//    for (auto& result : profileResults) {
-//        printf("%s: %3.3fms - %3.3fms\n", result.name, (double) result.cpu_time / 1000000.f, (double) result.gpu_time / 1000000.f);
-//    }
+    auto results = _renderer->getProfiler()->getResults();
+    if (!results.empty()) {
+        ProfilingResult &result = results.front();
+        _cpuTimes.push_back((float) result.cpu_time / 1000000.f);
+        _gpuTimes.push_back((float) result.gpu_time / 1000000.f);
+
+        while (_gpuTimes.size() > 120) {
+            // Only keep the 120 most recent times
+            _gpuTimes.pop_front();
+            _cpuTimes.pop_front();
+        }
+    }
 }
 
 void Application::handleEvent(SDL_Event *event) {
@@ -217,4 +278,26 @@ void Application::updateParticles() {
     _particleQuadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
     _particleQuadDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
 }
+
+void Application::renderUI() {
+    auto settings = _renderer->getSettingsManager()->getCurrentSettings();
+
+    auto ctx = _renderer->getNanovgContext();
+
+    nvgBeginFrame(ctx, settings.resolution.x, settings.resolution.y, 1.f);
+
+    auto w = 300;
+    auto h = 50;
+    auto x = settings.resolution.x - w - 20;
+    auto y = 20;
+
+    drawTimes(ctx, _cpuTimes, 120, x, y, w, h, "CPU Time");
+
+    y += h + 20;
+    drawTimes(ctx, _gpuTimes, 120, x, y, w, h, "GPU Time");
+
+    _renderer->nanovgEndFrame();
+}
+
+
 

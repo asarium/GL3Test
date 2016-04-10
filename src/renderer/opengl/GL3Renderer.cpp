@@ -15,6 +15,9 @@
 #include <renderer/Exceptions.hpp>
 #include <util/Assertion.hpp>
 
+#define NANOVG_GL3_IMPLEMENTATION   // Use GL2 implementation.
+#include <renderer/nanovg/nanovg_gl.h>
+
 namespace {
 
 #ifndef NDEBUG
@@ -140,6 +143,9 @@ GL3Renderer::~GL3Renderer() {
 }
 
 void GL3Renderer::deinitialize() {
+    nvgDeleteGL3(_nvgContext);
+    _nvgContext = nullptr;
+
     _drawCallManager.reset();
     _lightingManager.reset();
     _shaderManager.reset();
@@ -163,6 +169,7 @@ SDL_Window *GL3Renderer::initialize() {
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -238,9 +245,7 @@ SDL_Window *GL3Renderer::initialize() {
 
     updateResolution(settings.resolution.x, settings.resolution.y);
 
-    GLint max_samples;
-    glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
-    printf("%d\n", max_samples);
+    _nvgContext = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
 
     return _window;
 }
@@ -338,6 +343,26 @@ bool GL3Renderer::hasCapability(GraphicsCapability capability) const {
 
 Profiler *GL3Renderer::getProfiler() {
     return _profiler.get();
+}
+
+NVGcontext *GL3Renderer::getNanovgContext() {
+    return _nvgContext;
+}
+
+void GL3Renderer::nanovgEndFrame() {
+    nvgEndFrame(_nvgContext);
+
+    // Communicate the changes to out state tracker
+    GLState->setBlendMode(true);
+    GLState->setBlendFunc(BlendFunction::AdditiveAlpha);
+    GLState->setDepthTest(false);
+
+    GLState->bindVertexArray(0);
+
+    GLState->Buffer.bindArrayBuffer(0);
+    GLState->Program.use(0);
+
+    GLState->Texture.setActiveUnit(0);
 }
 
 GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer *renderer) : GL3Object(renderer),

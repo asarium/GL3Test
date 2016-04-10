@@ -19,6 +19,16 @@ set(file_renderer
         renderer/VertexLayout.hpp
         )
 
+set(file_renderer_nanovg
+        renderer/nanovg/fontstash.h
+        renderer/nanovg/nanovg.c
+        renderer/nanovg/nanovg.h
+        renderer/nanovg/nanovg_gl.h
+        renderer/nanovg/nanovg_gl_utils.h
+        renderer/nanovg/stb_image.h
+        renderer/nanovg/stb_truetype.h
+        )
+
 set(file_renderer_opengl
         renderer/opengl/Enums.hpp
         renderer/opengl/EnumTranslation.hpp
@@ -82,6 +92,7 @@ set(file_util
 # the source groups
 source_group("" FILES ${file_root})
 source_group("Renderer" FILES ${file_renderer})
+source_group("Renderer\\nanovg" FILES ${file_renderer_nanovg})
 source_group("Renderer\\opengl" FILES ${file_renderer_opengl})
 source_group("Test" FILES ${file_test})
 source_group("Util" FILES ${file_util})
@@ -90,6 +101,7 @@ source_group("Util" FILES ${file_util})
 set(file_root
         ${file_root}
         ${file_renderer}
+        ${file_renderer_nanovg}
         ${file_renderer_opengl}
         ${file_test}
         ${file_util}

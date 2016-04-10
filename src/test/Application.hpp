@@ -6,6 +6,7 @@
 #include "AssimpModel.hpp"
 
 #include <glm/glm.hpp>
+#include <deque>
 
 struct Particle {
     glm::vec3 position;
@@ -26,9 +27,7 @@ class Application {
     std::unique_ptr<VertexLayout> _particleQuadLayout;
     std::unique_ptr<InstancedDrawCall> _particleQuadDrawCall;
 
-    ProfilingCategory* _geometryCategory;
-    ProfilingCategory* _endLightPassCategory;
-    ProfilingCategory* _particleCategory;
+    ProfilingCategory* _wholeFrameCategory;
 
     Timing *_timing;
     Renderer *_renderer;
@@ -43,6 +42,10 @@ class Application {
     void changeResolution(uint32_t width, uint32_t height);
 
     void updateParticles();
+
+    std::deque<float> _cpuTimes;
+    std::deque<float> _gpuTimes;
+    void renderUI();
 public:
     Application(Renderer *renderer, Timing *timimg);
 

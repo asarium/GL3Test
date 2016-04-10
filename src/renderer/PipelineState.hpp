@@ -5,7 +5,8 @@
 enum class BlendFunction {
     None,
     Additive,
-    AdditiveAlpha
+    AdditiveAlpha,
+    Alpha
 };
 
 enum class DepthMode {
