@@ -1,7 +1,6 @@
 #version 150 core
 
 uniform sampler2D color_texture;
-uniform vec2 window_size;
 
 out vec4 out_color;
 
