@@ -20,12 +20,14 @@ class GL3ShaderProgram {
         return _uniformLocations[static_cast<size_t>(param)];
     }
 
-public:
-    GL3ShaderProgram(FileLoader *loader, const GL3ShaderDefinition &definition);
+    std::vector<UniformRequirements> _requirements;
+
+ public:
+    GL3ShaderProgram(FileLoader* loader, const GL3ShaderDefinition& definition);
     ~GL3ShaderProgram();
 
     void bind();
 
-    void bindAndSetParameters(const GL3ShaderParameters *parameters);
+    void bindAndSetParameters(const GL3ShaderParameters* parameters);
 };
 
