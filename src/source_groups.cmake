@@ -10,6 +10,7 @@ set(file_renderer
         renderer/Exceptions.hpp
         renderer/LightingManager.hpp
         renderer/PipelineState.hpp
+        renderer/Profiler.hpp
         renderer/Renderer.hpp
         renderer/RenderTarget.hpp
         renderer/RenderTargetManager.hpp
@@ -33,6 +34,8 @@ set(file_renderer_opengl
         renderer/opengl/GL3Object.hpp
         renderer/opengl/GL3PipelineState.cpp
         renderer/opengl/GL3PipelineState.hpp
+        renderer/opengl/GL3Profiler.cpp
+        renderer/opengl/GL3Profiler.hpp
         renderer/opengl/GL3Renderer.cpp
         renderer/opengl/GL3Renderer.hpp
         renderer/opengl/GL3RenderTarget.cpp

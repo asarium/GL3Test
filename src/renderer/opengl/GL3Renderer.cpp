@@ -144,6 +144,7 @@ void GL3Renderer::deinitialize() {
     _lightingManager.reset();
     _shaderManager.reset();
     _renderTargetManager.reset();
+    _profiler.reset();
     _util.reset();
 
     SDL_GL_DeleteContext(_context);
@@ -152,11 +153,11 @@ void GL3Renderer::deinitialize() {
     SDL_DestroyWindow(_window);
     _window = nullptr;
 
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 }
 
 SDL_Window *GL3Renderer::initialize() {
-    SDL_InitSubSystem(SDL_INIT_VIDEO);
+    SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -221,6 +222,7 @@ SDL_Window *GL3Renderer::initialize() {
 #endif
     GLState.reset(new GL3StateTracker());
     _util.reset(new GL3Util(this));
+    _profiler.reset(new GL3Profiler(this));
 
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
     // Preload the shaders
@@ -332,6 +334,10 @@ bool GL3Renderer::hasCapability(GraphicsCapability capability) const {
         default:
             return false; // Everything else is not supported
     }
+}
+
+Profiler *GL3Renderer::getProfiler() {
+    return _profiler.get();
 }
 
 GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer *renderer) : GL3Object(renderer),

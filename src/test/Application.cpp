@@ -116,6 +116,10 @@ Application::Application(Renderer *renderer, Timing *time) {
     _modelMx = mat4();
 
     _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
+
+    _geometryCategory = _renderer->getProfiler()->createCategory("Geometry submit");
+    _endLightPassCategory = _renderer->getProfiler()->createCategory("End light pass");
+    _particleCategory = _renderer->getProfiler()->createCategory("Particles");
 }
 
 Application::~Application() {
@@ -132,13 +136,25 @@ void Application::render(Renderer *renderer) {
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     renderer->getLightingManager()->beginLightPass(_projMx, _viewMx);
+    _geometryCategory->begin();
     _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
-    renderer->getLightingManager()->endLightPass();
+    _geometryCategory->end();
 
+    _endLightPassCategory->begin();
+    renderer->getLightingManager()->endLightPass();
+    _endLightPassCategory->end();
+
+    _particleCategory->begin();
     updateParticles();
     _particleQuadDrawCall->drawInstanced(_particles.size());
+    _particleCategory->end();
 
     renderer->presentNextFrame();
+
+    auto profileResults = _renderer->getProfiler()->getResults();
+//    for (auto& result : profileResults) {
+//        printf("%s: %3.3fms - %3.3fms\n", result.name, (double) result.cpu_time / 1000000.f, (double) result.gpu_time / 1000000.f);
+//    }
 }
 
 void Application::handleEvent(SDL_Event *event) {

@@ -6,6 +6,7 @@
 #include "GL3ShaderManager.hpp"
 #include "GL3RenderTargetManager.hpp"
 #include "GL3Util.hpp"
+#include "GL3Profiler.hpp"
 
 #include <SDL_video.h>
 
@@ -43,6 +44,7 @@ private:
     std::unique_ptr<GL3LightingManager> _lightingManager;
     std::unique_ptr<GL3ShaderManager> _shaderManager;
     std::unique_ptr<GL3RenderTargetManager> _renderTargetManager;
+    std::unique_ptr<GL3Profiler> _profiler;
     std::unique_ptr<GL3Util> _util;
 public:
     GL3Renderer(std::unique_ptr<FileLoader> &&fileLoader);
@@ -60,6 +62,8 @@ public:
     virtual LightingManager *getLightingManager() override;
 
     virtual RenderTargetManager *getRenderTargetManager() override;
+
+    virtual Profiler *getProfiler() override;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) override;
 

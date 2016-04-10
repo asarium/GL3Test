@@ -26,6 +26,10 @@ class Application {
     std::unique_ptr<VertexLayout> _particleQuadLayout;
     std::unique_ptr<InstancedDrawCall> _particleQuadDrawCall;
 
+    ProfilingCategory* _geometryCategory;
+    ProfilingCategory* _endLightPassCategory;
+    ProfilingCategory* _particleCategory;
+
     Timing *_timing;
     Renderer *_renderer;
 

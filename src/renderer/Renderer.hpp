@@ -17,6 +17,7 @@
 #include "LightingManager.hpp"
 #include "RenderTargetManager.hpp"
 #include "Exceptions.hpp"
+#include "Profiler.hpp"
 
 enum class GraphicsCapability {
     PointSprites,
@@ -63,6 +64,8 @@ public:
     virtual LightingManager *getLightingManager() = 0;
 
     virtual RenderTargetManager *getRenderTargetManager() = 0;
+
+    virtual Profiler* getProfiler() = 0;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) = 0;
 
