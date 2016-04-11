@@ -48,7 +48,7 @@ std::pair<uint64_t, uint64_t> GL3ProfilingCategory::getTimes() {
     std::pair<uint64_t, uint64_t> result_pair;
     while(hasTimes()) {
         // Remove all finished pairs from the queue and return the result of the last finished pair
-        auto &frontPair = _queryPairs.front();
+        auto frontPair = _queryPairs.front();
         _queryPairs.pop();
 
         GLint64 beginTime;
