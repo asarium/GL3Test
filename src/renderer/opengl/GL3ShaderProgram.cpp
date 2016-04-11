@@ -123,6 +123,9 @@ void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters* parameter
     GLint texture_unit = 0;
 
     GLState->Texture.unbindAll();
+#ifndef NDEBUG
+    size_t num_parameters_found = 0;
+#endif
 
     for (auto& parameter : parameters->getValues()) {
 #ifndef NDEBUG
@@ -143,6 +146,7 @@ void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters* parameter
             }
         }
         Assertion(valid_parameter, "The parameter is not valid for the current shader.");
+        ++num_parameters_found;
 #endif
 
         auto uniform_loc = getUniformLocation(parameter.param_type);
@@ -184,5 +188,10 @@ void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters* parameter
                 break;
         }
     }
+
+#ifndef NDEBUG
+    Assertion(num_parameters_found == _requirements.size(),
+              "A shader parameter is either missing or not appropriate for this shader!");
+#endif
 }
 
