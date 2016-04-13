@@ -9,7 +9,9 @@ in vec2 in_tex_coord;
 in vec3 in_pos_offset;
 in float in_radius;
 
-out vec2 vTexCoord;
+out VertexData {
+    vec2 tex_coord;
+} vertOut;
 
 void main() {
     vec4 view_pos = view_matrix * vec4(in_pos_offset, 1.f);
@@ -17,5 +19,5 @@ void main() {
 
     gl_Position = proj_matrix * view_pos;
 
-    vTexCoord = in_tex_coord;
+    vertOut.tex_coord = in_tex_coord;
 }

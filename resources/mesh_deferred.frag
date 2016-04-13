@@ -6,13 +6,15 @@ layout (location = 2) out vec4 out_albedo;
 
 uniform sampler2D color_texture;
 
-in vec3 vert_position;
-in vec2 vert_tex_coord;
-in vec3 vert_normal;
+in VertexData {
+    vec3 position;
+    vec2 tex_coord;
+    vec3 normal;
+} vertOut;
 
 void main()
 {
-    out_position = vert_position;
-    out_normal = normalize(vert_normal);
-    out_albedo = texture(color_texture, vert_tex_coord);
+    out_position = vertOut.position;
+    out_normal = normalize(vertOut.normal);
+    out_albedo = texture(color_texture, vertOut.tex_coord);
 }

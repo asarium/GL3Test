@@ -4,12 +4,14 @@ uniform sampler2D color_texture;
 
 out vec4 out_color;
 
-in vec3 vert_position;
-in vec2 vert_tex_coord;
-in vec3 vert_normal;
+in VertexData {
+    vec3 position;
+    vec2 tex_coord;
+    vec3 normal;
+} vertOut;
 
 void main()
 {
     //out_color = vec4(vert_tex_coord, 1.f, 1.f);
-    out_color = texture(color_texture, vert_tex_coord);
+    out_color = texture(color_texture, vertOut.tex_coord);
 }

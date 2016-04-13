@@ -7,18 +7,22 @@ layout(triangle_strip, max_vertices = 4) out;
 
 uniform mat4 proj_matrix;
 
-in float vRadius[];
+in VertexData {
+    float radius;
+} vertOut[];
 
-out vec2 vTexCoord;
+out VertexData {
+    vec2 tex_coord;
+} geomOut;
 
 void main()
 {
     for(int i=0; i<4; ++i)
     {
         vec4 eyePos = gl_in[0].gl_Position;           //start with point position
-        eyePos.xy += vRadius[0] * corners[i];         //add corner position
+        eyePos.xy += vertOut[0].radius * corners[i];         //add corner position
         gl_Position = proj_matrix * eyePos;             //complete transformation
-        vTexCoord = corners[i];                         //use corner as texCoord
+        geomOut.tex_coord = corners[i];                         //use corner as texCoord
         EmitVertex();
     }
     EndPrimitive();
