@@ -162,7 +162,7 @@ Application::Application(Renderer* renderer, Timing* time) {
     _floorDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _floorTexture.get());
 
     _sunLight = _renderer->getLightingManager()->addLight(LightType::Directional, true);
-    _sunLight->setDirection(glm::vec3(0.f, 1.f, 1.f));
+    _sunLight->setDirection(glm::vec3(10.f, 5.f, 0.f));
     _sunLight->setColor(glm::vec3(1.f));
 
     int width, height;

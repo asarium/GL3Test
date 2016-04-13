@@ -30,7 +30,13 @@ float calculate_directed_shadow(vec3 position) {
     proj_pos = (proj_pos * 0.5f) + vec3(0.5f);
     proj_pos.z -= 0.01;
 
-    return texture(directional_shadow_map, proj_pos);
+    float result = texture(directional_shadow_map, proj_pos);
+    if(proj_pos.z > 1.0)
+    {
+        result = 0.0;
+    }
+
+    return result;
 }
 
 void main()
