@@ -6,34 +6,55 @@
 #include "GL3VertexLayout.hpp"
 #include "GL3Object.hpp"
 
+#include <renderer/Renderer.hpp>
+
 #include <memory>
 #include <vector>
 #include <glad/glad.h>
 
-class GL3Renderer;
+class GL3LightingManager;
 
-class GL3Light : public Light {
-public:
-    GL3Light(LightType type);
+class GL3Light: public GL3Object, public Light {
+    GL3LightingManager* _lightingManager;
 
-    virtual ~GL3Light() { }
+    uint32_t _depthMapResolution;
 
-    virtual void setPosition(const glm::vec3 &pos) override;
+    GLuint _depthTexture;
+    GLuint _depthFrameBuffer;
 
-    virtual void setDirection(const glm::vec3 &pos) override;
+    std::unique_ptr<PipelineState> _shadowPipelineState;
 
-    virtual void setColor(const glm::vec3 &color) override;
-
-    virtual void setIntesity(float intensity) override;
+    void freeResources();
+    void createDepthBuffer(uint32_t resolution);
+ public:
+    GL3Light(GL3Renderer* renderer, GL3LightingManager* manager, LightType type, uint32_t shadowResolution);
+    virtual ~GL3Light();
 
     LightType type;
     glm::vec3 position;
     glm::vec3 direction;
     glm::vec3 color;
-    float intensity;
+
+    virtual void setPosition(const glm::vec3& pos) override;
+
+    virtual void setDirection(const glm::vec3& pos) override;
+
+    virtual void setColor(const glm::vec3& color) override;
+
+    virtual ShadowMatrices beginShadowPass() override;
+
+    virtual void endShadowPass() override;
+
+    virtual PipelineState* getShadowPipelineState() override;
+
+    bool hasShadow() {
+        return _depthMapResolution != 0;
+    }
+
+    void changeShadowMapResolution(uint32_t resolution);
 };
 
-class GL3LightingManager : GL3Object, public LightingManager {
+class GL3LightingManager: GL3Object, public LightingManager {
     enum GBuffer {
         POSITION_BUFFER = 0,
         NORMAL_BUFFER = 1,
@@ -54,16 +75,18 @@ class GL3LightingManager : GL3Object, public LightingManager {
 
     std::unique_ptr<PipelineState> _geometryPipelineState;
 
-    GL3ShaderProgram *_lightingPassProgram;
+    GL3ShaderProgram* _lightingPassProgram;
     GL3ShaderParameters _lightingPassParameters;
 
     glm::mat4 _projectionMatrix;
     glm::mat4 _viewMatrix;
 
+    uint32_t _shadowMapResolution;
+
     void createFrameBuffer(int width, int height);
     void freeResources();
-public:
-    GL3LightingManager(GL3Renderer *renderer);
+ public:
+    GL3LightingManager(GL3Renderer* renderer);
 
     virtual ~GL3LightingManager();
 
@@ -71,11 +94,13 @@ public:
 
     void resizeFramebuffer(uint32_t width, uint32_t height);
 
-    virtual Light *addLight(LightType type) override;
+    void changeShadowQuality(SettingsLevel level);
 
-    virtual void removeLight(Light *light) override;
+    virtual Light* addLight(LightType type, bool shadows) override;
 
-    virtual PipelineState *getRenderPipeline() override;
+    virtual void removeLight(Light* light) override;
+
+    virtual PipelineState* getRenderPipeline() override;
 
     virtual void clearLights() override;
 

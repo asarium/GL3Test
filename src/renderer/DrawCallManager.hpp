@@ -12,6 +12,7 @@ class PipelineState;
 enum class ShaderType {
     Mesh,
     LightedMesh,
+    ShadowMesh,
     PointSprite,
     InstancedSprite
 };

@@ -27,6 +27,9 @@ class Application {
     std::unique_ptr<VertexLayout> _particleQuadLayout;
     std::unique_ptr<InstancedDrawCall> _particleQuadDrawCall;
 
+    std::unique_ptr<Texture2D> _floorTexture;
+    std::unique_ptr<DrawCall> _floorDrawCall;
+
     ProfilingCategory* _wholeFrameCategory;
 
     Timing *_timing;
@@ -35,6 +38,8 @@ class Application {
     glm::mat4 _projMx;
     glm::mat4 _viewMx;
     glm::mat4 _modelMx;
+
+    Light* _sunLight;
 
     int _resolution_index = 0;
     bool _last_vsync = true;

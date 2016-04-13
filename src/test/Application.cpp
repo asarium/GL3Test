@@ -13,117 +13,103 @@
 using namespace glm;
 
 namespace {
-    struct VertexData {
-        glm::vec3 position;
-        glm::vec2 tex_coord;
-    };
+struct VertexData {
+    glm::vec3 position;
+    glm::vec2 tex_coord;
+    glm::vec3 normal;
+};
 
-    std::vector<VertexData> getQuadData() {
-        std::vector<VertexData> data;
-        data.push_back({glm::vec3(-1.0f, -1.0f, 0.f),
-                        glm::vec2(0.f, 0.f)
-                       });
-        data.push_back({glm::vec3(-1.0f, 1.0f, 0.f),
-                        glm::vec2(0.f, 1.f)
-                       });
-        data.push_back({glm::vec3(1.0f, -1.0f, 0.f),
-                        glm::vec2(1.f, 0.f)
-                       });
-        data.push_back({glm::vec3(1.0f, 1.0f, 0.f),
-                        glm::vec2(1.f, 1.f)
-                       });
+std::vector<VertexData> getQuadData() {
+    std::vector<VertexData> data;
+    data.push_back({
+                       glm::vec3(-1.0f, -1.0f, 0.f),
+                       glm::vec2(0.f, 0.f),
+                       glm::vec3(0.f, 0.f, -1.f)
+                   });
+    data.push_back({
+                       glm::vec3(-1.0f, 1.0f, 0.f),
+                       glm::vec2(0.f, 1.f),
+                       glm::vec3(0.f, 0.f, -1.f)
+                   });
+    data.push_back({
+                       glm::vec3(1.0f, -1.0f, 0.f),
+                       glm::vec2(1.f, 0.f),
+                       glm::vec3(0.f, 0.f, -1.f)
+                   });
+    data.push_back({
+                       glm::vec3(1.0f, 1.0f, 0.f),
+                       glm::vec2(1.f, 1.f),
+                       glm::vec3(0.f, 0.f, -1.f)
+                   });
 
-        return data;
-    }
-
-    void drawTimes(NVGcontext *ctx, const std::deque<float> &vals, size_t maxVals, int x, int y, int width, int height,
-                   const char *text) {
-        if (vals.empty()) {
-            return;
-        }
-
-        nvgSave(ctx);
-        nvgReset(ctx);
-        nvgFontFace(ctx, "sans");
-
-        nvgFontSize(ctx, 20.f);
-        nvgTextAlign(ctx, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-        nvgText(ctx, x + 5, y + 5, text, nullptr);
-
-        auto sum = std::accumulate(vals.begin(), vals.end(), 0.f);
-        auto avg = sum / vals.size();
-
-        char str[64];
-        sprintf(str, "%.2fms", avg);
-
-        nvgFontSize(ctx, 15.f);
-        nvgTextAlign(ctx, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
-        nvgText(ctx, x + width - 3, y + 5, str, nullptr);
-
-        nvgTranslate(ctx, x, y);
-        nvgScale(ctx, width, height);
-
-        nvgBeginPath(ctx);
-        nvgRect(ctx, 0.f, 0.f, 1.f, 1.f);
-        nvgFillColor(ctx, nvgRGBA(128, 128, 128, 128));
-        nvgFill(ctx);
-
-        nvgBeginPath(ctx);
-        nvgMoveTo(ctx, 0.f, 1.f);
-
-        auto maxTime = *std::max_element(vals.begin(), vals.end());
-        if (maxTime < 60.f) {
-            // Make 30 ms the minimum scale
-            maxTime = 60.f;
-        }
-
-        size_t index = 0;
-        for (auto time : vals) {
-            auto xPos = (float) index / maxVals;
-            auto yPos = time / maxTime;
-
-            nvgLineTo(ctx, xPos, 1.f - yPos);
-
-            ++index;
-        }
-        auto endPos = (float) (vals.size() - 1) / maxVals;
-        nvgLineTo(ctx, endPos, 1.f);
-        nvgFillColor(ctx, nvgRGBA(255, 192, 0, 128));
-        nvgFill(ctx);
-
-        nvgReset(ctx);
-    }
+    return data;
 }
 
-Application::Application(Renderer *renderer, Timing *time) {
+void drawTimes(NVGcontext* ctx, const std::deque<float>& vals, size_t maxVals, int x, int y, int width, int height,
+               const char* text) {
+    if (vals.empty()) {
+        return;
+    }
+
+    nvgSave(ctx);
+    nvgReset(ctx);
+    nvgFontFace(ctx, "sans");
+
+    nvgFontSize(ctx, 20.f);
+    nvgTextAlign(ctx, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+    nvgText(ctx, x + 5, y + 5, text, nullptr);
+
+    auto sum = std::accumulate(vals.begin(), vals.end(), 0.f);
+    auto avg = sum / vals.size();
+
+    char str[64];
+    sprintf(str, "%.2fms", avg);
+
+    nvgFontSize(ctx, 15.f);
+    nvgTextAlign(ctx, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+    nvgText(ctx, x + width - 3, y + 5, str, nullptr);
+
+    nvgTranslate(ctx, x, y);
+    nvgScale(ctx, width, height);
+
+    nvgBeginPath(ctx);
+    nvgRect(ctx, 0.f, 0.f, 1.f, 1.f);
+    nvgFillColor(ctx, nvgRGBA(128, 128, 128, 128));
+    nvgFill(ctx);
+
+    nvgBeginPath(ctx);
+    nvgMoveTo(ctx, 0.f, 1.f);
+
+    auto maxTime = *std::max_element(vals.begin(), vals.end());
+    if (maxTime < 60.f) {
+        // Make 30 ms the minimum scale
+        maxTime = 60.f;
+    }
+
+    size_t index = 0;
+    for (auto time : vals) {
+        auto xPos = (float) index / maxVals;
+        auto yPos = time / maxTime;
+
+        nvgLineTo(ctx, xPos, 1.f - yPos);
+
+        ++index;
+    }
+    auto endPos = (float) (vals.size() - 1) / maxVals;
+    nvgLineTo(ctx, endPos, 1.f);
+    nvgFillColor(ctx, nvgRGBA(255, 192, 0, 128));
+    nvgFill(ctx);
+
+    nvgReset(ctx);
+}
+}
+
+Application::Application(Renderer* renderer, Timing* time) {
     _timing = time;
     _renderer = renderer;
 
     _model.reset(new AssimpModel());
     _model->loadModel(renderer, "resources/duck.dae");
-
-    _particleTexture = util::load_texture(renderer, "resources/Capparticles_0000.png");
-
-    std::srand((unsigned int) std::time(nullptr));
-    for (size_t i = 0; i < 3; ++i) {
-        float f1 = (float) rand() / (float) RAND_MAX;
-        float f2 = (float) rand() / (float) RAND_MAX;
-        float f3 = (float) rand() / (float) RAND_MAX;
-
-        Particle p;
-        p.position = glm::vec3(f1 * 8.f - 4.f, 0.f, f2 * 8.f - 4.f);
-
-        p.radius = f3 * 5.f - 2.5f;
-        p.position.y = p.radius;
-
-        _particles.push_back(p);
-
-        auto light = renderer->getLightingManager()->addLight(LightType::Point);
-        light->setIntesity(5.f);
-        light->setColor(glm::normalize(p.position));
-        light->setPosition(p.position);
-        _particleLights.push_back(light);
-    }
 
     _particleBuffer = renderer->createBuffer(BufferType::Vertex);
     _particleBuffer->setData(_particles.data(), sizeof(Particle) * _particles.size(), BufferUsage::Streaming);
@@ -138,6 +124,8 @@ Application::Application(Renderer *renderer, Timing *time) {
                                       offsetof(VertexData, position));
     _particleQuadLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), quadBufferIdx,
                                       offsetof(VertexData, tex_coord));
+    _particleQuadLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), quadBufferIdx,
+                                      offsetof(VertexData, normal));
 
     auto infoBufferIdx = _particleQuadLayout->attachBufferObject(_particleBuffer.get());
     _particleQuadLayout->addInstanceComponent(AttributeType::PositionOffset, DataFormat::Vec3, 1, sizeof(Particle),
@@ -167,6 +155,18 @@ Application::Application(Renderer *renderer, Timing *time) {
                                                                                     quadData.size());
     _particleQuadDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _particleTexture.get());
 
+    _floorTexture = util::load_texture(renderer, "resources/wood.png");
+    DrawCallProperties props;
+    props.state = renderer->getLightingManager()->getRenderPipeline();
+    props.vertexLayout = _particleQuadLayout.get();
+    _floorDrawCall = _renderer->getDrawCallManager()->createDrawCall(props, PrimitiveType::TriangleStrip, 0,
+                                                                     quadData.size());
+    _floorDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _floorTexture.get());
+
+    _sunLight = _renderer->getLightingManager()->addLight(LightType::Directional, true);
+    _sunLight->setDirection(glm::vec3(0.f, 1.f, 1.f));
+    _sunLight->setColor(glm::vec3(1.f));
+
     int width, height;
     SDL_GL_GetDrawableSize(SDL_GL_GetCurrentWindow(), &width, &height);
 
@@ -182,22 +182,36 @@ Application::Application(Renderer *renderer, Timing *time) {
 Application::~Application() {
 }
 
-void Application::render(Renderer *renderer) {
+void Application::render(Renderer* renderer) {
     float radius = 10.0f;
     float camX = sin(_timing->getTotalTime()) * radius;
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
+    auto floorMatrix = mat4();
+    floorMatrix = glm::translate(floorMatrix, vec3(0.f, -1.f, 0.f));
+    floorMatrix = glm::rotate(floorMatrix, radians(90.f), vec3(1.f, 0.f, 0.f));
+    floorMatrix = glm::scale(floorMatrix, vec3(10.f, 10.f, 10.f));
+
     _wholeFrameCategory->begin();
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
+    auto matrices = _sunLight->beginShadowPass();
+    _sunLight->endShadowPass();
 
     renderer->getLightingManager()->beginLightPass(_projMx, _viewMx);
+
     _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
+
+    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ModelMatrix, floorMatrix);
+    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
+    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
+    _floorDrawCall->draw();
+
     renderer->getLightingManager()->endLightPass();
 
-    updateParticles();
-    _particleQuadDrawCall->drawInstanced(_particles.size());
+//    updateParticles();
+//    _particleQuadDrawCall->drawInstanced(_particles.size());
 
     renderUI();
 
@@ -206,7 +220,7 @@ void Application::render(Renderer *renderer) {
 
     auto results = _renderer->getProfiler()->getResults();
     if (!results.empty()) {
-        ProfilingResult &result = results.front();
+        ProfilingResult& result = results.front();
         _cpuTimes.push_back((float) result.cpu_time / 1000000.f);
         _gpuTimes.push_back((float) result.gpu_time / 1000000.f);
 
@@ -218,7 +232,7 @@ void Application::render(Renderer *renderer) {
     }
 }
 
-void Application::handleEvent(SDL_Event *event) {
+void Application::handleEvent(SDL_Event* event) {
     switch (event->type) {
         case SDL_KEYUP:
             switch (event->key.keysym.scancode) {
@@ -263,7 +277,7 @@ void Application::changeResolution(uint32_t width, uint32_t height) {
 
 void Application::updateParticles() {
     size_t index = 0;
-    for (auto &particle : _particles) {
+    for (auto& particle : _particles) {
         float time = _timing->getTotalTime() + particle.radius;
 
         float y = (float) std::sin(time * M_PI_2);

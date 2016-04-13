@@ -7,9 +7,10 @@
 
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include <util/Assertion.hpp>
 
-GL3LightingManager::GL3LightingManager(GL3Renderer *renderer) : GL3Object(renderer), _renderFrameBuffer(0),
-                                                                _gBufferTextures{0} {
+GL3LightingManager::GL3LightingManager(GL3Renderer* renderer) : GL3Object(renderer), _renderFrameBuffer(0),
+                                                                _gBufferTextures{ 0 }, _shadowMapResolution(0) {
 }
 
 GL3LightingManager::~GL3LightingManager() {
@@ -33,12 +34,16 @@ bool GL3LightingManager::initialize() {
     return true;
 }
 
-Light *GL3LightingManager::addLight(LightType type) {
-    _lights.emplace_back(new GL3Light(type));
+Light* GL3LightingManager::addLight(LightType type, bool shadows) {
+    if (shadows && type != LightType::Directional) {
+        return nullptr; // Shadows are only supported for directional lights currently
+    }
+
+    _lights.emplace_back(new GL3Light(this->_renderer, this, type, shadows ? _shadowMapResolution : 0));
     return _lights.back().get();
 }
 
-void GL3LightingManager::removeLight(Light *light) {
+void GL3LightingManager::removeLight(Light* light) {
     for (auto iter = _lights.begin(); iter != _lights.end(); ++iter) {
         if (iter->get() == light) {
             _lights.erase(iter);
@@ -51,7 +56,7 @@ void GL3LightingManager::clearLights() {
     _lights.clear();
 }
 
-void GL3LightingManager::beginLightPass(const glm::mat4 &projection, const glm::mat4 &view) {
+void GL3LightingManager::beginLightPass(const glm::mat4& projection, const glm::mat4& view) {
     _projectionMatrix = projection;
     _viewMatrix = view;
 
@@ -91,17 +96,17 @@ void GL3LightingManager::endLightPass() {
     _lightingPassParameters.setVec2(GL3ShaderParameterType::UVScale, uv_scale);
     _lightingPassParameters.setMat4(GL3ShaderParameterType::ProjectionMatrix, _projectionMatrix);
     _lightingPassParameters.setMat4(GL3ShaderParameterType::ViewMatrix, _viewMatrix);
+    _lightingPassParameters.setVec2(GL3ShaderParameterType::WindowSize, glm::vec2(width, height));
 
-    for (auto &light : _lights) {
+    for (auto& light : _lights) {
         switch (light->type) {
             case LightType::Point: {
                 _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 0);
                 _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->position);
-                _lightingPassParameters.setVec2(GL3ShaderParameterType::WindowSize, glm::vec2(width, height));
 
                 const float cutoff = 0.01f; // Cutoff value after which this light does not affect anything anymore
                 // This depends on the formula in the shader!
-                auto scale = sqrtf((light->intensity / cutoff) - 1.f) * 1.2f;
+                auto scale = sqrtf((glm::length(light->color) / cutoff) - 1.f) * 1.2f;
                 glm::mat4 lightSphere;
                 lightSphere = glm::translate(lightSphere, light->position);
                 lightSphere = glm::scale(lightSphere, glm::vec3(scale));
@@ -119,7 +124,6 @@ void GL3LightingManager::endLightPass() {
         }
 
         _lightingPassParameters.setVec3(GL3ShaderParameterType::LightColor, light->color);
-        _lightingPassParameters.setFloat(GL3ShaderParameterType::LightIntensitiy, light->intensity);
 
         _lightingPassProgram->bindAndSetParameters(&_lightingPassParameters);
 
@@ -140,27 +144,7 @@ void GL3LightingManager::endLightPass() {
     GLState->Framebuffer.popBinding();
 }
 
-GL3Light::GL3Light(LightType in_type) : type(in_type) {
-
-}
-
-void GL3Light::setPosition(const glm::vec3 &pos) {
-    position = pos;
-}
-
-void GL3Light::setDirection(const glm::vec3 &dir) {
-    direction = glm::normalize(dir);
-}
-
-void GL3Light::setColor(const glm::vec3 &color) {
-    this->color = glm::normalize(color);
-}
-
-void GL3Light::setIntesity(float intensity) {
-    this->intensity = intensity;
-}
-
-PipelineState *GL3LightingManager::getRenderPipeline() {
+PipelineState* GL3LightingManager::getRenderPipeline() {
     return _geometryPipelineState.get();
 }
 
@@ -226,40 +210,14 @@ void GL3LightingManager::createFrameBuffer(int width, int height) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gBufferTextures[ALBEDO_BUFFER], 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderBuffer);
 
-    GLuint attachments[NUM_GBUFFERS] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    GLuint attachments[NUM_GBUFFERS] = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2
+    };
     glDrawBuffers(NUM_GBUFFERS, attachments);
 
-    auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        switch (status) {
-            case GL_FRAMEBUFFER_COMPLETE:
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                std::cout << "FBO error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"
-                << std::endl;
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                std::cout << "FBO error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"
-                << std::endl;
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                std::cout << "FBO error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"
-                << std::endl;
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-                std::cout << "FBO error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"
-                << std::endl;
-                break;
-            case GL_FRAMEBUFFER_UNSUPPORTED:
-                std::cout << "FBO error: GL_FRAMEBUFFER_UNSUPPORTED"
-                << std::endl;
-                break;
-            default:
-                std::cout << "FBO error: Unknown error"
-                << std::endl;
-                break;
-        }
-    }
+    checkFrameBufferStatus();
 
     _lightingPassParameters.set2dTextureHandle(GL3ShaderParameterType::PositionTexture,
                                                _gBufferTextures[POSITION_BUFFER]);
@@ -278,5 +236,147 @@ void GL3LightingManager::resizeFramebuffer(uint32_t width, uint32_t height) {
     freeResources();
 
     createFrameBuffer(width, height);
+}
+void GL3LightingManager::changeShadowQuality(SettingsLevel level) {
+    switch (level) {
+        case SettingsLevel::Disabled:
+            _shadowMapResolution = 0;
+            break;
+        case SettingsLevel::Low:
+            _shadowMapResolution = 512;
+            break;
+        case SettingsLevel::Medium:
+            _shadowMapResolution = 1024;
+            break;
+        case SettingsLevel::High:
+            _shadowMapResolution = 2048;
+            break;
+        case SettingsLevel::Ultra:
+            _shadowMapResolution = 4096;
+            break;
+    }
+
+    for (auto& light : _lights) {
+        if (light->hasShadow()) {
+            light->changeShadowMapResolution(_shadowMapResolution);
+        }
+    }
+}
+
+GL3Light::GL3Light(GL3Renderer* renderer, GL3LightingManager* manager, LightType in_type, uint32_t depthMapResolution)
+    : GL3Object(renderer), _lightingManager(manager), type(in_type), _depthTexture(0), _depthFrameBuffer(0),
+      _depthMapResolution(depthMapResolution) {
+    if (!hasShadow()) {
+        return;
+    }
+
+    createDepthBuffer(depthMapResolution);
+}
+GL3Light::~GL3Light() {
+    freeResources();
+}
+
+void GL3Light::setPosition(const glm::vec3& pos) {
+    position = pos;
+}
+
+void GL3Light::setDirection(const glm::vec3& dir) {
+    direction = glm::normalize(dir);
+}
+
+void GL3Light::setColor(const glm::vec3& color) {
+    this->color = color;
+}
+ShadowMatrices GL3Light::beginShadowPass() {
+    Assertion(hasShadow(), "beginShadowPass() called for non-shadowed light!");
+
+    GLState->Framebuffer.pushBinding();
+    GLState->Framebuffer.bind(_depthFrameBuffer);
+
+    GLState->setDepthMask(true);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, _depthMapResolution, _depthMapResolution);
+
+    ShadowMatrices matrices;
+
+    GLfloat near_plane = 1.0f, far_plane = 7.5f;
+    matrices.projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    matrices.view = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
+                                glm::vec3(0.0f, 0.0f, 0.0f),
+                                glm::vec3(0.0f, 1.0f, 0.0f));
+
+    return matrices;
+}
+
+void GL3Light::endShadowPass() {
+    Assertion(hasShadow(), "beginShadowPass() called for non-shadowed light!");
+
+    GLState->Framebuffer.popBinding();
+}
+void GL3Light::changeShadowMapResolution(uint32_t resolution) {
+    Assertion(hasShadow(), "Shadow map resolution changed for non-shadowed light!");
+
+    freeResources();
+    createDepthBuffer(resolution);
+}
+void GL3Light::freeResources() {
+    if (glIsTexture(_depthTexture)) {
+        glDeleteTextures(1, &_depthTexture);
+        _depthTexture = 0;
+    }
+    if (glIsFramebuffer(_depthFrameBuffer)) {
+        glDeleteFramebuffers(1, &_depthFrameBuffer);
+        _depthFrameBuffer = 0;
+    }
+}
+void GL3Light::createDepthBuffer(uint32_t resolution) {
+    _depthMapResolution = resolution;
+
+    // Setup shadow mapping
+    glGenFramebuffers(1, &_depthFrameBuffer);
+
+    glGenTextures(1, &_depthTexture);
+    GLState->Texture.bindTexture(0, GL_TEXTURE_2D, _depthTexture);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 _depthMapResolution,
+                 _depthMapResolution,
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 GL_FLOAT,
+                 NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    GLState->Framebuffer.pushBinding();
+    GLState->Framebuffer.bind(_depthFrameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTexture, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    checkFrameBufferStatus();
+
+    GLState->Framebuffer.popBinding();
+}
+PipelineState* GL3Light::getShadowPipelineState() {
+    if (_shadowPipelineState) {
+        return _shadowPipelineState.get();
+    }
+    // Lazily initialize the pipeline state
+    PipelineProperties props;
+    props.blendFunction = BlendFunction::None;
+    props.blending = false;
+
+    props.depthFunction = DepthFunction::Less;
+    props.depthMode = DepthMode::ReadWrite;
+
+    props.shaderType = ShaderType::ShadowMesh;
+
+    _shadowPipelineState = _renderer->createPipelineState(props);
+
+    return _shadowPipelineState.get();
 }
 

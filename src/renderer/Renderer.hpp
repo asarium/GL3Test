@@ -21,6 +21,14 @@
 
 #include "nanovg/nanovg.h"
 
+enum class SettingsLevel {
+    Disabled,
+    Low,
+    Medium,
+    High,
+    Ultra
+};
+
 enum class GraphicsCapability {
     PointSprites,
     S3TC,
@@ -34,17 +42,19 @@ enum class SettingsParameterType {
 enum class SettingsParameter {
     Resolution,
     VerticalSync,
-    MultiSamplingAntiAliasing
+    MultiSamplingAntiAliasing,
+    Shadows
 };
 
 struct RendererSettings {
     glm::uvec2 resolution;
     bool vertical_sync;
     uint32_t msaa_samples;
+    SettingsLevel shadow_quality;
 };
 
 class RendererSettingsManager {
-public:
+ public:
     virtual ~RendererSettingsManager() { }
 
     virtual void changeSettings(const RendererSettings& settings) = 0;
@@ -55,18 +65,18 @@ public:
 };
 
 class Renderer {
-public:
+ public:
     virtual ~Renderer() { }
 
-    virtual SDL_Window *initialize() = 0;
+    virtual SDL_Window* initialize() = 0;
 
-    virtual RendererSettingsManager *getSettingsManager() = 0;
+    virtual RendererSettingsManager* getSettingsManager() = 0;
 
-    virtual DrawCallManager *getDrawCallManager() = 0;
+    virtual DrawCallManager* getDrawCallManager() = 0;
 
-    virtual LightingManager *getLightingManager() = 0;
+    virtual LightingManager* getLightingManager() = 0;
 
-    virtual RenderTargetManager *getRenderTargetManager() = 0;
+    virtual RenderTargetManager* getRenderTargetManager() = 0;
 
     virtual Profiler* getProfiler() = 0;
 
@@ -76,11 +86,11 @@ public:
 
     virtual std::unique_ptr<Texture2D> createTexture() = 0;
 
-    virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties &props) = 0;
+    virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) = 0;
 
     virtual bool hasCapability(GraphicsCapability capability) const = 0;
 
-    virtual void clear(const glm::vec4 &color) = 0;
+    virtual void clear(const glm::vec4& color) = 0;
 
     virtual void presentNextFrame() = 0;
 

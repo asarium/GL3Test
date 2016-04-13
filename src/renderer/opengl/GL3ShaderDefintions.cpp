@@ -212,7 +212,34 @@ ShaderDefinition shader_definitions[] =
                     }
                 }
             }
-        }
+        },
+        {
+            GL3ShaderType::ShadowMesh,
+            {
+                {
+                    GL_VERTEX_SHADER,
+                    "mesh_shadow.vert"
+                },
+                {
+                    GL_FRAGMENT_SHADER,
+                    "mesh_shadow.frag"
+                }
+            },
+            {
+                {
+                    GL3ShaderParameterType::ModelMatrix,
+                    { ParameterDataType::Mat4 }
+                },
+                {
+                    GL3ShaderParameterType::ViewMatrix,
+                    { ParameterDataType::Mat4 }
+                },
+                {
+                    GL3ShaderParameterType::ProjectionMatrix,
+                    { ParameterDataType::Mat4 }
+                }
+            }
+        },
     };
 
 UniformMapping uniform_mappings[] = {

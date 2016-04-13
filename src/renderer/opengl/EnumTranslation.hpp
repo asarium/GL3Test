@@ -31,6 +31,8 @@ inline GL3ShaderType convertShaderType(ShaderType type) {
             return GL3ShaderType::PointSprite;
         case ShaderType::InstancedSprite:
             return GL3ShaderType::InstancedSprite;
+        case ShaderType::ShadowMesh:
+            return GL3ShaderType::ShadowMesh;
         default:
             return GL3ShaderType::Mesh;
     }

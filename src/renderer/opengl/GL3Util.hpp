@@ -24,4 +24,6 @@ public:
     void drawSphere();
 };
 
+bool checkFrameBufferStatus();
+
 

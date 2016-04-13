@@ -35,6 +35,7 @@ private:
 
     GL3RenderSettingsManager _settingsManager;
 
+    bool _initialized;
     SDL_GLContext _context;
     SDL_Window *_window;
 

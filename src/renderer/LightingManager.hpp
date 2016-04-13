@@ -10,24 +10,33 @@ enum class LightType {
     Ambient
 };
 
+struct ShadowMatrices {
+    glm::mat4 projection;
+    glm::mat4 view;
+};
+
 class Light {
-public:
+ public:
     virtual ~Light() { }
 
-    virtual void setPosition(const glm::vec3 &pos) = 0;
+    virtual void setPosition(const glm::vec3& pos) = 0;
 
-    virtual void setDirection(const glm::vec3 &dir) = 0;
+    virtual void setDirection(const glm::vec3& dir) = 0;
 
-    virtual void setColor(const glm::vec3 &color) = 0;
+    virtual void setColor(const glm::vec3& color) = 0;
 
-    virtual void setIntesity(float intensity) = 0;
+    virtual ShadowMatrices beginShadowPass() = 0;
+
+    virtual void endShadowPass() = 0;
+
+    virtual PipelineState* getShadowPipelineState() = 0;
 };
 
 class LightingManager {
-public:
+ public:
     virtual ~LightingManager() { };
 
-    virtual Light *addLight(LightType type) = 0;
+    virtual Light* addLight(LightType type, bool lighting) = 0;
 
     virtual PipelineState* getRenderPipeline() = 0;
 

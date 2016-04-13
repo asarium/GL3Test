@@ -22,119 +22,120 @@ namespace {
 
 #ifndef NDEBUG
 
-    void debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity,
-                        GLsizei length, const GLchar *message, const void *userParam) {
-        const char *sourceStr;
-        const char *typeStr;
-        const char *severityStr;
+void debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity,
+                    GLsizei length, const GLchar* message, const void* userParam) {
+    const char* sourceStr;
+    const char* typeStr;
+    const char* severityStr;
 
-        switch (source) {
-            case GL_DEBUG_SOURCE_API_ARB:
-                sourceStr = "opengl";
-                break;
-            case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
-                sourceStr = "WindowSys";
-                break;
-            case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
-                sourceStr = "Shader Compiler";
-                break;
-            case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
-                sourceStr = "Third Party";
-                break;
-            case GL_DEBUG_SOURCE_APPLICATION_ARB:
-                sourceStr = "Application";
-                break;
-            case GL_DEBUG_SOURCE_OTHER_ARB:
-                sourceStr = "Other";
-                break;
-            default:
-                sourceStr = "Unknown";
-                break;
-        }
-
-        switch (type) {
-            case GL_DEBUG_TYPE_ERROR_ARB:
-                typeStr = "Error";
-                break;
-            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
-                typeStr = "Deprecated behavior";
-                break;
-            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
-                typeStr = "Undefined behavior";
-                break;
-            case GL_DEBUG_TYPE_PORTABILITY_ARB:
-                typeStr = "Portability";
-                break;
-            case GL_DEBUG_TYPE_PERFORMANCE_ARB:
-                typeStr = "Performance";
-                break;
-            case GL_DEBUG_TYPE_OTHER_ARB:
-                typeStr = "Other";
-                break;
-            default:
-                typeStr = "Unknown";
-                break;
-        }
-
-        switch (severity) {
-            case GL_DEBUG_SEVERITY_HIGH_ARB:
-                severityStr = "High";
-                break;
-            case GL_DEBUG_SEVERITY_MEDIUM_ARB:
-                severityStr = "Medium";
-                break;
-            case GL_DEBUG_SEVERITY_LOW_ARB:
-                severityStr = "Low";
-                break;
-            default:
-                severityStr = "Unknown";
-                break;
-        }
-
-        printf("opengl Debug: Source:%s\tType:%s\tID:%d\tSeverity:%s\tMessage:%s\n",
-               sourceStr, typeStr, id, severityStr, message);
+    switch (source) {
+        case GL_DEBUG_SOURCE_API_ARB:
+            sourceStr = "opengl";
+            break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
+            sourceStr = "WindowSys";
+            break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
+            sourceStr = "Shader Compiler";
+            break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
+            sourceStr = "Third Party";
+            break;
+        case GL_DEBUG_SOURCE_APPLICATION_ARB:
+            sourceStr = "Application";
+            break;
+        case GL_DEBUG_SOURCE_OTHER_ARB:
+            sourceStr = "Other";
+            break;
+        default:
+            sourceStr = "Unknown";
+            break;
     }
 
-    bool hasPendingDebugMessage() {
-        GLint numMsgs = 0;
-        glGetIntegerv(GL_DEBUG_LOGGED_MESSAGES_ARB, &numMsgs);
-
-        return numMsgs > 0;
+    switch (type) {
+        case GL_DEBUG_TYPE_ERROR_ARB:
+            typeStr = "Error";
+            break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
+            typeStr = "Deprecated behavior";
+            break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
+            typeStr = "Undefined behavior";
+            break;
+        case GL_DEBUG_TYPE_PORTABILITY_ARB:
+            typeStr = "Portability";
+            break;
+        case GL_DEBUG_TYPE_PERFORMANCE_ARB:
+            typeStr = "Performance";
+            break;
+        case GL_DEBUG_TYPE_OTHER_ARB:
+            typeStr = "Other";
+            break;
+        default:
+            typeStr = "Unknown";
+            break;
     }
 
-    bool printNextDebugMessage() {
-        if (!hasPendingDebugMessage()) {
-            return false;
-        }
-
-        GLint msgLen = 0;
-        glGetIntegerv(GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_ARB, &msgLen);
-
-        std::vector<GLchar> msg;
-        msg.resize(msgLen + 1); // Includes null character, needs to be removed later
-
-        GLenum source;
-        GLenum type;
-        GLenum severity;
-        GLuint id;
-        GLsizei length;
-
-        GLuint numFound = glGetDebugMessageLogARB(1, msg.size(), &source, &type, &id, &severity, &length, &msg[0]);
-
-        if (numFound < 1) {
-            return false;
-        }
-
-        debug_callback(source, type, id, severity, length, msg.data(), nullptr);
-
-        return true;
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH_ARB:
+            severityStr = "High";
+            break;
+        case GL_DEBUG_SEVERITY_MEDIUM_ARB:
+            severityStr = "Medium";
+            break;
+        case GL_DEBUG_SEVERITY_LOW_ARB:
+            severityStr = "Low";
+            break;
+        default:
+            severityStr = "Unknown";
+            break;
     }
+
+    printf("opengl Debug: Source:%s\tType:%s\tID:%d\tSeverity:%s\tMessage:%s\n",
+           sourceStr, typeStr, id, severityStr, message);
+}
+
+bool hasPendingDebugMessage() {
+    GLint numMsgs = 0;
+    glGetIntegerv(GL_DEBUG_LOGGED_MESSAGES_ARB, &numMsgs);
+
+    return numMsgs > 0;
+}
+
+bool printNextDebugMessage() {
+    if (!hasPendingDebugMessage()) {
+        return false;
+    }
+
+    GLint msgLen = 0;
+    glGetIntegerv(GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_ARB, &msgLen);
+
+    std::vector<GLchar> msg;
+    msg.resize(msgLen + 1); // Includes null character, needs to be removed later
+
+    GLenum source;
+    GLenum type;
+    GLenum severity;
+    GLuint id;
+    GLsizei length;
+
+    GLuint numFound = glGetDebugMessageLogARB(1, msg.size(), &source, &type, &id, &severity, &length, &msg[0]);
+
+    if (numFound < 1) {
+        return false;
+    }
+
+    debug_callback(source, type, id, severity, length, msg.data(), nullptr);
+
+    return true;
+}
 
 #endif
 }
 
-GL3Renderer::GL3Renderer(std::unique_ptr<FileLoader> &&fileLoader) : _fileLoader(std::move(fileLoader)),
-                                                                     _settingsManager(this), _window(nullptr) {
+GL3Renderer::GL3Renderer(std::unique_ptr<FileLoader>&& fileLoader) : _fileLoader(std::move(fileLoader)),
+                                                                     _settingsManager(this), _window(nullptr),
+                                                                     _initialized(false) {
 
 }
 
@@ -162,7 +163,7 @@ void GL3Renderer::deinitialize() {
     SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 }
 
-SDL_Window *GL3Renderer::initialize() {
+SDL_Window* GL3Renderer::initialize() {
     SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -247,6 +248,8 @@ SDL_Window *GL3Renderer::initialize() {
 
     _nvgContext = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
 
+    _initialized = true;
+
     return _window;
 }
 
@@ -257,7 +260,7 @@ void GL3Renderer::updateResolution(uint32_t width, uint32_t height) {
     _renderTargetManager->useRenderTarget(nullptr); // Setup correct view port
 }
 
-RendererSettingsManager *GL3Renderer::getSettingsManager() {
+RendererSettingsManager* GL3Renderer::getSettingsManager() {
     return &_settingsManager;
 }
 
@@ -265,7 +268,7 @@ void GL3Renderer::presentNextFrame() {
     SDL_GL_SwapWindow(_window);
 }
 
-void GL3Renderer::clear(const glm::vec4 &color) {
+void GL3Renderer::clear(const glm::vec4& color) {
     glClearColor(color.r, color.g, color.b, color.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -282,11 +285,11 @@ std::unique_ptr<VertexLayout> GL3Renderer::createVertexLayout() {
     return std::unique_ptr<VertexLayout>(new GL3VertexLayout());
 }
 
-DrawCallManager *GL3Renderer::getDrawCallManager() {
+DrawCallManager* GL3Renderer::getDrawCallManager() {
     return _drawCallManager.get();
 }
 
-LightingManager *GL3Renderer::getLightingManager() {
+LightingManager* GL3Renderer::getLightingManager() {
     return _lightingManager.get();
 }
 
@@ -294,7 +297,7 @@ std::unique_ptr<Texture2D> GL3Renderer::createTexture() {
     return std::unique_ptr<Texture2D>(new GL3Texture2D());
 }
 
-std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelineProperties &props) {
+std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelineProperties& props) {
     GL3PipelineProperties gl_props;
     gl_props.shader = _shaderManager->getShader(convertShaderType(props.shaderType));
 
@@ -306,27 +309,27 @@ std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelinePr
     return std::unique_ptr<PipelineState>(new GL3PipelineState(gl_props));
 }
 
-GL3ShaderManager *GL3Renderer::getShaderManager() {
+GL3ShaderManager* GL3Renderer::getShaderManager() {
     return _shaderManager.get();
 }
 
-RenderTargetManager *GL3Renderer::getRenderTargetManager() {
+RenderTargetManager* GL3Renderer::getRenderTargetManager() {
     return _renderTargetManager.get();
 }
 
-GL3DrawCallManager *GL3Renderer::getGLDrawCallManager() {
+GL3DrawCallManager* GL3Renderer::getGLDrawCallManager() {
     return _drawCallManager.get();
 }
 
-GL3LightingManager *GL3Renderer::getGLLightingManager() {
+GL3LightingManager* GL3Renderer::getGLLightingManager() {
     return _lightingManager.get();
 }
 
-GL3RenderTargetManager *GL3Renderer::getGLRenderTargetManager() {
+GL3RenderTargetManager* GL3Renderer::getGLRenderTargetManager() {
     return _renderTargetManager.get();
 }
 
-SDL_Window *GL3Renderer::getWindow() {
+SDL_Window* GL3Renderer::getWindow() {
     return _window;
 }
 
@@ -343,11 +346,11 @@ bool GL3Renderer::hasCapability(GraphicsCapability capability) const {
     }
 }
 
-Profiler *GL3Renderer::getProfiler() {
+Profiler* GL3Renderer::getProfiler() {
     return _profiler.get();
 }
 
-NVGcontext *GL3Renderer::getNanovgContext() {
+NVGcontext* GL3Renderer::getNanovgContext() {
     return _nvgContext;
 }
 
@@ -367,7 +370,7 @@ void GL3Renderer::nanovgEndFrame() {
     GLState->Texture.setActiveUnit(0);
 }
 
-GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer *renderer) : GL3Object(renderer),
+GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer* renderer) : GL3Object(renderer),
                                                                                          _settingsSet(false) {
 }
 
@@ -412,30 +415,36 @@ bool GL3Renderer::GL3RenderSettingsManager::supportsSetting(SettingsParameter pa
             return true; // Changing resolution is supported
         case SettingsParameter::VerticalSync:
             return true; // Changing vsync is supported
+        case SettingsParameter::Shadows:
+            return true; // Shadows are implemented using shadow mapping
         default:
             return false; // Unknown option is not supported
     }
 }
 
-void GL3Renderer::GL3RenderSettingsManager::changeSettings(const RendererSettings &settings) {
+void GL3Renderer::GL3RenderSettingsManager::changeSettings(const RendererSettings& settings) {
     auto previousSettings = _currentSettings;
     _currentSettings = settings;
 
-    auto changeAll = !_settingsSet;
     _settingsSet = true;
 
-    if (changeAll || _currentSettings.resolution != previousSettings.resolution) {
-        changeResolution(_currentSettings.resolution.x, _currentSettings.resolution.y);
-    }
+    if (_renderer->_initialized) {
+        // Only change settings if the renderer has actually been initialized
+        if (_currentSettings.resolution != previousSettings.resolution) {
+            changeResolution(_currentSettings.resolution.x, _currentSettings.resolution.y);
+        }
 
-    if (changeAll || _currentSettings.vertical_sync != previousSettings.vertical_sync) {
-        SDL_GL_SetSwapInterval(_currentSettings.vertical_sync ? 1 : 0);
-    }
+        if (_currentSettings.vertical_sync != previousSettings.vertical_sync) {
+            SDL_GL_SetSwapInterval(_currentSettings.vertical_sync ? 1 : 0);
+        }
 
-    _currentSettings = settings;
+        if (_currentSettings.shadow_quality != previousSettings.shadow_quality) {
+            _renderer->_lightingManager->changeShadowQuality(_currentSettings.shadow_quality);
+        }
+    }
 }
 
-bool GL3Renderer::GL3RenderSettingsManager::getSettings(RendererSettings &settings) {
+bool GL3Renderer::GL3RenderSettingsManager::getSettings(RendererSettings& settings) {
     settings = _currentSettings;
 
     return _settingsSet;

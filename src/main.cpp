@@ -66,6 +66,8 @@ namespace {
             RendererSettings settings;
             settings.resolution = glm::uvec2(1680, 1050);
             settings.vertical_sync = true;
+            settings.msaa_samples = 0;
+            settings.shadow_quality = SettingsLevel::Medium;
             renderer->getSettingsManager()->changeSettings(settings);
 
             window = renderer->initialize();
