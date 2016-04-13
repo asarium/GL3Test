@@ -52,7 +52,7 @@ class Application {
     std::deque<float> _gpuTimes;
     void renderUI();
 
-    void renderScene();
+    void renderScene(const glm::mat4& projMx, const glm::mat4& viewMx);
 public:
     Application(Renderer *renderer, Timing *timimg);
 

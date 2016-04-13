@@ -184,20 +184,18 @@ void Application::render(Renderer* renderer) {
     float radius = 10.0f;
     float camX = sin(_timing->getTotalTime()) * radius;
     float camZ = cos(_timing->getTotalTime()) * radius;
-    _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    _viewMx = glm::lookAt(glm::vec3(camX, 3.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
     _wholeFrameCategory->begin();
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-//    auto matrices = _sunLight->beginShadowPass();
-//    _sunLight->getShadowPipelineState()->bind();
-//
-//
-//    _sunLight->endShadowPass();
+    auto matrices = _sunLight->beginShadowPass();
+    renderScene(matrices.projection, matrices.view);
+    _sunLight->endShadowPass();
 
     renderer->getLightingManager()->beginLightPass(_projMx, _viewMx);
 
-    renderScene();
+    renderScene(_projMx, _viewMx);
 
     renderer->getLightingManager()->endLightPass();
 
@@ -303,17 +301,17 @@ void Application::renderUI() {
 
     _renderer->nanovgEndFrame();
 }
-void Application::renderScene() {
-    _model->drawModel(_renderer, _projMx, _viewMx, _modelMx);
+void Application::renderScene(const glm::mat4& projMx, const glm::mat4& viewMx) {
+    _model->drawModel(_renderer, projMx, viewMx, _modelMx);
 
     auto floorMatrix = mat4();
-    floorMatrix = glm::translate(floorMatrix, vec3(0.f, -1.f, 0.f));
+    floorMatrix = glm::translate(floorMatrix, vec3(0.f, 0.f, 0.f));
     floorMatrix = glm::rotate(floorMatrix, radians(90.f), vec3(1.f, 0.f, 0.f));
     floorMatrix = glm::scale(floorMatrix, vec3(10.f, 10.f, 10.f));
 
     _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ModelMatrix, floorMatrix);
-    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
-    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
+    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, projMx);
+    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, viewMx);
     _floorDrawCall->draw();
 }
 

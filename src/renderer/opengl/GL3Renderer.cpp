@@ -242,6 +242,8 @@ SDL_Window* GL3Renderer::initialize() {
     _lightingManager.reset(new GL3LightingManager(this));
     _lightingManager->initialize();
 
+    _lightingManager->changeShadowQuality(_settingsManager.getCurrentSettings().shadow_quality);
+
     _renderTargetManager.reset(new GL3RenderTargetManager(this));
 
     updateResolution(settings.resolution.x, settings.resolution.y);

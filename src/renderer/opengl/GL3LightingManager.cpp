@@ -75,6 +75,7 @@ void GL3LightingManager::beginLightPass(const glm::mat4& projection, const glm::
     glClearColor(0.f, 0.f, 0.f, 1.f);
     GLState->setDepthMask(true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, width, height);
     _geometryPipelineState->bind();
 }
 
@@ -98,6 +99,7 @@ void GL3LightingManager::endLightPass() {
     _lightingPassParameters.setMat4(GL3ShaderParameterType::ProjectionMatrix, _projectionMatrix);
     _lightingPassParameters.setMat4(GL3ShaderParameterType::ViewMatrix, _viewMatrix);
     _lightingPassParameters.setVec2(GL3ShaderParameterType::WindowSize, glm::vec2(width, height));
+    _lightingPassParameters.setInteger(GL3ShaderParameterType::LightHasShadow, 0);
 
     for (auto& light : _lights) {
         switch (light->type) {
@@ -118,6 +120,10 @@ void GL3LightingManager::endLightPass() {
             case LightType::Directional:
                 _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 1);
                 _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->direction);
+
+                if (light->hasShadow()) {
+                    light->setParameters(&_lightingPassParameters);
+                }
                 break;
             case LightType::Ambient:
                 _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 2);
@@ -305,22 +311,22 @@ ShadowMatrices GL3Light::beginShadowPass() {
     GLState->setDepthMask(true);
     glClear(GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, _depthMapResolution, _depthMapResolution);
+    glCullFace(GL_FRONT);
 
-    ShadowMatrices matrices;
-
-    GLfloat near_plane = 1.0f, far_plane = 7.5f;
-    matrices.projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-    matrices.view = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
-                                glm::vec3(0.0f, 0.0f, 0.0f),
-                                glm::vec3(0.0f, 1.0f, 0.0f));
+    GLfloat near_plane = 1.0f, far_plane = 70.f;
+    _matrices.projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    _matrices.view = glm::lookAt(this->direction * 10.f,
+                                 glm::vec3(0.0f, 0.0f, 0.0f),
+                                 glm::vec3(0.0f, 1.0f, 0.0f));
 
     _shadowPipelineState->bind();
 
-    return matrices;
+    return _matrices;
 }
 
 void GL3Light::endShadowPass() {
     Assertion(hasShadow(), "beginShadowPass() called for non-shadowed light!");
+    glCullFace(GL_BACK);
 
     GLState->Framebuffer.popBinding();
 }
@@ -359,8 +365,12 @@ void GL3Light::createDepthBuffer(uint32_t resolution) {
                  NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
 
     GLState->Framebuffer.pushBinding();
     GLState->Framebuffer.bind(_depthFrameBuffer);
@@ -371,5 +381,11 @@ void GL3Light::createDepthBuffer(uint32_t resolution) {
     checkFrameBufferStatus();
 
     GLState->Framebuffer.popBinding();
+}
+void GL3Light::setParameters(GL3ShaderParameters* params) {
+    params->setInteger(GL3ShaderParameterType::LightHasShadow, 1);
+    params->set2dTextureHandle(GL3ShaderParameterType::DirectionalShadowMap, _depthTexture);
+    params->setMat4(GL3ShaderParameterType::LightProjectionMatrix, _matrices.projection);
+    params->setMat4(GL3ShaderParameterType::LightViewMatrix, _matrices.view);
 }
 

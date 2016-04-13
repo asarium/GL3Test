@@ -4,6 +4,11 @@ uniform sampler2D g_position;
 uniform sampler2D g_normal;
 uniform sampler2D g_albedo;
 
+uniform int light_has_shadow;
+uniform sampler2DShadow directional_shadow_map;
+uniform mat4 light_proj_matrix;
+uniform mat4 light_view_matrix;
+
 uniform vec2 window_size;
 uniform vec2 uv_scale;
 
@@ -13,6 +18,20 @@ uniform vec3 light_color;
 uniform float light_intensity;
 
 out vec4 frag_color;
+
+float calculate_directed_shadow(vec3 position) {
+    if (light_has_shadow == 0) {
+        return 1.f;
+    }
+
+    vec4 pos_light_space = light_proj_matrix * light_view_matrix * vec4(position, 1.f);
+
+    vec3 proj_pos = pos_light_space.xyz / pos_light_space.w;
+    proj_pos = (proj_pos * 0.5f) + vec3(0.5f);
+    proj_pos.z -= 0.01;
+
+    return texture(directional_shadow_map, proj_pos);
+}
 
 void main()
 {
@@ -37,7 +56,7 @@ void main()
     {
         // Directional light
         float intens = max(dot(light_vector, normal), 0.f);
-        lighting = light_color * color * intens;
+        lighting = light_color * color * intens * calculate_directed_shadow(position);
     }
     else if (light_type == 2)
     {

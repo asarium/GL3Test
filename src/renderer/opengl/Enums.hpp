@@ -27,6 +27,11 @@ enum class GL3ShaderParameterType {
     LightColor,
     LightIntensitiy,
 
+    LightHasShadow,
+    DirectionalShadowMap,
+    LightProjectionMatrix,
+    LightViewMatrix,
+
     NUM_VALUES
 };
 

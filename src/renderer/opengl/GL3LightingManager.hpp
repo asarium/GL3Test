@@ -24,6 +24,8 @@ class GL3Light: public GL3Object, public Light {
 
     std::unique_ptr<PipelineState> _shadowPipelineState;
 
+    ShadowMatrices _matrices;
+
     void freeResources();
     void createDepthBuffer(uint32_t resolution);
  public:
@@ -50,6 +52,8 @@ class GL3Light: public GL3Object, public Light {
     }
 
     void changeShadowMapResolution(uint32_t resolution);
+
+    void setParameters(GL3ShaderParameters* params);
 };
 
 class GL3LightingManager: GL3Object, public LightingManager {

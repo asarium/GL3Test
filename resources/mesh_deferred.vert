@@ -20,5 +20,5 @@ void main()
 
     vertOut.position = (model_matrix*in_position).xyz;
     vertOut.tex_coord = in_tex_coord;
-    vertOut.normal = normalize((model_matrix * vec4(in_normal, 0.f)).xyz);
+    vertOut.normal = transpose(inverse(mat3(model_matrix))) * in_normal;
 }

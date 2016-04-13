@@ -294,6 +294,22 @@ UniformMapping uniform_mappings[] = {
     {
         GL3ShaderParameterType::LightIntensitiy,
         "light_intensity"
+    },
+    {
+        GL3ShaderParameterType::LightHasShadow,
+        "light_has_shadow"
+    },
+    {
+        GL3ShaderParameterType::DirectionalShadowMap,
+        "directional_shadow_map"
+    },
+    {
+        GL3ShaderParameterType::LightProjectionMatrix,
+        "light_proj_matrix"
+    },
+    {
+        GL3ShaderParameterType::LightViewMatrix,
+        "light_view_matrix"
     }
 };
 
