@@ -115,7 +115,7 @@ GL3ShaderProgram::~GL3ShaderProgram() {
 }
 
 void GL3ShaderProgram::bind() {
-    GLState->Program.use(_handle);
+    GLState->Program.use(this);
 }
 
 void GL3ShaderProgram::bindAndSetParameters(const GL3ShaderParameters* parameters) {

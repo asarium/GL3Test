@@ -148,7 +148,6 @@ Application::Application(Renderer* renderer, Timing* time) {
     _particleQuadPipelineState = renderer->createPipelineState(pipelineProperties);
 
     DrawCallProperties drawCallProperties;
-    drawCallProperties.state = _particleQuadPipelineState.get();
     drawCallProperties.vertexLayout = _particleQuadLayout.get();
     _particleQuadDrawCall = renderer->getDrawCallManager()->createInstancedDrawCall(drawCallProperties,
                                                                                     PrimitiveType::TriangleStrip, 0,
@@ -157,7 +156,6 @@ Application::Application(Renderer* renderer, Timing* time) {
 
     _floorTexture = util::load_texture(renderer, "resources/wood.png");
     DrawCallProperties props;
-    props.state = renderer->getLightingManager()->getRenderPipeline();
     props.vertexLayout = _particleQuadLayout.get();
     _floorDrawCall = _renderer->getDrawCallManager()->createDrawCall(props, PrimitiveType::TriangleStrip, 0,
                                                                      quadData.size());
@@ -188,25 +186,18 @@ void Application::render(Renderer* renderer) {
     float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
-    auto floorMatrix = mat4();
-    floorMatrix = glm::translate(floorMatrix, vec3(0.f, -1.f, 0.f));
-    floorMatrix = glm::rotate(floorMatrix, radians(90.f), vec3(1.f, 0.f, 0.f));
-    floorMatrix = glm::scale(floorMatrix, vec3(10.f, 10.f, 10.f));
-
     _wholeFrameCategory->begin();
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-    auto matrices = _sunLight->beginShadowPass();
-    _sunLight->endShadowPass();
+//    auto matrices = _sunLight->beginShadowPass();
+//    _sunLight->getShadowPipelineState()->bind();
+//
+//
+//    _sunLight->endShadowPass();
 
     renderer->getLightingManager()->beginLightPass(_projMx, _viewMx);
 
-    _model->drawModel(renderer, _projMx, _viewMx, _modelMx);
-
-    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ModelMatrix, floorMatrix);
-    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
-    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
-    _floorDrawCall->draw();
+    renderScene();
 
     renderer->getLightingManager()->endLightPass();
 
@@ -312,6 +303,21 @@ void Application::renderUI() {
 
     _renderer->nanovgEndFrame();
 }
+void Application::renderScene() {
+    _model->drawModel(_renderer, _projMx, _viewMx, _modelMx);
+
+    auto floorMatrix = mat4();
+    floorMatrix = glm::translate(floorMatrix, vec3(0.f, -1.f, 0.f));
+    floorMatrix = glm::rotate(floorMatrix, radians(90.f), vec3(1.f, 0.f, 0.f));
+    floorMatrix = glm::scale(floorMatrix, vec3(10.f, 10.f, 10.f));
+
+    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ModelMatrix, floorMatrix);
+    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
+    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
+    _floorDrawCall->draw();
+}
+
+
 
 
 

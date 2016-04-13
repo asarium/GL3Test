@@ -365,7 +365,7 @@ void GL3Renderer::nanovgEndFrame() {
     GLState->bindVertexArray(0);
 
     GLState->Buffer.bindArrayBuffer(0);
-    GLState->Program.use(0);
+    GLState->Program.use(nullptr);
 
     GLState->Texture.setActiveUnit(0);
 }

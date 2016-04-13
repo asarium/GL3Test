@@ -21,7 +21,7 @@ GL3TextureState::GL3TextureState() {
 }
 
 void GL3TextureState::bindTexture(int tex_unit, GLenum target, GLuint handle) {
-    auto &texunit = _textureUnits[tex_unit];
+    auto& texunit = _textureUnits[tex_unit];
 
     if (texunit.textureTarget.isNewValue(target) || texunit.boundTexture.isNewValue(handle)) {
         texunit.textureTarget.setIfChanged(target);
@@ -36,7 +36,7 @@ void GL3TextureState::bindTexture(int tex_unit, GLenum target, GLuint handle) {
 
 void GL3TextureState::unbindAll() {
     for (size_t i = 0; i < _textureUnits.size(); ++i) {
-        auto &targetState = _textureUnits[i].textureTarget;
+        auto& targetState = _textureUnits[i].textureTarget;
         auto target = targetState.isDirty() ? GL_TEXTURE_2D : *targetState;
         bindTexture(static_cast<int>(i), target, 0);
     }
@@ -49,7 +49,7 @@ void GL3TextureState::setActiveUnit(int tex_unit) {
 }
 
 void GL3TextureState::bindTexture(GLenum target, GLuint handle) {
-    auto &texunit = _textureUnits[*_activeTextureUnit];
+    auto& texunit = _textureUnits[*_activeTextureUnit];
 
     if (texunit.textureTarget.isNewValue(target) || texunit.boundTexture.isNewValue(handle)) {
         texunit.textureTarget.setIfChanged(target);
@@ -152,9 +152,13 @@ void GL3StateTracker::setBlendFunc(BlendFunction mode) {
     }
 }
 
-void GL3ProgramState::use(GLuint handle) {
-    if (_activeProgram.setIfChanged(handle)) {
-        glUseProgram(handle);
+void GL3ProgramState::use(GL3ShaderProgram* program) {
+    if (_activeProgram.setIfChanged(program)) {
+        if (program){
+            glUseProgram(program->getHandle());
+        } else {
+            glUseProgram(0);
+        }
     }
 }
 

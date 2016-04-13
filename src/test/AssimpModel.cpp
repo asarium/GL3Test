@@ -141,7 +141,6 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
     for (auto &entry : offset_length_mapping) {
         DrawCallProperties draw_props;
         draw_props.vertexLayout = _vertexLayout.get();
-        draw_props.state = renderer->getLightingManager()->getRenderPipeline();
 
         auto drawCall = renderer->getDrawCallManager()->createIndexedCall(draw_props, PrimitiveType::Triangle,
                                                                           entry.second.first, entry.second.second,

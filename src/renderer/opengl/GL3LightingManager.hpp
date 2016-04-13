@@ -45,8 +45,6 @@ class GL3Light: public GL3Object, public Light {
 
     virtual void endShadowPass() override;
 
-    virtual PipelineState* getShadowPipelineState() override;
-
     bool hasShadow() {
         return _depthMapResolution != 0;
     }
@@ -99,8 +97,6 @@ class GL3LightingManager: GL3Object, public LightingManager {
     virtual Light* addLight(LightType type, bool shadows) override;
 
     virtual void removeLight(Light* light) override;
-
-    virtual PipelineState* getRenderPipeline() override;
 
     virtual void clearLights() override;
 

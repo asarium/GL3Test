@@ -4,6 +4,7 @@
 #include <util/Assertion.hpp>
 #include "GL3DrawCall.hpp"
 #include "GL3DrawCallManager.hpp"
+#include "GL3State.hpp"
 
 namespace {
     size_t getTypeSize(GLenum type) {
@@ -27,7 +28,7 @@ GL3DrawCall::~GL3DrawCall() {
 
 void GL3DrawCall::setGLState() {
     _properties.vertexLayout->bind();
-    _properties.state->setupState(&_parameters);
+    GLState->Program.getCurrentProgram()->bindAndSetParameters(&_parameters);
 }
 
 void GL3DrawCall::draw() {

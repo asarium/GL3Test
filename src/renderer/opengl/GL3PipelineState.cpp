@@ -8,8 +8,8 @@
 
 #include <util/Assertion.hpp>
 
-void GL3PipelineState::setupState(const GL3ShaderParameters *parms) {
-    _props.shader->bindAndSetParameters(parms);
+void GL3PipelineState::setupState() {
+    _props.shader->bind();
 
     switch (_props.depthMode) {
         case DepthMode::None:
@@ -43,4 +43,8 @@ void GL3PipelineState::setupState(const GL3ShaderParameters *parms) {
     GLState->setBlendMode(_props.blending);
     GLState->setBlendFunc(_props.blendFunction);
 }
+void GL3PipelineState::bind() {
+    setupState();
+}
+
 

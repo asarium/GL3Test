@@ -19,7 +19,6 @@ enum class ShaderType {
 
 struct DrawCallProperties {
     VertexLayout *vertexLayout;
-    PipelineState *state;
 };
 
 enum class PrimitiveType {

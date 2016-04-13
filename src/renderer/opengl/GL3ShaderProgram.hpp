@@ -29,5 +29,9 @@ class GL3ShaderProgram {
     void bind();
 
     void bindAndSetParameters(const GL3ShaderParameters* parameters);
+
+    inline GLuint getHandle() {
+        return _handle;
+    }
 };
 

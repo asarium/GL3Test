@@ -31,7 +31,6 @@ namespace {
 
 GL3DrawCallProperties GL3DrawCallManager::convertProperties(const DrawCallProperties &props) {
     GL3DrawCallProperties gl_props;
-    gl_props.state = static_cast<GL3PipelineState *>(props.state);
     gl_props.vertexLayout = static_cast<GL3VertexLayout *>(props.vertexLayout);
 
     return gl_props;

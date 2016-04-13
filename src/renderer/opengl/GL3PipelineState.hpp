@@ -20,7 +20,9 @@ public:
 
     virtual ~GL3PipelineState() { }
 
-    void setupState(const GL3ShaderParameters* params);
+    virtual void bind() override;
+
+    void setupState();
 };
 
 

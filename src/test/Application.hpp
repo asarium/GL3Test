@@ -51,6 +51,8 @@ class Application {
     std::deque<float> _cpuTimes;
     std::deque<float> _gpuTimes;
     void renderUI();
+
+    void renderScene();
 public:
     Application(Renderer *renderer, Timing *timimg);
 

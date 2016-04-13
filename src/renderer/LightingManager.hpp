@@ -28,8 +28,6 @@ class Light {
     virtual ShadowMatrices beginShadowPass() = 0;
 
     virtual void endShadowPass() = 0;
-
-    virtual PipelineState* getShadowPipelineState() = 0;
 };
 
 class LightingManager {
@@ -37,8 +35,6 @@ class LightingManager {
     virtual ~LightingManager() { };
 
     virtual Light* addLight(LightType type, bool lighting) = 0;
-
-    virtual PipelineState* getRenderPipeline() = 0;
 
     virtual void removeLight(Light* light) = 0;
 

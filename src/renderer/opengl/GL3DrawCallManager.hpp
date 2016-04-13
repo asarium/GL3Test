@@ -8,7 +8,6 @@
 
 struct GL3DrawCallProperties {
     GL3VertexLayout *vertexLayout;
-    GL3PipelineState *state;
 
     GLenum primitive_type;
     GLsizei count;

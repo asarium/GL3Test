@@ -44,4 +44,6 @@ struct PipelineProperties {
 class PipelineState {
 public:
     virtual ~PipelineState() { }
+
+    virtual void bind() = 0;
 };

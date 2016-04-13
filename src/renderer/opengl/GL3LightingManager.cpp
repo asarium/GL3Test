@@ -75,6 +75,7 @@ void GL3LightingManager::beginLightPass(const glm::mat4& projection, const glm::
     glClearColor(0.f, 0.f, 0.f, 1.f);
     GLState->setDepthMask(true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    _geometryPipelineState->bind();
 }
 
 void GL3LightingManager::endLightPass() {
@@ -142,10 +143,6 @@ void GL3LightingManager::endLightPass() {
                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
     GLState->Framebuffer.popBinding();
-}
-
-PipelineState* GL3LightingManager::getRenderPipeline() {
-    return _geometryPipelineState.get();
 }
 
 void GL3LightingManager::freeResources() {
@@ -271,6 +268,18 @@ GL3Light::GL3Light(GL3Renderer* renderer, GL3LightingManager* manager, LightType
     }
 
     createDepthBuffer(depthMapResolution);
+
+
+    PipelineProperties props;
+    props.blendFunction = BlendFunction::None;
+    props.blending = false;
+
+    props.depthFunction = DepthFunction::Less;
+    props.depthMode = DepthMode::ReadWrite;
+
+    props.shaderType = ShaderType::ShadowMesh;
+
+    _shadowPipelineState = _renderer->createPipelineState(props);
 }
 GL3Light::~GL3Light() {
     freeResources();
@@ -304,6 +313,8 @@ ShadowMatrices GL3Light::beginShadowPass() {
     matrices.view = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
                                 glm::vec3(0.0f, 0.0f, 0.0f),
                                 glm::vec3(0.0f, 1.0f, 0.0f));
+
+    _shadowPipelineState->bind();
 
     return matrices;
 }
@@ -360,23 +371,5 @@ void GL3Light::createDepthBuffer(uint32_t resolution) {
     checkFrameBufferStatus();
 
     GLState->Framebuffer.popBinding();
-}
-PipelineState* GL3Light::getShadowPipelineState() {
-    if (_shadowPipelineState) {
-        return _shadowPipelineState.get();
-    }
-    // Lazily initialize the pipeline state
-    PipelineProperties props;
-    props.blendFunction = BlendFunction::None;
-    props.blending = false;
-
-    props.depthFunction = DepthFunction::Less;
-    props.depthMode = DepthMode::ReadWrite;
-
-    props.shaderType = ShaderType::ShadowMesh;
-
-    _shadowPipelineState = _renderer->createPipelineState(props);
-
-    return _shadowPipelineState.get();
 }
 
