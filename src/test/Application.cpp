@@ -165,6 +165,10 @@ Application::Application(Renderer* renderer, Timing* time) {
     _sunLight->setDirection(glm::vec3(10.f, 5.f, 0.f));
     _sunLight->setColor(glm::vec3(1.f));
 
+    auto light = _renderer->getLightingManager()->addLight(LightType::Point, false);
+    light->setPosition(glm::vec3(-3.f, 1.f, 0.f));
+    light->setColor(glm::vec3(2.4f, 8.2f, 5.3f));
+
     int width, height;
     SDL_GL_GetDrawableSize(SDL_GL_GetCurrentWindow(), &width, &height);
 
