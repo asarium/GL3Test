@@ -37,6 +37,10 @@ void GL3ProfilingCategory::end() {
 }
 
 bool GL3ProfilingCategory::hasTimes() {
+    if (_queryPairs.empty()) {
+        return false;
+    }
+
     auto &frontPair = _queryPairs.front();
     GLint resAvailable;
     glGetQueryObjectiv(frontPair.end_query, GL_QUERY_RESULT_AVAILABLE, &resAvailable);
