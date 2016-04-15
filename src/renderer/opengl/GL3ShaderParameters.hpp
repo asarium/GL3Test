@@ -55,7 +55,7 @@ public:
 
     virtual void setMat4(ShaderParameterType param, const glm::mat4 &value) override;
 
-    virtual void setTexture(ShaderParameterType param, Texture2D* value) override;
+    virtual void setTexture(ShaderParameterType param, Texture2DHandle* value) override;
 
     virtual void setRenderTarget(ShaderParameterType param, RenderTarget* value) override;
 

@@ -42,12 +42,19 @@ namespace {
     }
 }
 
-GL3Texture2D::GL3Texture2D() {
+GL3Texture2D::GL3Texture2D(GLuint handle) : _textureHandle(handle)
+{
+}
+
+GL3Texture2D::GL3Texture2D() : _textureHandle(0) {
     glGenTextures(1, &_textureHandle);
 }
 
 GL3Texture2D::~GL3Texture2D() {
-    glDeleteTextures(1, &_textureHandle);
+    if (_textureHandle != 0)
+    {
+        glDeleteTextures(1, &_textureHandle);
+    }
 }
 
 void GL3Texture2D::bind(int tex_unit) {

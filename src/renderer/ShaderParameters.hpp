@@ -26,7 +26,7 @@ public:
 
     virtual void setMat4(ShaderParameterType param, const glm::mat4 &value) = 0;
 
-    virtual void setTexture(ShaderParameterType param, Texture2D* value) = 0;
+    virtual void setTexture(ShaderParameterType param, Texture2DHandle* value) = 0;
 
     virtual void setRenderTarget(ShaderParameterType param, RenderTarget* value) = 0;
 };

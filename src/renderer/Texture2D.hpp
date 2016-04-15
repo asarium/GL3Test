@@ -14,7 +14,14 @@ enum class CompressionFormat {
     S3TC_RGBA_DXT5,
 };
 
-class Texture2D {
+class Texture2DHandle {
+protected:
+    Texture2DHandle() {}
+public:
+    virtual ~Texture2DHandle() {}
+};
+
+class Texture2D : public Texture2DHandle {
 public:
     virtual ~Texture2D() { }
 

@@ -3,6 +3,8 @@
 #include "renderer/Texture2D.hpp"
 
 #include <glad/glad.h>
+#include <util/Assertion.hpp>
+#include "GL3Object.hpp"
 
 struct TextureProperties {
     GLenum internal_format;
@@ -15,10 +17,11 @@ struct TextureProperties {
 };
 
 class GL3Texture2D : public Texture2D {
-    GLuint _textureHandle;
     TextureProperties _props;
+    GLuint _textureHandle;
 public:
     GL3Texture2D();
+    explicit GL3Texture2D(GLuint handle);
     virtual ~GL3Texture2D();
 
     void bind(int tex_unit = 0);
