@@ -152,11 +152,6 @@ void GL3LightingManager::endLightPass() {
 }
 
 void GL3LightingManager::freeResources() {
-    if (glIsFramebuffer(_renderFrameBuffer)) {
-        glDeleteFramebuffers(1, &_renderFrameBuffer);
-        _renderFrameBuffer = 0;
-    }
-
     if (glIsTexture(_gBufferTextures[0])) {
         glDeleteTextures(NUM_GBUFFERS, _gBufferTextures);
         memset(_gBufferTextures, 0, sizeof(_gBufferTextures));
@@ -166,6 +161,11 @@ void GL3LightingManager::freeResources() {
         glDeleteRenderbuffers(1, &_depthRenderBuffer);
         _depthRenderBuffer = 0;
     }
+
+    if (glIsFramebuffer(_renderFrameBuffer)) {
+        glDeleteFramebuffers(1, &_renderFrameBuffer);
+        _renderFrameBuffer = 0;
+    }
 }
 
 void GL3LightingManager::createFrameBuffer(int width, int height) {
@@ -174,6 +174,7 @@ void GL3LightingManager::createFrameBuffer(int width, int height) {
     _framebufferSize = glm::ivec2(width, height);
 
     glGenTextures(NUM_GBUFFERS, _gBufferTextures);
+    GLState->Texture.unbindAll();
 
     GLState->Texture.bindTexture(GL_TEXTURE_2D, _gBufferTextures[POSITION_BUFFER]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, _framebufferSize.x, _framebufferSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
