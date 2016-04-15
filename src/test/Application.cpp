@@ -6,6 +6,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
+
+#include <numeric>
 #include <ctime>
 
 #include "util/textures.hpp"
