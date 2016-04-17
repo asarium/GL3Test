@@ -87,6 +87,7 @@ set(file_util
         util/textures.cpp
         util/Timing.hpp
         util/Timing.cpp
+        util/UniqueHandle.hpp
         )
 
 # the source groups
