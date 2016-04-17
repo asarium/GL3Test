@@ -13,6 +13,10 @@ public:
     virtual size_t getHeight() const = 0;
 
     virtual void copyToTexture(Texture2D* target) = 0;
+
+    virtual Texture2DHandle* getColorTexture() = 0;
+
+    virtual Texture2DHandle* getDepthTexture() = 0;
 };
 
 

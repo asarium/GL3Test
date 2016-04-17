@@ -72,13 +72,6 @@ void GL3ShaderParameters::setTexture(GL3ShaderParameterType param, GL3Texture2D 
     val.value.tex2d = value;
 }
 
-void GL3ShaderParameters::setRenderTarget(GL3ShaderParameterType param, GL3RenderTarget *value) {
-    auto &val = getValue(param);
-    val.param_type = param;
-    val.data_type = ParameterDataType::Tex2DHandle;
-    val.value.tex2dhandle = value->getTextureHandle();
-}
-
 const std::vector<ParameterValue> &GL3ShaderParameters::getValues() const {
     return _values;
 }
@@ -106,10 +99,3 @@ void GL3ShaderParameters::setMat4(ShaderParameterType param, const glm::mat4 &va
 void GL3ShaderParameters::setTexture(ShaderParameterType param, Texture2DHandle *value) {
     setTexture(convertParameterType(param), static_cast<GL3Texture2D *>(value));
 }
-
-void GL3ShaderParameters::setRenderTarget(ShaderParameterType param, RenderTarget *value) {
-    setRenderTarget(convertParameterType(param), static_cast<GL3RenderTarget *>(value));
-}
-
-
-

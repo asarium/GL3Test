@@ -4,16 +4,20 @@
 
 #include <glad/glad.h>
 #include <renderer/Texture2D.hpp>
+#include "GL3Texture2D.hpp"
 
-class GL3RenderTarget : public RenderTarget {
+class GL3RenderTarget : public RenderTarget
+{
     GLsizei _width;
     GLsizei _heigth;
 
     GLuint _renderFramebuffer;
-    GLuint _colorTexture;
-    GLuint _depthRenderBuffer;
+    
+    GL3Texture2D _colorTexture;
+
+    GL3Texture2D _depthTexture;
 public:
-    GL3RenderTarget(size_t width, size_t height, GLuint framebuffer, GLuint colorTexture, GLuint depthRenderBuffer);
+    GL3RenderTarget(size_t width, size_t height, GLuint framebuffer, GLuint colorTexture, GLuint depthTexture);
 
     virtual ~GL3RenderTarget();
 
@@ -23,9 +27,10 @@ public:
 
     virtual void copyToTexture(Texture2D* target) override;
 
+    Texture2DHandle* getColorTexture() override;
+
+    Texture2DHandle* getDepthTexture() override;
+
     void bindFramebuffer();
-
-    GLuint getTextureHandle();
 };
-
 

@@ -6,24 +6,16 @@
 #include "GL3Texture2D.hpp"
 
 GL3RenderTarget::GL3RenderTarget(size_t width, size_t height, GLuint framebuffer, GLuint colorTexture,
-                                 GLuint depthRenderBuffer) : _width((GLsizei) width), _heigth((GLsizei) height),
+                                 GLuint depthTexture) : _width((GLsizei) width), _heigth((GLsizei) height),
                                                              _renderFramebuffer(framebuffer),
                                                              _colorTexture(colorTexture),
-                                                             _depthRenderBuffer(depthRenderBuffer) {
+                                                             _depthTexture(depthTexture) {
 
 }
 
 GL3RenderTarget::~GL3RenderTarget() {
     if (glIsFramebuffer(_renderFramebuffer)) {
         glDeleteFramebuffers(1, &_renderFramebuffer);
-    }
-
-    if (glIsTexture(_colorTexture)) {
-        glDeleteTextures(1, &_colorTexture);
-    }
-
-    if (glIsRenderbuffer(_depthRenderBuffer)) {
-        glDeleteRenderbuffers(1, &_depthRenderBuffer);
     }
 }
 
@@ -33,10 +25,6 @@ size_t GL3RenderTarget::getHeight() const {
 
 size_t GL3RenderTarget::getWidth() const {
     return (size_t) _width;
-}
-
-GLuint GL3RenderTarget::getTextureHandle() {
-    return _colorTexture;
 }
 
 void GL3RenderTarget::bindFramebuffer() {
@@ -53,4 +41,14 @@ void GL3RenderTarget::copyToTexture(Texture2D *target) {
     glTexture->copyDataFromFramebuffer(_width, _heigth);
 
     GLState->Framebuffer.popBinding();
+}
+
+Texture2DHandle* GL3RenderTarget::getColorTexture()
+{
+    return &_colorTexture;
+}
+
+Texture2DHandle* GL3RenderTarget::getDepthTexture()
+{
+    return &_depthTexture;
 }

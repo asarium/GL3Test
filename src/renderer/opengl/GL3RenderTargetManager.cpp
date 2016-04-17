@@ -5,6 +5,7 @@
 #include "GL3State.hpp"
 
 #include <iostream>
+#include "GL3Renderer.hpp"
 
 GL3RenderTargetManager::GL3RenderTargetManager(GL3Renderer *renderer) : GL3Object(renderer),
                                                                         _currentRenderTarget(nullptr) {
@@ -24,8 +25,9 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
     // Make sure we don't interfere with any already bound framebuffer
     GLState->Framebuffer.pushBinding();
     GLuint framebuffer;
+
     GLuint colorTexture;
-    GLuint depthRenderBuffer;
+    GLuint depthTexture;
 
     glGenFramebuffers(1, &framebuffer);
     GLState->Framebuffer.bind(framebuffer);
@@ -42,48 +44,23 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
 
     GLState->Texture.bindTexture(GL_TEXTURE_2D, 0);
 
-    glGenRenderbuffers(1, &depthRenderBuffer);
-    GLState->bindRenderBuffer(depthRenderBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, (GLint) width, (GLint) height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
-    GLState->bindRenderBuffer(0);
+    glGenTextures(1, &depthTexture);
+    GLState->Texture.bindTexture(0, GL_TEXTURE_2D, depthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, (GLint)width, (GLint)height, 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        switch (status) {
-            case GL_FRAMEBUFFER_COMPLETE:
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                std::cout << "FBO error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"
-                << std::endl;
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                std::cout << "FBO error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"
-                << std::endl;
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                std::cout << "FBO error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"
-                << std::endl;
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-                std::cout << "FBO error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"
-                << std::endl;
-                break;
-            case GL_FRAMEBUFFER_UNSUPPORTED:
-                std::cout << "FBO error: GL_FRAMEBUFFER_UNSUPPORTED"
-                << std::endl;
-                break;
-            default:
-                std::cout << "FBO error: Unknown error"
-                << std::endl;
-                break;
-        }
-    }
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+
+    checkFrameBufferStatus();
 
     GLState->Framebuffer.popBinding();
 
     return std::unique_ptr<RenderTarget>(
-        new GL3RenderTarget(width, height, framebuffer, colorTexture, depthRenderBuffer));
+        new GL3RenderTarget(width, height, framebuffer, colorTexture, depthTexture));
 }
 
 GL3RenderTarget *GL3RenderTargetManager::getCurrentRenderTarget() {

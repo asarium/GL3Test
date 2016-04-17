@@ -57,8 +57,6 @@ public:
 
     virtual void setTexture(ShaderParameterType param, Texture2DHandle* value) override;
 
-    virtual void setRenderTarget(ShaderParameterType param, RenderTarget* value) override;
-
 
     void set2dTextureHandle(GL3ShaderParameterType param, GLuint handle);
 
