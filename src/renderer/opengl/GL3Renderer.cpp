@@ -296,7 +296,7 @@ LightingManager* GL3Renderer::getLightingManager() {
 }
 
 std::unique_ptr<Texture2D> GL3Renderer::createTexture() {
-    return std::unique_ptr<Texture2D>(new GL3Texture2D());
+    return GL3Texture2D::createTexture();
 }
 
 std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelineProperties& props) {
