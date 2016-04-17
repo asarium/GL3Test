@@ -32,6 +32,7 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
     glGenFramebuffers(1, &framebuffer);
     GLState->Framebuffer.bind(framebuffer);
 
+    GLState->Texture.unbindAll();
     glGenTextures(1, &colorTexture);
     GLState->Texture.bindTexture(GL_TEXTURE_2D, colorTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLint) width, (GLint) height, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -40,9 +41,8 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
 
-    GLState->Texture.bindTexture(GL_TEXTURE_2D, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
 
     glGenTextures(1, &depthTexture);
     GLState->Texture.bindTexture(0, GL_TEXTURE_2D, depthTexture);
@@ -54,6 +54,7 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+    GLState->Texture.unbindAll();
 
     checkFrameBufferStatus();
 
