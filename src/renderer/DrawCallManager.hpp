@@ -9,14 +9,6 @@ class VertexLayout;
 
 class PipelineState;
 
-enum class ShaderType {
-    Mesh,
-    LightedMesh,
-    ShadowMesh,
-    PointSprite,
-    InstancedSprite
-};
-
 struct DrawCallProperties {
     VertexLayout *vertexLayout;
 };

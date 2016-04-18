@@ -21,7 +21,7 @@ void GL3RenderTargetManager::useRenderTarget(RenderTarget *target) {
     _currentRenderTarget->bindFramebuffer();
 }
 
-std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t width, size_t height) {
+std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(const RenderTargetProperties& properties) {
     // Make sure we don't interfere with any already bound framebuffer
     GLState->Framebuffer.pushBinding();
     GLuint framebuffer;
@@ -32,10 +32,12 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
     glGenFramebuffers(1, &framebuffer);
     GLState->Framebuffer.bind(framebuffer);
 
+    auto internal_color = properties.floating_point ? GL_RGBA16F : GL_RGBA;
+
     GLState->Texture.unbindAll();
     glGenTextures(1, &colorTexture);
     GLState->Texture.bindTexture(GL_TEXTURE_2D, colorTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLint) width, (GLint) height, 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, internal_color, (GLint)properties.width, (GLint)properties.height, 0, GL_RGB, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -46,7 +48,7 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
 
     glGenTextures(1, &depthTexture);
     GLState->Texture.bindTexture(0, GL_TEXTURE_2D, depthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, (GLint)width, (GLint)height, 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLint)properties.width, (GLint)properties.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -61,7 +63,7 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(size_t 
     GLState->Framebuffer.popBinding();
 
     return std::unique_ptr<RenderTarget>(
-        new GL3RenderTarget(width, height, framebuffer, colorTexture, depthTexture));
+        new GL3RenderTarget(properties.width, properties.height, framebuffer, colorTexture, depthTexture));
 }
 
 GL3RenderTarget *GL3RenderTargetManager::getCurrentRenderTarget() {

@@ -16,7 +16,7 @@ public:
 
     GL3RenderTarget* getCurrentRenderTarget();
 
-    virtual std::unique_ptr<RenderTarget> createRenderTarget(size_t width, size_t height) override;
+    virtual std::unique_ptr<RenderTarget> createRenderTarget(const RenderTargetProperties& properties) override;
 
     virtual void useRenderTarget(RenderTarget *target) override;
 };

@@ -32,6 +32,9 @@ enum class GL3ShaderParameterType {
     LightProjectionMatrix,
     LightViewMatrix,
 
+    // HDR post processing
+    HdrExposure,
+
     NUM_VALUES
 };
 
@@ -42,6 +45,7 @@ enum class GL3ShaderType {
     LightingPass,
     PointSprite,
     InstancedSprite,
+    HdrPostProcessing,
 
     NUM_VALUES
 };

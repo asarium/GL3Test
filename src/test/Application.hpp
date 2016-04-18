@@ -30,6 +30,13 @@ class Application {
     std::unique_ptr<Texture2D> _floorTexture;
     std::unique_ptr<DrawCall> _floorDrawCall;
 
+    std::unique_ptr<BufferObject> _fullscreenTriBuffer;
+    std::unique_ptr<VertexLayout> _fullscreenTriLayout;
+    std::unique_ptr<DrawCall> _fullscreenTriDrawCall;
+    std::unique_ptr<PipelineState> _hdrPipelineState;
+
+    std::unique_ptr<RenderTarget> _hdrRenderTarget;
+
     ProfilingCategory* _wholeFrameCategory;
 
     Timing *_timing;
@@ -43,6 +50,8 @@ class Application {
 
     int _resolution_index = 0;
     bool _last_vsync = true;
+
+    std::unique_ptr<RenderTarget> createHDRRenderTarget(uint32_t width, uint32_t height);
 
     void changeResolution(uint32_t width, uint32_t height);
 

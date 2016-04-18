@@ -47,6 +47,24 @@ std::vector<VertexData> getQuadData() {
     return data;
 }
 
+std::vector<VertexData> getFullscreenTriData() {
+    std::vector<VertexData> data;
+    data.push_back({ glm::vec3(-1.0f, -1.0f, 0.f),
+        glm::vec2(0.f, 0.f),
+        glm::vec3(0.f)
+    });
+    data.push_back({ glm::vec3(3.0f, -1.0f, 0.f),
+        glm::vec2(2.f, 0.f),
+        glm::vec3(0.f)
+    });
+    data.push_back({ glm::vec3(-1.0f, 3.0f, 0.f),
+        glm::vec2(0.f, 2.f),
+        glm::vec3(0.f)
+    });
+
+    return data;
+}
+
 void drawTimes(NVGcontext* ctx, const std::deque<float>& vals, size_t maxVals, int x, int y, int width, int height,
                const char* text) {
     if (vals.empty()) {
@@ -181,6 +199,28 @@ Application::Application(Renderer* renderer, Timing* time) {
 
     _wholeFrameCategory = _renderer->getProfiler()->createCategory("Whole frame");
     nvgCreateFont(_renderer->getNanovgContext(), "sans", "resources/Roboto-Regular.ttf");
+
+    _hdrRenderTarget = createHDRRenderTarget(width, height);
+
+    _fullscreenTriBuffer = _renderer->createBuffer(BufferType::Vertex);
+    auto triData = getFullscreenTriData();
+    _fullscreenTriBuffer->setData(triData.data(), triData.size() * sizeof(VertexData), BufferUsage::Static);
+
+    _fullscreenTriLayout = _renderer->createVertexLayout();
+    auto bufferIdx = _fullscreenTriLayout->attachBufferObject(_fullscreenTriBuffer.get());
+    _fullscreenTriLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), bufferIdx, offsetof(VertexData, position));
+    _fullscreenTriLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), bufferIdx, offsetof(VertexData, tex_coord));
+    
+    _fullscreenTriLayout->finalize();
+
+    DrawCallProperties draw_call_properties;
+    draw_call_properties.vertexLayout = _fullscreenTriLayout.get();
+    _fullscreenTriDrawCall = _renderer->getDrawCallManager()->createDrawCall(draw_call_properties, PrimitiveType::Triangle, 0, 3);
+
+    PipelineProperties hdrProps;
+    hdrProps.shaderType = ShaderType::HdrPostProcessing;
+
+    _hdrPipelineState = _renderer->createPipelineState(hdrProps);
 }
 
 Application::~Application() {
@@ -195,6 +235,9 @@ void Application::render(Renderer* renderer) {
     _wholeFrameCategory->begin();
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
+    _renderer->getRenderTargetManager()->useRenderTarget(_hdrRenderTarget.get());
+    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
+
     auto matrices = _sunLight->beginShadowPass();
     renderScene(matrices.projection, matrices.view);
     _sunLight->endShadowPass();
@@ -204,6 +247,12 @@ void Application::render(Renderer* renderer) {
     renderScene(_projMx, _viewMx);
 
     renderer->getLightingManager()->endLightPass();
+    _renderer->getRenderTargetManager()->useRenderTarget(nullptr);
+
+    _hdrPipelineState->bind();
+    _fullscreenTriDrawCall->getParameters()->setFloat(ShaderParameterType::HdrExposure, 1.f);
+    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _hdrRenderTarget->getColorTexture());
+    _fullscreenTriDrawCall->draw();
 
 //    updateParticles();
 //    _particleQuadDrawCall->drawInstanced(_particles.size());
@@ -262,12 +311,24 @@ void Application::handleEvent(SDL_Event* event) {
     }
 }
 
+std::unique_ptr<RenderTarget> Application::createHDRRenderTarget(uint32_t width, uint32_t height)
+{
+    RenderTargetProperties props;
+    props.width = width;
+    props.height = height;
+    props.floating_point = true;
+
+    return _renderer->getRenderTargetManager()->createRenderTarget(props);
+}
+
 void Application::changeResolution(uint32_t width, uint32_t height) {
     auto settings = _renderer->getSettingsManager()->getCurrentSettings();
     settings.resolution = glm::uvec2(width, height);
     _renderer->getSettingsManager()->changeSettings(settings);
 
     _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
+
+    _hdrRenderTarget = createHDRRenderTarget(width, height);
 }
 
 void Application::updateParticles() {

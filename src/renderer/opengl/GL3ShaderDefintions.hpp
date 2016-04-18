@@ -26,19 +26,12 @@ struct UniformMapping {
     const char* name;
 };
 
-struct UniformRequirements {
-    GL3ShaderParameterType checked_type;
-    std::vector<ParameterDataType> acceptable_datatypes;
-};
-
 struct GL3ShaderDefinition {
     std::vector<ShaderFilename> filenames;
 
     std::vector<UniformMapping> uniforms;
 
     std::vector<AttributeBinding> attribute_bindings;
-
-    std::vector<UniformRequirements> uniform_requirements;
 };
 
 GL3ShaderDefinition getShaderDefinition(GL3ShaderType type);

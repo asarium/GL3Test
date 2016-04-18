@@ -4,11 +4,18 @@
 
 #include <memory>
 
+struct RenderTargetProperties
+{
+    size_t width;
+    size_t height;
+    bool floating_point;
+};
+
 class RenderTargetManager {
 public:
     virtual ~RenderTargetManager() { }
 
-    virtual std::unique_ptr<RenderTarget> createRenderTarget(size_t width, size_t height) = 0;
+    virtual std::unique_ptr<RenderTarget> createRenderTarget(const RenderTargetProperties& properties) = 0;
 
     virtual void useRenderTarget(RenderTarget* target) = 0;
 };

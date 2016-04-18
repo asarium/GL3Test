@@ -27,6 +27,15 @@ enum class DepthFunction {
     GreaterOrEqual
 };
 
+enum class ShaderType {
+    Mesh,
+    LightedMesh,
+    ShadowMesh,
+    PointSprite,
+    InstancedSprite,
+    HdrPostProcessing
+};
+
 struct PipelineProperties {
     ShaderType shaderType;
 

@@ -5,7 +5,6 @@ namespace {
 struct ShaderDefinition {
   GL3ShaderType type;
   std::vector<ShaderFilename> files;
-  std::vector<UniformRequirements> uniform_requirements;
 };
 ShaderDefinition shader_definitions[] =
     {
@@ -20,27 +19,6 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "model.frag"
                 }
-            },
-            {
-                {
-                    GL3ShaderParameterType::ModelMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ViewMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ProjectionMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ColorTexture,
-                    {
-                        ParameterDataType::Tex2D,
-                        ParameterDataType::Tex2DHandle
-                    }
-                }
             }
         },
         {
@@ -54,27 +32,6 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "mesh_deferred.frag"
                 }
-            },
-            {
-                {
-                    GL3ShaderParameterType::ModelMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ViewMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ProjectionMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ColorTexture,
-                    {
-                        ParameterDataType::Tex2D,
-                        ParameterDataType::Tex2DHandle
-                    }
-                }
             }
         },
         {
@@ -87,65 +44,6 @@ ShaderDefinition shader_definitions[] =
                 {
                     GL_FRAGMENT_SHADER,
                     "lighting_pass.frag"
-                }
-            },
-            {
-                {
-                    GL3ShaderParameterType::ModelMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ViewMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ProjectionMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::PositionTexture,
-                    {
-                        ParameterDataType::Tex2D,
-                        ParameterDataType::Tex2DHandle
-                    }
-                },
-                {
-                    GL3ShaderParameterType::NormalTexture,
-                    {
-                        ParameterDataType::Tex2D,
-                        ParameterDataType::Tex2DHandle
-                    }
-                },
-                {
-                    GL3ShaderParameterType::AlbedoTexture,
-                    {
-                        ParameterDataType::Tex2D,
-                        ParameterDataType::Tex2DHandle
-                    }
-                },
-                {
-                    GL3ShaderParameterType::WindowSize,
-                    { ParameterDataType::Vec2 }
-                },
-                {
-                    GL3ShaderParameterType::UVScale,
-                    { ParameterDataType::Vec2 }
-                },
-                {
-                    GL3ShaderParameterType::LightType,
-                    { ParameterDataType::Integer }
-                },
-                {
-                    GL3ShaderParameterType::LightVectorParameter,
-                    { ParameterDataType::Vec3 }
-                },
-                {
-                    GL3ShaderParameterType::LightColor,
-                    { ParameterDataType::Vec3 }
-                },
-                {
-                    GL3ShaderParameterType::LightIntensitiy,
-                    { ParameterDataType::Float }
                 }
             }
         },
@@ -164,23 +62,6 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "2d_sprite.frag"
                 }
-            },
-            {
-                {
-                    GL3ShaderParameterType::ViewMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ProjectionMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ColorTexture,
-                    {
-                        ParameterDataType::Tex2D,
-                        ParameterDataType::Tex2DHandle
-                    }
-                }
             }
         },
         {
@@ -193,23 +74,6 @@ ShaderDefinition shader_definitions[] =
                 {
                     GL_FRAGMENT_SHADER,
                     "2d_sprite.frag"
-                }
-            },
-            {
-                {
-                    GL3ShaderParameterType::ViewMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ProjectionMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ColorTexture,
-                    {
-                        ParameterDataType::Tex2D,
-                        ParameterDataType::Tex2DHandle
-                    }
                 }
             }
         },
@@ -224,22 +88,21 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "mesh_shadow.frag"
                 }
-            },
-            {
-                {
-                    GL3ShaderParameterType::ModelMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ViewMatrix,
-                    { ParameterDataType::Mat4 }
-                },
-                {
-                    GL3ShaderParameterType::ProjectionMatrix,
-                    { ParameterDataType::Mat4 }
-                }
             }
         },
+        {
+            GL3ShaderType::HdrPostProcessing,
+            {
+                {
+                    GL_VERTEX_SHADER,
+                    "hdr_post_processing.vert",
+                },
+                {
+                    GL_FRAGMENT_SHADER,
+                    "hdr_post_processing.frag",
+                }
+            }
+        }
     };
 
 UniformMapping uniform_mappings[] = {
@@ -310,6 +173,10 @@ UniformMapping uniform_mappings[] = {
     {
         GL3ShaderParameterType::LightViewMatrix,
         "light_view_matrix"
+    },
+    {
+        GL3ShaderParameterType::HdrExposure,
+        "hdr_exposure"
     }
 };
 
@@ -359,7 +226,6 @@ GL3ShaderDefinition getShaderDefinition(GL3ShaderType type) {
     for (auto& file:shader_definitions) {
         if (file.type == type) {
             def.filenames = file.files;
-            def.uniform_requirements = file.uniform_requirements;
         }
     }
 

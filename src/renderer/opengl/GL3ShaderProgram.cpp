@@ -98,11 +98,10 @@ GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params) {
 }
 }
 
-GL3ShaderProgram::GL3ShaderProgram(FileLoader* loader, const GL3ShaderDefinition& definition)
-    : _requirements(definition.uniform_requirements) {
+GL3ShaderProgram::GL3ShaderProgram(FileLoader* loader, const GL3ShaderDefinition& definition) {
     _handle = compileProgram(loader, definition);
 
-    // Now get the locations of the uniforms
+    // Now get the locations of the uniformss
     for (auto& mapping : definition.uniforms) {
         auto loc = glGetUniformLocation(_handle, mapping.name);
 

@@ -29,12 +29,6 @@ enum class SettingsLevel {
     Ultra
 };
 
-enum class GraphicsCapability {
-    PointSprites,
-    S3TC,
-    Instancing
-};
-
 enum class SettingsParameterType {
     Boolean
 };
@@ -62,6 +56,13 @@ class RendererSettingsManager {
     virtual RendererSettings getCurrentSettings() const = 0;
 
     virtual bool supportsSetting(SettingsParameter parameter) const = 0;
+};
+
+enum class GraphicsCapability {
+    PointSprites,
+    S3TC,
+    Instancing,
+    FloatingPointTextures
 };
 
 class Renderer {

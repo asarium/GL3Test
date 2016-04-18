@@ -9,7 +9,8 @@ enum class ShaderParameterType {
     ViewMatrix,
     ProjectionMatrix,
     ColorTexture,
-    WindowSize
+    WindowSize,
+    HdrExposure
 };
 
 class ShaderParameters {

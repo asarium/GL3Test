@@ -2,7 +2,7 @@
 
 #include "Enums.hpp"
 #include <renderer/ShaderParameters.hpp>
-#include <renderer/DrawCallManager.hpp>
+#include <renderer/PipelineState.hpp>
 
 inline GL3ShaderParameterType convertParameterType(ShaderParameterType type) {
     switch (type) {
@@ -16,6 +16,8 @@ inline GL3ShaderParameterType convertParameterType(ShaderParameterType type) {
             return GL3ShaderParameterType::ColorTexture;
         case ShaderParameterType::WindowSize:
             return GL3ShaderParameterType::WindowSize;
+        case ShaderParameterType::HdrExposure:
+            return GL3ShaderParameterType::HdrExposure;
         default:
             return GL3ShaderParameterType::ModelMatrix;
     }
@@ -33,6 +35,8 @@ inline GL3ShaderType convertShaderType(ShaderType type) {
             return GL3ShaderType::InstancedSprite;
         case ShaderType::ShadowMesh:
             return GL3ShaderType::ShadowMesh;
+        case ShaderType::HdrPostProcessing:
+            return GL3ShaderType::HdrPostProcessing;
         default:
             return GL3ShaderType::Mesh;
     }

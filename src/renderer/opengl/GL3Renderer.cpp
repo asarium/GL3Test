@@ -272,6 +272,7 @@ void GL3Renderer::presentNextFrame() {
 
 void GL3Renderer::clear(const glm::vec4& color) {
     glClearColor(color.r, color.g, color.b, color.a);
+    GLState->setDepthMask(true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -343,6 +344,8 @@ bool GL3Renderer::hasCapability(GraphicsCapability capability) const {
             return GLAD_GL_EXT_texture_compression_s3tc != 0; // Supported if the extension is present
         case GraphicsCapability::Instancing:
             return true; // OpenGL 3 always supports instancing
+        case GraphicsCapability::FloatingPointTextures:
+            return true; // OpenGL 3 core has support for this
         default:
             return false; // Everything else is not supported
     }
