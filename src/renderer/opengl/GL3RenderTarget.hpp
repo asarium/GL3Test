@@ -31,6 +31,8 @@ public:
 
     Texture2DHandle* getDepthTexture() override;
 
+    bool hasDepthBuffer();
+
     void bindFramebuffer();
 };
 

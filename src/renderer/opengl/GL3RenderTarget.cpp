@@ -52,3 +52,8 @@ Texture2DHandle* GL3RenderTarget::getDepthTexture()
 {
     return &_depthTexture;
 }
+
+bool GL3RenderTarget::hasDepthBuffer()
+{
+    return _depthTexture.getHandle() != 0;
+}

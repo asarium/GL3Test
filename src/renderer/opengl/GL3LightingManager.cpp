@@ -141,14 +141,18 @@ void GL3LightingManager::endLightPass() {
         }
     }
 
-    // Now copy the depth component back to the screen
-    GLState->Framebuffer.pushBinding();
+    // Only try to copy the depth buffer if there actually is one
+    if (currentRenderTarget->hasDepthBuffer())
+    {
+        // Now copy the depth component back to the screen
+        GLState->Framebuffer.pushBinding();
 
-    GLState->Framebuffer.bindRead(_renderFrameBuffer);
-    glBlitFramebuffer(0, 0, (GLint) width, (GLint) height, 0, 0, (GLint) width, (GLint) height,
-                      GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        GLState->Framebuffer.bindRead(_renderFrameBuffer);
+        glBlitFramebuffer(0, 0, (GLint)width, (GLint)height, 0, 0, (GLint)width, (GLint)height,
+            GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-    GLState->Framebuffer.popBinding();
+        GLState->Framebuffer.popBinding();
+    }
 }
 
 void GL3LightingManager::freeResources() {
