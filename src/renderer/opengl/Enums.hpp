@@ -34,6 +34,8 @@ enum class GL3ShaderParameterType {
 
     // HDR post processing
     HdrExposure,
+    BloomHorizontal,
+    BloomedTexture,
 
     NUM_VALUES
 };
@@ -45,7 +47,10 @@ enum class GL3ShaderType {
     LightingPass,
     PointSprite,
     InstancedSprite,
+
     HdrPostProcessing,
+    HdrBrightpass,
+    HdrBloom,
 
     NUM_VALUES
 };

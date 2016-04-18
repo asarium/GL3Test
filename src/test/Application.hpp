@@ -35,6 +35,11 @@ class Application {
     std::unique_ptr<DrawCall> _fullscreenTriDrawCall;
     std::unique_ptr<PipelineState> _hdrPipelineState;
 
+    std::unique_ptr<RenderTarget> _bloomRenderTargets[2];
+
+    std::unique_ptr<PipelineState> _brightPassState;
+    std::unique_ptr<PipelineState> _bloomPassState;
+
     std::unique_ptr<RenderTarget> _hdrRenderTarget;
 
     ProfilingCategory* _wholeFrameCategory;
@@ -62,6 +67,8 @@ class Application {
     void renderUI();
 
     void renderScene(const glm::mat4& projMx, const glm::mat4& viewMx);
+
+    Texture2DHandle* doBloomPass();
 public:
     Application(Renderer *renderer, Timing *timimg);
 

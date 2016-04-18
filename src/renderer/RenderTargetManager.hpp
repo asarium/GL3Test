@@ -9,6 +9,7 @@ struct RenderTargetProperties
     size_t width;
     size_t height;
     bool floating_point;
+    bool with_depth_buffer;
 };
 
 class RenderTargetManager {

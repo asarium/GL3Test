@@ -10,12 +10,16 @@ enum class ShaderParameterType {
     ProjectionMatrix,
     ColorTexture,
     WindowSize,
-    HdrExposure
+    HdrExposure,
+    BloomHorizontal,
+    BloomedTexture
 };
 
 class ShaderParameters {
 public:
     virtual ~ShaderParameters() { }
+
+    virtual void setBoolean(ShaderParameterType param, bool value) = 0;
 
     virtual void setInteger(ShaderParameterType param, int value) = 0;
 

@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Enums.hpp"
+
 #include <renderer/ShaderParameters.hpp>
 #include <renderer/PipelineState.hpp>
+
+#include <util/Assertion.hpp>
 
 inline GL3ShaderParameterType convertParameterType(ShaderParameterType type) {
     switch (type) {
@@ -18,7 +21,12 @@ inline GL3ShaderParameterType convertParameterType(ShaderParameterType type) {
             return GL3ShaderParameterType::WindowSize;
         case ShaderParameterType::HdrExposure:
             return GL3ShaderParameterType::HdrExposure;
+        case ShaderParameterType::BloomHorizontal:
+            return GL3ShaderParameterType::BloomHorizontal;
+        case ShaderParameterType::BloomedTexture:
+            return GL3ShaderParameterType::BloomedTexture;
         default:
+            Assertion(false, "Unhandled shader parameter type translation!");
             return GL3ShaderParameterType::ModelMatrix;
     }
 }
@@ -37,7 +45,12 @@ inline GL3ShaderType convertShaderType(ShaderType type) {
             return GL3ShaderType::ShadowMesh;
         case ShaderType::HdrPostProcessing:
             return GL3ShaderType::HdrPostProcessing;
+        case ShaderType::HdrBrightpass:
+            return GL3ShaderType::HdrBrightpass;
+        case ShaderType::HdrBloom:
+            return GL3ShaderType::HdrBloom;
         default:
+            Assertion(false, "Unhandled shader type translation!");
             return GL3ShaderType::Mesh;
     }
 }
@@ -59,6 +72,7 @@ inline GLint mapAttributeLocation(AttributeType type) {
         case AttributeType::PositionOffset:
             return 6;
         default:
+            Assertion(false, "Unhandled attribute location mapping!");
             return 0;
     }
 }

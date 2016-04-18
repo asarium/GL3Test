@@ -35,17 +35,18 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<Sha
 
         if (success == GL_FALSE) {
             printf("Shader compilation failed!\n");
-            GLint logSize = 0;
-            glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &logSize);
+        }
 
-            if (logSize > 0) {
-                std::string info_log;
-                info_log.resize(logSize);
+        GLint logSize = 0;
+        glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &logSize);
 
-                glGetShaderInfoLog(handle, logSize, &logSize, &info_log[0]);
+        if (logSize > 1) {
+            std::string info_log;
+            info_log.resize(logSize);
 
-                printf("Shader info log: %s\n", info_log.c_str());
-            }
+            glGetShaderInfoLog(handle, logSize, &logSize, &info_log[0]);
+
+            printf("Shader info log: %s\n", info_log.c_str());
         }
 #endif
     }
@@ -74,18 +75,18 @@ GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params) {
 
     if (success == GL_FALSE) {
         printf("Shader linking failed!\n");
+    }
 
-        GLint logSize = 0;
-        glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logSize);
+    GLint logSize = 0;
+    glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logSize);
 
-        if (logSize > 0) {
-            std::string info_log;
-            info_log.resize(logSize);
+    if (logSize > 1) {
+        std::string info_log;
+        info_log.resize(logSize);
 
-            glGetProgramInfoLog(prog, logSize, &logSize, &info_log[0]);
+        glGetProgramInfoLog(prog, logSize, &logSize, &info_log[0]);
 
-            printf("Program info log: %s\n", info_log.c_str());
-        }
+        printf("Program info log: %s\n", info_log.c_str());
     }
 #endif
 

@@ -99,3 +99,6 @@ void GL3ShaderParameters::setMat4(ShaderParameterType param, const glm::mat4 &va
 void GL3ShaderParameters::setTexture(ShaderParameterType param, Texture2DHandle *value) {
     setTexture(convertParameterType(param), static_cast<GL3Texture2D *>(value));
 }
+void GL3ShaderParameters::setBoolean(ShaderParameterType param, bool value) {
+    setInteger(convertParameterType(param), value ? GL_TRUE : GL_FALSE);
+}

@@ -49,18 +49,21 @@ std::vector<VertexData> getQuadData() {
 
 std::vector<VertexData> getFullscreenTriData() {
     std::vector<VertexData> data;
-    data.push_back({ glm::vec3(-1.0f, -1.0f, 0.f),
-        glm::vec2(0.f, 0.f),
-        glm::vec3(0.f)
-    });
-    data.push_back({ glm::vec3(3.0f, -1.0f, 0.f),
-        glm::vec2(2.f, 0.f),
-        glm::vec3(0.f)
-    });
-    data.push_back({ glm::vec3(-1.0f, 3.0f, 0.f),
-        glm::vec2(0.f, 2.f),
-        glm::vec3(0.f)
-    });
+    data.push_back({
+                       glm::vec3(-1.0f, -1.0f, 0.f),
+                       glm::vec2(0.f, 0.f),
+                       glm::vec3(0.f)
+                   });
+    data.push_back({
+                       glm::vec3(3.0f, -1.0f, 0.f),
+                       glm::vec2(2.f, 0.f),
+                       glm::vec3(0.f)
+                   });
+    data.push_back({
+                       glm::vec3(-1.0f, 3.0f, 0.f),
+                       glm::vec2(0.f, 2.f),
+                       glm::vec3(0.f)
+                   });
 
     return data;
 }
@@ -202,25 +205,47 @@ Application::Application(Renderer* renderer, Timing* time) {
 
     _hdrRenderTarget = createHDRRenderTarget(width, height);
 
+    _bloomRenderTargets[0] = createHDRRenderTarget(width, height);
+    _bloomRenderTargets[1] = createHDRRenderTarget(width, height);
+
+    PipelineProperties brightPassProps;
+    brightPassProps.shaderType = ShaderType::HdrBrightpass;
+
+    _brightPassState = _renderer->createPipelineState(brightPassProps);
+
     _fullscreenTriBuffer = _renderer->createBuffer(BufferType::Vertex);
     auto triData = getFullscreenTriData();
     _fullscreenTriBuffer->setData(triData.data(), triData.size() * sizeof(VertexData), BufferUsage::Static);
 
     _fullscreenTriLayout = _renderer->createVertexLayout();
     auto bufferIdx = _fullscreenTriLayout->attachBufferObject(_fullscreenTriBuffer.get());
-    _fullscreenTriLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), bufferIdx, offsetof(VertexData, position));
-    _fullscreenTriLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), bufferIdx, offsetof(VertexData, tex_coord));
-    
+    _fullscreenTriLayout->addComponent(AttributeType::Position,
+                                       DataFormat::Vec3,
+                                       sizeof(VertexData),
+                                       bufferIdx,
+                                       offsetof(VertexData, position));
+    _fullscreenTriLayout->addComponent(AttributeType::TexCoord,
+                                       DataFormat::Vec2,
+                                       sizeof(VertexData),
+                                       bufferIdx,
+                                       offsetof(VertexData, tex_coord));
+
     _fullscreenTriLayout->finalize();
 
     DrawCallProperties draw_call_properties;
     draw_call_properties.vertexLayout = _fullscreenTriLayout.get();
-    _fullscreenTriDrawCall = _renderer->getDrawCallManager()->createDrawCall(draw_call_properties, PrimitiveType::Triangle, 0, 3);
+    _fullscreenTriDrawCall =
+        _renderer->getDrawCallManager()->createDrawCall(draw_call_properties, PrimitiveType::Triangle, 0, 3);
 
     PipelineProperties hdrProps;
     hdrProps.shaderType = ShaderType::HdrPostProcessing;
 
     _hdrPipelineState = _renderer->createPipelineState(hdrProps);
+
+    PipelineProperties bloomProps;
+    hdrProps.shaderType = ShaderType::HdrBloom;
+
+    _bloomPassState = _renderer->createPipelineState(hdrProps);
 }
 
 Application::~Application() {
@@ -247,11 +272,16 @@ void Application::render(Renderer* renderer) {
     renderScene(_projMx, _viewMx);
 
     renderer->getLightingManager()->endLightPass();
+
+    auto bloomed_texture = doBloomPass();
+
     _renderer->getRenderTargetManager()->useRenderTarget(nullptr);
 
     _hdrPipelineState->bind();
     _fullscreenTriDrawCall->getParameters()->setFloat(ShaderParameterType::HdrExposure, 1.f);
-    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _hdrRenderTarget->getColorTexture());
+    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture,
+                                                        _hdrRenderTarget->getColorTexture());
+    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::BloomedTexture, bloomed_texture);
     _fullscreenTriDrawCall->draw();
 
 //    updateParticles();
@@ -276,47 +306,12 @@ void Application::render(Renderer* renderer) {
     }
 }
 
-void Application::handleEvent(SDL_Event* event) {
-    switch (event->type) {
-        case SDL_KEYUP:
-            switch (event->key.keysym.scancode) {
-                case SDL_SCANCODE_R:
-                    _resolution_index = (_resolution_index + 1) % 2;
-
-                    if (_resolution_index == 0) {
-                        changeResolution(1680, 1050);
-                    } else {
-                        changeResolution(1920, 1200);
-                    }
-                    break;
-                case SDL_SCANCODE_F:
-                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), SDL_WINDOW_FULLSCREEN);
-                    break;
-                case SDL_SCANCODE_B:
-                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
-                    SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_FALSE);
-                    break;
-                case SDL_SCANCODE_W:
-                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
-                    SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_TRUE);
-                    break;
-                case SDL_SCANCODE_V:
-                    _last_vsync = !_last_vsync;
-                    auto settings = _renderer->getSettingsManager()->getCurrentSettings();
-                    settings.vertical_sync = _last_vsync;
-                    _renderer->getSettingsManager()->changeSettings(settings);
-                    break;
-            }
-            break;
-    }
-}
-
-std::unique_ptr<RenderTarget> Application::createHDRRenderTarget(uint32_t width, uint32_t height)
-{
+std::unique_ptr<RenderTarget> Application::createHDRRenderTarget(uint32_t width, uint32_t height) {
     RenderTargetProperties props;
     props.width = width;
     props.height = height;
     props.floating_point = true;
+    props.with_depth_buffer = false;
 
     return _renderer->getRenderTargetManager()->createRenderTarget(props);
 }
@@ -382,7 +377,71 @@ void Application::renderScene(const glm::mat4& projMx, const glm::mat4& viewMx) 
     _floorDrawCall->draw();
 }
 
+Texture2DHandle* Application::doBloomPass() {
+    _renderer->getRenderTargetManager()->useRenderTarget(_bloomRenderTargets[0].get());
+    _brightPassState->bind();
+
+    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture,
+                                                        _hdrRenderTarget->getColorTexture());
+    _fullscreenTriDrawCall->draw();
+
+    // bloom target 0 now contains the parts of the scene that are bright
+    bool first_iter = true;
+    bool horizontal = true;
+
+    _bloomPassState->bind();
+    auto amount = 10;
+    for (auto i = 0; i < amount; ++i) {
+        auto index = horizontal ? 1 : 0;
+        auto other_index = horizontal ? 0 : 1;
+
+        _renderer->getRenderTargetManager()->useRenderTarget(_bloomRenderTargets[index].get());
+        _fullscreenTriDrawCall->getParameters()->setBoolean(ShaderParameterType::BloomHorizontal, horizontal);
+        _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture,
+                                                            _bloomRenderTargets[other_index]->getColorTexture());
+        _fullscreenTriDrawCall->draw();
+
+        horizontal = !horizontal;
+        if (first_iter) {
+            first_iter = false;
+        }
+    }
 
 
+    return _bloomRenderTargets[horizontal ? 1 : 0]->getColorTexture();
+}
 
+void Application::handleEvent(SDL_Event* event) {
+    switch (event->type) {
+        case SDL_KEYUP:
+            switch (event->key.keysym.scancode) {
+                case SDL_SCANCODE_R:
+                    _resolution_index = (_resolution_index + 1) % 2;
 
+                    if (_resolution_index == 0) {
+                        changeResolution(1680, 1050);
+                    } else {
+                        changeResolution(1920, 1200);
+                    }
+                    break;
+                case SDL_SCANCODE_F:
+                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), SDL_WINDOW_FULLSCREEN);
+                    break;
+                case SDL_SCANCODE_B:
+                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
+                    SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_FALSE);
+                    break;
+                case SDL_SCANCODE_W:
+                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
+                    SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_TRUE);
+                    break;
+                case SDL_SCANCODE_V:
+                    _last_vsync = !_last_vsync;
+                    auto settings = _renderer->getSettingsManager()->getCurrentSettings();
+                    settings.vertical_sync = _last_vsync;
+                    _renderer->getSettingsManager()->changeSettings(settings);
+                    break;
+            }
+            break;
+    }
+}

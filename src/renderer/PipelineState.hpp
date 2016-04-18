@@ -33,7 +33,9 @@ enum class ShaderType {
     ShadowMesh,
     PointSprite,
     InstancedSprite,
-    HdrPostProcessing
+    HdrPostProcessing,
+    HdrBrightpass,
+    HdrBloom,
 };
 
 struct PipelineProperties {

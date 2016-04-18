@@ -45,6 +45,8 @@ public:
 
     virtual ~GL3ShaderParameters();
 
+    virtual void setBoolean(ShaderParameterType param, bool value) override;
+
     virtual void setInteger(ShaderParameterType param, int value) override;
 
     virtual void setFloat(ShaderParameterType param, float value) override;

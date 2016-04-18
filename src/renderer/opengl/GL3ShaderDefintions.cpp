@@ -95,11 +95,37 @@ ShaderDefinition shader_definitions[] =
             {
                 {
                     GL_VERTEX_SHADER,
-                    "hdr_post_processing.vert",
+                    "direct_passthrough.vert",
                 },
                 {
                     GL_FRAGMENT_SHADER,
                     "hdr_post_processing.frag",
+                }
+            }
+        },
+        {
+            GL3ShaderType::HdrBrightpass,
+            {
+                {
+                    GL_VERTEX_SHADER,
+                    "direct_passthrough.vert",
+                },
+                {
+                    GL_FRAGMENT_SHADER,
+                    "brightpass.frag",
+                }
+            }
+        },
+        {
+            GL3ShaderType::HdrBloom,
+            {
+                {
+                    GL_VERTEX_SHADER,
+                    "direct_passthrough.vert",
+                },
+                {
+                    GL_FRAGMENT_SHADER,
+                    "bloom_pass.frag",
                 }
             }
         }
@@ -177,6 +203,14 @@ UniformMapping uniform_mappings[] = {
     {
         GL3ShaderParameterType::HdrExposure,
         "hdr_exposure"
+    },
+    {
+        GL3ShaderParameterType::BloomHorizontal,
+        "horizontal"
+    },
+    {
+        GL3ShaderParameterType::BloomedTexture,
+        "bloomed_texture"
     }
 };
 
