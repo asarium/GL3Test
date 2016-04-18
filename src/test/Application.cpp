@@ -243,9 +243,9 @@ Application::Application(Renderer* renderer, Timing* time) {
     _hdrPipelineState = _renderer->createPipelineState(hdrProps);
 
     PipelineProperties bloomProps;
-    hdrProps.shaderType = ShaderType::HdrBloom;
+    bloomProps.shaderType = ShaderType::HdrBloom;
 
-    _bloomPassState = _renderer->createPipelineState(hdrProps);
+    _bloomPassState = _renderer->createPipelineState(bloomProps);
 }
 
 Application::~Application() {
