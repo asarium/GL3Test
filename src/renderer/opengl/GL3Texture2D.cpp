@@ -3,6 +3,7 @@
 
 #include "GL3Texture2D.hpp"
 #include "GL3State.hpp"
+#include "GL3Renderer.hpp"
 
 #include <renderer/Exceptions.hpp>
 
@@ -42,10 +43,10 @@ GLenum getFormat(TextureFormat format) {
 }
 }
 
-GL3Texture2D::GL3Texture2D(GLuint handle) : _handle(handle) {
+GL3Texture2D::GL3Texture2D(GL3Renderer* renderer, GLuint handle) : GL3Object(renderer), _handle(handle), _nvgHandle(0) {
 }
 
-GL3Texture2D::GL3Texture2D() : _handle() {
+GL3Texture2D::GL3Texture2D(GL3Renderer* renderer) : GL3Object(renderer), _handle(), _nvgHandle(0) {
 }
 
 GL3Texture2D::~GL3Texture2D() {
@@ -169,8 +170,26 @@ void GL3Texture2D::copyDataFromFramebuffer(GLsizei width, GLsizei height) {
 void GL3Texture2D::reset(GLuint handle) {
     _handle.reset(handle);
 }
-std::unique_ptr<GL3Texture2D> GL3Texture2D::createTexture() {
+std::unique_ptr<GL3Texture2D> GL3Texture2D::createTexture(GL3Renderer* renderer) {
     GLuint name;
     glGenTextures(1, &name);
-    return std::unique_ptr<GL3Texture2D>(new GL3Texture2D(name));
+    return std::unique_ptr<GL3Texture2D>(new GL3Texture2D(renderer, name));
 }
+
+void GL3Texture2D::updateSize(GLsizei width, GLsizei height) {
+    _props.width = width;
+    _props.height = height;
+}
+int GL3Texture2D::getNanoVGHandle() {
+    Assertion(*_handle != 0, "Trying to get NanoVG handle from invalid texture!");
+
+    if (_nvgHandle > 0) {
+        return _nvgHandle;
+    }
+
+    _nvgHandle = _renderer->getNanoVGImageHandle(*_handle, _props.width, _props.height);
+    return _nvgHandle;
+}
+
+
+

@@ -5,12 +5,17 @@
 #include "GL3State.hpp"
 #include "GL3Texture2D.hpp"
 
-GL3RenderTarget::GL3RenderTarget(size_t width, size_t height, GLuint framebuffer, GLuint colorTexture,
-                                 GLuint depthTexture) : _width((GLsizei) width), _heigth((GLsizei) height),
-                                                             _renderFramebuffer(framebuffer),
-                                                             _colorTexture(colorTexture),
-                                                             _depthTexture(depthTexture) {
-
+GL3RenderTarget::GL3RenderTarget(GL3Renderer* renderer,
+                                 GLsizei width,
+                                 GLsizei height,
+                                 GLuint framebuffer,
+                                 GLuint colorTexture,
+                                 GLuint depthTexture) : _width(width), _heigth(height),
+                                                        _renderFramebuffer(framebuffer),
+                                                        _colorTexture(renderer, colorTexture),
+                                                        _depthTexture(renderer, depthTexture) {
+    _colorTexture.updateSize(width, height);
+    _depthTexture.updateSize(width, height);
 }
 
 GL3RenderTarget::~GL3RenderTarget() {
@@ -32,8 +37,8 @@ void GL3RenderTarget::bindFramebuffer() {
     glViewport(0, 0, (GLsizei) _width, (GLsizei) _heigth);
 }
 
-void GL3RenderTarget::copyToTexture(Texture2D *target) {
-    auto glTexture = static_cast<GL3Texture2D *>(target);
+void GL3RenderTarget::copyToTexture(Texture2D* target) {
+    auto glTexture = static_cast<GL3Texture2D*>(target);
 
     GLState->Framebuffer.pushBinding();
 
@@ -43,17 +48,14 @@ void GL3RenderTarget::copyToTexture(Texture2D *target) {
     GLState->Framebuffer.popBinding();
 }
 
-Texture2DHandle* GL3RenderTarget::getColorTexture()
-{
+Texture2DHandle* GL3RenderTarget::getColorTexture() {
     return &_colorTexture;
 }
 
-Texture2DHandle* GL3RenderTarget::getDepthTexture()
-{
+Texture2DHandle* GL3RenderTarget::getDepthTexture() {
     return &_depthTexture;
 }
 
-bool GL3RenderTarget::hasDepthBuffer()
-{
+bool GL3RenderTarget::hasDepthBuffer() {
     return _depthTexture.getHandle() != 0;
 }

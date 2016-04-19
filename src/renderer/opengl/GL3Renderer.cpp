@@ -297,7 +297,7 @@ LightingManager* GL3Renderer::getLightingManager() {
 }
 
 std::unique_ptr<Texture2D> GL3Renderer::createTexture() {
-    return GL3Texture2D::createTexture();
+    return GL3Texture2D::createTexture(this);
 }
 
 std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelineProperties& props) {
@@ -373,6 +373,9 @@ void GL3Renderer::nanovgEndFrame() {
     GLState->Program.use(nullptr);
 
     GLState->Texture.setActiveUnit(0);
+}
+int GL3Renderer::getNanoVGImageHandle(GLuint tex_handle, GLsizei width, GLsizei height) {
+    return nvglCreateImageFromHandleGL3(_nvgContext, tex_handle, width, height, NVG_IMAGE_NODELETE);
 }
 
 GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer* renderer) : GL3Object(renderer),

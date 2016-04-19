@@ -26,12 +26,14 @@ struct GL3TextureDeleter {
 };
 typedef std::unique_ptr<GLuint, GL3TextureDeleter> Gl3TextureHandle;
 
-class GL3Texture2D : public Texture2D {
+class GL3Texture2D : public GL3Object, public Texture2D {
     TextureProperties _props;
     Gl3TextureHandle _handle;
+
+    int _nvgHandle;
 public:
-    GL3Texture2D();
-    explicit GL3Texture2D(GLuint handle);
+    explicit GL3Texture2D(GL3Renderer* renderer);
+    explicit GL3Texture2D(GL3Renderer* renderer, GLuint handle);
     virtual ~GL3Texture2D();
 
     GLuint getHandle();
@@ -42,6 +44,10 @@ public:
 
     void copyDataFromFramebuffer(GLsizei width, GLsizei height);
 
+    void updateSize(GLsizei width, GLsizei height);
+
+    virtual int getNanoVGHandle() override ;
+
     virtual void initialize(size_t width, size_t height, TextureFormat format, void* data) override;
 
     virtual void updateData(void *data) override;
@@ -50,6 +56,6 @@ public:
 
     virtual void updateCompressedData(size_t data_size, void *data) override;
 
-    static std::unique_ptr<GL3Texture2D> createTexture();
+    static std::unique_ptr<GL3Texture2D> createTexture(GL3Renderer* renderer);
 };
 

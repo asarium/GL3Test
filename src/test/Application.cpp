@@ -253,8 +253,8 @@ Application::~Application() {
 
 void Application::render(Renderer* renderer) {
     float radius = 10.0f;
-    float camX = sin(_timing->getTotalTime()) * radius;
-    float camZ = cos(_timing->getTotalTime()) * radius;
+    float camX = sin(M_PI_2) * radius;
+    float camZ = cos(M_PI_2) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 3.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
     _wholeFrameCategory->begin();

@@ -88,6 +88,8 @@ public:
 
     void updateResolution(uint32_t width, uint32_t height);
 
+    int getNanoVGImageHandle(GLuint tex_handle, GLsizei width, GLsizei height);
+
     SDL_Window *getWindow();
 
     GL3DrawCallManager *getGLDrawCallManager();

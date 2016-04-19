@@ -19,6 +19,8 @@ protected:
     Texture2DHandle() {}
 public:
     virtual ~Texture2DHandle() {}
+
+    virtual int getNanoVGHandle() = 0;
 };
 
 class Texture2D : public Texture2DHandle {

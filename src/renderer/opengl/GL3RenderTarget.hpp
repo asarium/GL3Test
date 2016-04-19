@@ -6,18 +6,22 @@
 #include <renderer/Texture2D.hpp>
 #include "GL3Texture2D.hpp"
 
-class GL3RenderTarget : public RenderTarget
-{
+class GL3RenderTarget: public RenderTarget {
     GLsizei _width;
     GLsizei _heigth;
 
     GLuint _renderFramebuffer;
-    
+
     GL3Texture2D _colorTexture;
 
     GL3Texture2D _depthTexture;
-public:
-    GL3RenderTarget(size_t width, size_t height, GLuint framebuffer, GLuint colorTexture, GLuint depthTexture);
+ public:
+    GL3RenderTarget(GL3Renderer* renderer,
+                    GLsizei width,
+                    GLsizei height,
+                    GLuint framebuffer,
+                    GLuint colorTexture,
+                    GLuint depthTexture);
 
     virtual ~GL3RenderTarget();
 
