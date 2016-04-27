@@ -188,9 +188,9 @@ Application::Application(Renderer* renderer, Timing* time) {
     _sunLight->setDirection(glm::vec3(10.f, 5.f, 0.f));
     _sunLight->setColor(glm::vec3(1.f));
 
-    auto light = _renderer->getLightingManager()->addLight(LightType::Point, false);
-    light->setPosition(glm::vec3(-3.f, 1.f, 0.f));
-    light->setColor(glm::vec3(2.4f, 8.2f, 5.3f));
+//    auto light = _renderer->getLightingManager()->addLight(LightType::Point, false);
+//    light->setPosition(glm::vec3(-3.f, 1.f, 0.f));
+//    light->setColor(glm::vec3(2.4f, 8.2f, 5.3f));
 
     int width, height;
     SDL_GL_GetDrawableSize(SDL_GL_GetCurrentWindow(), &width, &height);
@@ -252,15 +252,15 @@ Application::~Application() {
 }
 
 void Application::render(Renderer* renderer) {
-    float radius = 10.0f;
-    float camX = sin(M_PI_2) * radius;
-    float camZ = cos(M_PI_2) * radius;
+    float radius = 3.0f;
+    float camX = sin(_timing->getTotalTime()) * radius;
+    float camZ = cos(_timing->getTotalTime()) * radius;
     _viewMx = glm::lookAt(glm::vec3(camX, 3.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
     _wholeFrameCategory->begin();
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-    _renderer->getRenderTargetManager()->useRenderTarget(_hdrRenderTarget.get());
+//    _renderer->getRenderTargetManager()->useRenderTarget(_hdrRenderTarget.get());
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     auto matrices = _sunLight->beginShadowPass();
@@ -273,16 +273,16 @@ void Application::render(Renderer* renderer) {
 
     renderer->getLightingManager()->endLightPass();
 
-    auto bloomed_texture = doBloomPass();
+//    auto bloomed_texture = doBloomPass();
 
-    _renderer->getRenderTargetManager()->useRenderTarget(nullptr);
-
-    _hdrPipelineState->bind();
-    _fullscreenTriDrawCall->getParameters()->setFloat(ShaderParameterType::HdrExposure, 1.f);
-    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture,
-                                                        _hdrRenderTarget->getColorTexture());
-    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::BloomedTexture, bloomed_texture);
-    _fullscreenTriDrawCall->draw();
+//    _renderer->getRenderTargetManager()->useRenderTarget(nullptr);
+//
+//    _hdrPipelineState->bind();
+//    _fullscreenTriDrawCall->getParameters()->setFloat(ShaderParameterType::HdrExposure, 1.f);
+//    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture,
+//                                                        _hdrRenderTarget->getColorTexture());
+//    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::BloomedTexture, bloomed_texture);
+//    _fullscreenTriDrawCall->draw();
 
 //    updateParticles();
 //    _particleQuadDrawCall->drawInstanced(_particles.size());
