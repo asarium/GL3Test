@@ -21,7 +21,7 @@ class GL3ShaderProgram {
     }
 
  public:
-    GL3ShaderProgram(FileLoader* loader, const GL3ShaderDefinition& definition);
+    GL3ShaderProgram(GLuint handle, const GL3ShaderDefinition& definition);
     ~GL3ShaderProgram();
 
     void bind();
