@@ -316,7 +316,6 @@ ShadowMatrices GL3Light::beginShadowPass() {
     GLState->setDepthMask(true);
     glClear(GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, _depthMapResolution, _depthMapResolution);
-    glCullFace(GL_FRONT);
 
     GLfloat near_plane = 1.0f, far_plane = 70.f;
     _matrices.projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
@@ -331,7 +330,6 @@ ShadowMatrices GL3Light::beginShadowPass() {
 
 void GL3Light::endShadowPass() {
     Assertion(hasShadow(), "beginShadowPass() called for non-shadowed light!");
-    glCullFace(GL_BACK);
 
     GLState->Framebuffer.popBinding();
 }
@@ -368,8 +366,8 @@ void GL3Light::createDepthBuffer(uint32_t resolution) {
                  GL_DEPTH_COMPONENT,
                  GL_FLOAT,
                  NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
