@@ -13,47 +13,47 @@
 #include <glm/gtx/string_cast.hpp>
 
 namespace {
-    struct VertexData {
-        glm::vec3 position;
-        glm::vec3 normal;
-        glm::vec2 tex_coord;
-    };
+struct VertexData {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 tex_coord;
+};
 
-    bool loggerCreated = false;
+bool loggerCreated = false;
 
-    void createAILogger() {
-        if (loggerCreated) {
-            return;
-        }
-        loggerCreated = true;
-
-        // Change this line to normal if you not want to analyse the import process
-        Assimp::Logger::LogSeverity severity = Assimp::Logger::NORMAL;
-        //Assimp::Logger::LogSeverity severity = Assimp::Logger::VERBOSE;
-
-        // Create a logger instance for Console Output
-        Assimp::DefaultLogger::create("", severity, aiDefaultLogStream_STDOUT);
-
-        // Now I am ready for logging my stuff
-        Assimp::DefaultLogger::get()->info("this is my info-call");
+void createAILogger() {
+    if (loggerCreated) {
+        return;
     }
+    loggerCreated = true;
 
-    void logInfo(std::string logString) {
-        // Will add message to File with "info" Tag
-        Assimp::DefaultLogger::get()->info(logString.c_str());
-    }
+    // Change this line to normal if you not want to analyse the import process
+    Assimp::Logger::LogSeverity severity = Assimp::Logger::NORMAL;
+    //Assimp::Logger::LogSeverity severity = Assimp::Logger::VERBOSE;
 
-    void logDebug(const char *logString) {
-        // Will add message to File with "debug" Tag
-        Assimp::DefaultLogger::get()->debug(logString);
-    }
+    // Create a logger instance for Console Output
+    Assimp::DefaultLogger::create("", severity, aiDefaultLogStream_STDOUT);
+
+    // Now I am ready for logging my stuff
+    Assimp::DefaultLogger::get()->info("this is my info-call");
+}
+
+void logInfo(std::string logString) {
+    // Will add message to File with "info" Tag
+    Assimp::DefaultLogger::get()->info(logString.c_str());
+}
+
+void logDebug(const char* logString) {
+    // Will add message to File with "debug" Tag
+    Assimp::DefaultLogger::get()->debug(logString);
+}
 }
 
 AssimpModel::AssimpModel() : _scene(nullptr) {
     createAILogger();
 }
 
-bool AssimpModel::loadModel(Renderer *renderer, const std::string &path) {
+bool AssimpModel::loadModel(Renderer* renderer, const std::string& path) {
     if (!loadScene(path)) {
         return false;
     }
@@ -67,7 +67,7 @@ bool AssimpModel::loadModel(Renderer *renderer, const std::string &path) {
     return true;
 }
 
-bool AssimpModel::loadScene(const std::string &path) {
+bool AssimpModel::loadScene(const std::string& path) {
     _scene = _importer.ReadFile(path, aiProcessPreset_TargetRealtime_Quality);
     // If the import failed, report it
     if (!_scene) {
@@ -78,7 +78,7 @@ bool AssimpModel::loadScene(const std::string &path) {
     return true;
 }
 
-bool AssimpModel::createVertexLayouts(Renderer *renderer) {
+bool AssimpModel::createVertexLayouts(Renderer* renderer) {
     std::vector<VertexData> vertex_data;
     std::vector<uint32_t> indices;
 
@@ -93,9 +93,9 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
         }
 
         for (size_t vert = 0; vert < mesh->mNumVertices; ++vert) {
-            const aiVector3D &pPos = mesh->mVertices[vert];
-            const aiVector3D &pNormal = mesh->HasNormals() ? mesh->mNormals[vert] : aiVector3D();
-            const aiVector3D &pTexCoord = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][vert] : aiVector3D();
+            const aiVector3D& pPos = mesh->mVertices[vert];
+            const aiVector3D& pNormal = mesh->HasNormals() ? mesh->mNormals[vert] : aiVector3D();
+            const aiVector3D& pTexCoord = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][vert] : aiVector3D();
 
             VertexData data;
             data.position = glm::vec3(pPos.x, pPos.y, pPos.z);
@@ -105,7 +105,7 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
         }
 
         for (size_t index = 0; index < mesh->mNumFaces; ++index) {
-            auto &face = mesh->mFaces[index];
+            auto& face = mesh->mFaces[index];
             assert(face.mNumIndices == 3);
             indices.push_back(face.mIndices[0] + index_offset);
             indices.push_back(face.mIndices[1] + index_offset);
@@ -138,13 +138,15 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
 
     _vertexLayout->finalize();
 
-    for (auto &entry : offset_length_mapping) {
-        DrawCallProperties draw_props;
+    for (auto& entry : offset_length_mapping) {
+        DrawCallCreateProperties draw_props;
         draw_props.vertexLayout = _vertexLayout.get();
+        draw_props.primitive_type = PrimitiveType::Triangle;
+        draw_props.offset = entry.second.first;
+        draw_props.count = entry.second.second;
+        draw_props.index_type = IndexType::Integer;
 
-        auto drawCall = renderer->getDrawCallManager()->createIndexedCall(draw_props, PrimitiveType::Triangle,
-                                                                          entry.second.first, entry.second.second,
-                                                                          IndexType::Integer);
+        auto drawCall = renderer->getDrawCallManager()->createDrawCall(draw_props);
         drawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _texture.get());
 
         _sceneDrawCalls.insert(std::make_pair(entry.first, std::move(drawCall)));
@@ -153,13 +155,13 @@ bool AssimpModel::createVertexLayouts(Renderer *renderer) {
     return true;
 }
 
-void AssimpModel::drawModel(Renderer *renderer, const glm::mat4 &projection, const glm::mat4 &view,
-                            const glm::mat4 &model) {
+void AssimpModel::drawModel(Renderer* renderer, const glm::mat4& projection, const glm::mat4& view,
+                            const glm::mat4& model) {
     recursiveRender(renderer, _scene->mRootNode, projection, view, model);
 }
 
-void AssimpModel::recursiveRender(Renderer *renderer, const aiNode *node, const glm::mat4 &projection,
-                                  const glm::mat4 &view, const glm::mat4 &model) {
+void AssimpModel::recursiveRender(Renderer* renderer, const aiNode* node, const glm::mat4& projection,
+                                  const glm::mat4& view, const glm::mat4& model) {
     auto final_transform = model;
 
     auto aiTransform = node->mTransformation;
@@ -174,7 +176,7 @@ void AssimpModel::recursiveRender(Renderer *renderer, const aiNode *node, const 
             continue;
         }
 
-        auto &drawCall = it->second;
+        auto& drawCall = it->second;
 
         auto params = drawCall->getParameters();
         params->setMat4(ShaderParameterType::ProjectionMatrix, projection);

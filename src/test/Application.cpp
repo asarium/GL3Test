@@ -170,18 +170,23 @@ Application::Application(Renderer* renderer, Timing* time) {
     pipelineProperties.depthFunction = DepthFunction::Less;
     _particleQuadPipelineState = renderer->createPipelineState(pipelineProperties);
 
-    DrawCallProperties drawCallProperties;
+    DrawCallCreateProperties drawCallProperties;
     drawCallProperties.vertexLayout = _particleQuadLayout.get();
-    _particleQuadDrawCall = renderer->getDrawCallManager()->createInstancedDrawCall(drawCallProperties,
-                                                                                    PrimitiveType::TriangleStrip, 0,
-                                                                                    quadData.size());
+    drawCallProperties.primitive_type = PrimitiveType::TriangleStrip;
+    drawCallProperties.offset = 0;
+    drawCallProperties.count = quadData.size();
+    drawCallProperties.index_type = IndexType::None;
+    _particleQuadDrawCall = renderer->getDrawCallManager()->createInstancedDrawCall(drawCallProperties);
     _particleQuadDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _particleTexture.get());
 
     _floorTexture = util::load_texture(renderer, "resources/wood.png");
-    DrawCallProperties props;
+    DrawCallCreateProperties props;
     props.vertexLayout = _particleQuadLayout.get();
-    _floorDrawCall = _renderer->getDrawCallManager()->createDrawCall(props, PrimitiveType::TriangleStrip, 0,
-                                                                     quadData.size());
+    props.primitive_type = PrimitiveType::TriangleStrip;
+    props.offset = 0;
+    props.count = quadData.size();
+    props.index_type = IndexType::None;
+    _floorDrawCall = _renderer->getDrawCallManager()->createDrawCall(props);
     _floorDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _floorTexture.get());
 
     _sunLight = _renderer->getLightingManager()->addLight(LightType::Directional, true);
@@ -232,10 +237,13 @@ Application::Application(Renderer* renderer, Timing* time) {
 
     _fullscreenTriLayout->finalize();
 
-    DrawCallProperties draw_call_properties;
+    DrawCallCreateProperties draw_call_properties;
     draw_call_properties.vertexLayout = _fullscreenTriLayout.get();
-    _fullscreenTriDrawCall =
-        _renderer->getDrawCallManager()->createDrawCall(draw_call_properties, PrimitiveType::Triangle, 0, 3);
+    draw_call_properties.primitive_type = PrimitiveType::Triangle;
+    draw_call_properties.offset = 0;
+    draw_call_properties.count = 3;
+    draw_call_properties.index_type = IndexType::None;
+    _fullscreenTriDrawCall = _renderer->getDrawCallManager()->createDrawCall(draw_call_properties);
 
     PipelineProperties hdrProps;
     hdrProps.shaderType = ShaderType::HdrPostProcessing;

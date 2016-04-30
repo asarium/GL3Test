@@ -9,10 +9,6 @@ class VertexLayout;
 
 class PipelineState;
 
-struct DrawCallProperties {
-    VertexLayout *vertexLayout;
-};
-
 enum class PrimitiveType {
     Point,
     Triangle,
@@ -20,38 +16,33 @@ enum class PrimitiveType {
 };
 
 enum class IndexType {
+    None,
     Short,
     Integer
 };
 
+struct DrawCallCreateProperties {
+    VertexLayout* vertexLayout;
+
+    PrimitiveType primitive_type;
+
+    size_t offset;
+    size_t count;
+
+    IndexType index_type;
+};
+
 class DrawCallManager {
-public:
+ public:
     virtual ~DrawCallManager() { }
 
-    virtual std::unique_ptr<DrawCall> createDrawCall(const DrawCallProperties &props, PrimitiveType type,
-                                                     size_t offset, size_t count) = 0;
+    virtual std::unique_ptr<DrawCall> createDrawCall(const DrawCallCreateProperties& props) = 0;
 
-    virtual std::unique_ptr<DrawCall> createIndexedCall(const DrawCallProperties &props, PrimitiveType type,
-                                                        size_t offset, size_t count, IndexType indexType) = 0;
-
-    virtual std::unique_ptr<VariableDrawCall> createVariableDrawCall(const DrawCallProperties &props,
-                                                                     PrimitiveType type) = 0;
-
-    virtual std::unique_ptr<VariableDrawCall> createVariableIndexedCall(const DrawCallProperties &props,
-                                                                        PrimitiveType type,
-                                                                        IndexType indexType) = 0;
+    virtual std::unique_ptr<VariableDrawCall> createVariableDrawCall(const DrawCallCreateProperties& props) = 0;
 
 
-    virtual std::unique_ptr<InstancedDrawCall> createInstancedDrawCall(const DrawCallProperties &props, PrimitiveType type,
-                                                     size_t offset, size_t count) = 0;
+    virtual std::unique_ptr<InstancedDrawCall> createInstancedDrawCall(const DrawCallCreateProperties& props) = 0;
 
-    virtual std::unique_ptr<InstancedDrawCall> createInstancedIndexedCall(const DrawCallProperties &props, PrimitiveType type,
-                                                        size_t offset, size_t count, IndexType indexType) = 0;
-
-    virtual std::unique_ptr<InstancedVariableDrawCall> createInstancedVariableDrawCall(const DrawCallProperties &props,
-                                                                     PrimitiveType type) = 0;
-
-    virtual std::unique_ptr<InstancedVariableDrawCall> createInstancedVariableIndexedCall(const DrawCallProperties &props,
-                                                                        PrimitiveType type,
-                                                                        IndexType indexType) = 0;
+    virtual std::unique_ptr<InstancedVariableDrawCall>
+        createInstancedVariableDrawCall(const DrawCallCreateProperties& props) = 0;
 };
