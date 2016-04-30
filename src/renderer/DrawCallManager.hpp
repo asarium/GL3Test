@@ -30,6 +30,15 @@ struct DrawCallCreateProperties {
     size_t count;
 
     IndexType index_type;
+
+    uint32_t base_vertex;
+
+    uint32_t min_index;
+    uint32_t max_index;
+
+    DrawCallCreateProperties()
+        : vertexLayout(nullptr), primitive_type(PrimitiveType::Triangle), offset(0), count(0),
+          index_type(IndexType::None), base_vertex(0), min_index(0), max_index(0) { }
 };
 
 class DrawCallManager {

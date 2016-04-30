@@ -39,6 +39,11 @@ GL3DrawCallProperties GL3DrawCallManager::convertProperties(const DrawCallCreate
         gl_props.index.type = getIndexType(props.index_type);
     }
 
+    gl_props.base_vertex = props.base_vertex;
+
+    gl_props.range_begin = props.min_index;
+    gl_props.range_end = props.max_index;
+
     return gl_props;
 }
 

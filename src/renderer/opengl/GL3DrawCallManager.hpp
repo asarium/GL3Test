@@ -19,6 +19,18 @@ struct GL3DrawCallProperties {
     struct {
         GLenum type;
     } index;
+
+    GLint base_vertex;
+    GLuint range_begin;
+    GLuint range_end;
+
+    inline bool hasBaseVertex() {
+        return base_vertex != 0;
+    }
+
+    inline bool hasRange() {
+        return range_begin != range_end;
+    }
 };
 
 class GL3DrawCallManager : public DrawCallManager {
