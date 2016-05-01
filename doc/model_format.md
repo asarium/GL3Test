@@ -38,6 +38,7 @@ struct VertexData {
     vec2 tex_coord;
     vec3 normal;
     vec3 tangent;
+    vec3 bitangent;
 }
 ```
 This struct is packed and not aligned in any way.
@@ -51,33 +52,9 @@ This struct is packed and not aligned in any way.
 ## Index data
 Index data can be used to generate GPU index buffers.
 
-TODO: This could be further improved by using the base vertex functions and then using shorts instead of ints. However,
-this will limit the number of triangles in a single submodel to ~20000.
 
  Length | Description
 --------|-------------------------------------------
  4      | Identifier ("INDX")
  8      | Length
- var    | Index data. These are unsigned 32-bit integers. The actual referenced vertex can only be determined with a submodel. Can also be sent directly to the GPU.
-
-## Mesh data
-A mesh contains the information about one part of the model. The mesh chunk contains a list of all meshes in the model.
-The mesh data needs to be stored in the same order as it appears in this chunk because the scene graph uses indices into
-this array.
-Each mesh uses the following data structure:
-```c
-struct MeshData {
-    uint64 offset; // The offset into the index buffer. Specified in bytes.
-    uint32 count; // Number of indices to use starting at the offset
-    
-    uint32 base_index; // The base vertex value, this needs to be added to the index value from the index buffer (either manually or using your Graphics API)
-    uint32 min_index; // The minimum index that will occur in the specified range
-    uint32 max_index_; // The maximum index that will occur in the specified range
-}
-```
-
- Length | Description
---------|-------------------------------------------
- 4      | Identifier ("MESH")
- 8      | Length
- var    | Index data. These are unsigned 32-bit integers. The actual referenced vertex can only be determined with a submodel.
+ var    | Index data. These are unsigned 16-bit integers. The actual referenced vertex can only be determined with a submodel. Can also be sent directly to the GPU.

@@ -9,6 +9,8 @@
 
 #include <numeric>
 #include <ctime>
+#include <model/AssimpModelConverter.hpp>
+#include <model/ModelLoader.hpp>
 
 #include "util/textures.hpp"
 
@@ -131,8 +133,21 @@ Application::Application(Renderer* renderer, Timing* time) {
     _timing = time;
     _renderer = renderer;
 
-    _model.reset(new AssimpModel());
-    _model->loadModel(renderer, "resources/duck.dae");
+    auto freq = SDL_GetPerformanceFrequency();
+    auto begin = SDL_GetPerformanceCounter();
+    AssimpModelConverter converter;
+    converter.convertModel("resources/duck.dae", "duck", "resources/export");
+    auto end = SDL_GetPerformanceCounter();
+
+    printf("Converting: %fms\n", (end - begin) * 1000.0 / freq);
+
+    ModelLoader loader(_renderer);
+
+    begin = SDL_GetPerformanceCounter();
+    _model = std::move(loader.loadModel("resources/export/duck"));
+    end = SDL_GetPerformanceCounter();
+
+    printf("Loading: %fms\n", (end - begin) * 1000.0 / freq);
 
     _particleBuffer = renderer->createBuffer(BufferType::Vertex);
     _particleBuffer->setData(_particles.data(), sizeof(Particle) * _particles.size(), BufferUsage::Streaming);
@@ -372,7 +387,7 @@ void Application::renderUI() {
     _renderer->nanovgEndFrame();
 }
 void Application::renderScene(const glm::mat4& projMx, const glm::mat4& viewMx) {
-    _model->drawModel(_renderer, projMx, viewMx, _modelMx);
+    _model->render(projMx, viewMx, _modelMx);
 
     auto floorMatrix = mat4();
     floorMatrix = glm::translate(floorMatrix, vec3(0.f, 0.f, 0.f));

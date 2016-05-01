@@ -67,10 +67,12 @@ inline GLint mapAttributeLocation(AttributeType type) {
             return 3;
         case AttributeType::Tangent:
             return 4;
-        case AttributeType::Radius:
+        case AttributeType::Bitangent:
             return 5;
-        case AttributeType::PositionOffset:
+        case AttributeType::Radius:
             return 6;
+        case AttributeType::PositionOffset:
+            return 7;
         default:
             Assertion(false, "Unhandled attribute location mapping!");
             return 0;

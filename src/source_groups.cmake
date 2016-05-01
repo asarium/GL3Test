@@ -3,6 +3,15 @@ set(file_root
         main.cpp
         )
 
+set(file_model
+        model/AssimpModelConverter.cpp
+        model/AssimpModelConverter.hpp
+        model/Model.cpp
+        model/Model.hpp
+        model/ModelLoader.cpp
+        model/ModelLoader.hpp
+        )
+
 set(file_renderer
         renderer/BufferObject.hpp
         renderer/DrawCall.hpp
@@ -92,6 +101,7 @@ set(file_util
 
 # the source groups
 source_group("" FILES ${file_root})
+source_group("Model" FILES ${file_model})
 source_group("Renderer" FILES ${file_renderer})
 source_group("Renderer\\nanovg" FILES ${file_renderer_nanovg})
 source_group("Renderer\\opengl" FILES ${file_renderer_opengl})
@@ -101,6 +111,7 @@ source_group("Util" FILES ${file_util})
 # append all files to the file_root
 set(file_root
         ${file_root}
+        ${file_model}
         ${file_renderer}
         ${file_renderer_nanovg}
         ${file_renderer_opengl}

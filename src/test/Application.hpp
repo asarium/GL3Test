@@ -2,8 +2,8 @@
 
 #include <renderer/Renderer.hpp>
 #include <util/Timing.hpp>
+#include <model/Model.hpp>
 #include <SDL_events.h>
-#include "AssimpModel.hpp"
 
 #include <glm/glm.hpp>
 #include <deque>
@@ -14,7 +14,7 @@ struct Particle {
 };
 
 class Application {
-    std::unique_ptr<AssimpModel> _model;
+    std::unique_ptr<Model> _model;
 
     std::unique_ptr<Texture2D> _particleTexture;
     std::unique_ptr<BufferObject> _particleBuffer;

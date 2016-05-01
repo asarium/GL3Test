@@ -2,6 +2,7 @@
 find_package(SDL2 REQUIRED)
 find_package(GLM REQUIRED)
 find_package(assimp REQUIRED)
+find_package(Jansson REQUIRED)
 
 include(source_groups.cmake)
 
@@ -18,3 +19,6 @@ target_include_directories(ogl3_test PRIVATE "${ASSIMP_INCLUDE_DIRS}")
 find_library(ASSIMP_LIBRARY "${ASSIMP_LIBRARIES}"
         PATHS ${ASSIMP_LIBRARY_DIRS})
 target_link_libraries(ogl3_test PRIVATE ${ASSIMP_LIBRARY})
+
+target_include_directories(ogl3_test PRIVATE ${JANSSON_INCLUDE_DIRS})
+target_link_libraries(ogl3_test PRIVATE ${JANSSON_LIBRARIES})

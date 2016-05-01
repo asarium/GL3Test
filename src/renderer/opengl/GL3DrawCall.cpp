@@ -55,7 +55,7 @@ void GL3DrawCall::actualDraw(GLsizei count, GLint offset) {
                                           _properties.range_begin,
                                           _properties.range_end,
                                           _properties.count,
-                                          _properties.primitive_type,
+                                          _properties.index.type,
                                           indices,
                                           _properties.base_vertex);
         } else if (!has_base && has_range) {
@@ -64,13 +64,13 @@ void GL3DrawCall::actualDraw(GLsizei count, GLint offset) {
                                 _properties.range_begin,
                                 _properties.range_end,
                                 _properties.count,
-                                _properties.primitive_type,
+                                _properties.index.type,
                                 indices);
         } else if (has_base && !has_range) {
             // Only have a base vertex
             glDrawElementsBaseVertex(_properties.primitive_type,
                                      _properties.count,
-                                     _properties.primitive_type,
+                                     _properties.index.type,
                                      indices,
                                      _properties.base_vertex);
         } else {

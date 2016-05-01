@@ -14,6 +14,7 @@ enum class AttributeType {
     Normal,
     Color,
     Tangent,
+    Bitangent,
     Radius,
     PositionOffset
 };
