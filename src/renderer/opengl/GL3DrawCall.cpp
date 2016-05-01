@@ -77,7 +77,6 @@ void GL3DrawCall::actualDraw(GLsizei count, GLint offset) {
             // We have neither, use the standard way
             glDrawElements(_properties.primitive_type, count, _properties.index.type, indices);
         }
-
     } else {
         glDrawArrays(_properties.primitive_type, offset, count);
     }
@@ -100,8 +99,35 @@ void GL3DrawCall::actualDrawInstanced(GLsizei instances, GLsizei count, GLint of
     setGLState();
 
     if (_properties.indexed) {
-        glDrawElementsInstanced(_properties.primitive_type, count, _properties.index.type,
-                                reinterpret_cast<void*>(offset * getTypeSize(_properties.index.type)), instances);
+        auto has_base = _properties.hasBaseVertex();
+        auto has_range = _properties.hasRange();
+        auto indices = reinterpret_cast<void*>(offset * getTypeSize(_properties.index.type));
+
+        // There are no glDrawRangeElements* variants for instanced rendering, just use the normal functions
+
+        if (has_base && has_range) {
+            // Full combination, base vertex and range specified
+            glDrawElementsInstancedBaseVertex(_properties.primitive_type,
+                                              _properties.count,
+                                              _properties.index.type,
+                                              indices,
+                                              _properties.base_vertex,
+                                              instances);
+        } else if (!has_base && has_range) {
+            // Only have a range
+            glDrawElementsInstanced(_properties.primitive_type, count, _properties.index.type, indices, instances);
+        } else if (has_base && !has_range) {
+            // Only have a base vertex
+            glDrawElementsInstancedBaseVertex(_properties.primitive_type,
+                                              _properties.count,
+                                              _properties.index.type,
+                                              indices,
+                                              _properties.base_vertex,
+                                              instances);
+        } else {
+            // We have neither, use the standard way
+            glDrawElementsInstanced(_properties.primitive_type, count, _properties.index.type, indices, instances);
+        }
     } else {
         glDrawArraysInstanced(_properties.primitive_type, offset, count, instances);
     }
