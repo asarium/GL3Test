@@ -183,6 +183,7 @@ void AssimpModelConverter::convertModel(const std::string& input_file,
         auto json_root = serializeMetadata();
         FILE* f = std::fopen(oss.str().c_str(), "wb");
         json_dumpf(json_root, f, JSON_INDENT(4) | JSON_ENSURE_ASCII);
+        json_decref(json_root);
         std::fclose(f);
     } catch (const std::runtime_error& e) {
         fprintf(stderr, "Error while writing meta data: %s\n", e.what());
