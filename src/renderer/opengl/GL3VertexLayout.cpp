@@ -16,12 +16,16 @@ GL3VertexLayout::~GL3VertexLayout() {
     }
 }
 
-VertexLayout::BufferIndex GL3VertexLayout::attachBufferObject(BufferObject *buffer) {
-    _attachedBuffers.push_back(static_cast<GL3BufferObject *>(buffer));
+VertexLayout::BufferIndex GL3VertexLayout::attachBufferObject(BufferObject* buffer) {
+    _attachedBuffers.push_back(static_cast<GL3BufferObject*>(buffer));
     return _attachedBuffers.size() - 1;
 }
 
-void GL3VertexLayout::addComponent(AttributeType type, DataFormat format, size_t stride, BufferIndex source, size_t offset) {
+void GL3VertexLayout::addComponent(AttributeType type,
+                                   DataFormat format,
+                                   size_t stride,
+                                   BufferIndex source,
+                                   size_t offset) {
     Component comp;
     comp.attribute_location = mapAttributeLocation(type); // Data type is also the bound attribute location
 
@@ -93,6 +97,7 @@ void GL3VertexLayout::finalize() {
     glGenVertexArrays(1, &_vaoHandle);
     GLState->bindVertexArray(_vaoHandle);
     for (auto& comp : _components) {
+        Assertion(comp.buffer->getType() == BufferType::Vertex, "Non vertex buffer used for vertex component!");
         comp.buffer->bind();
 
         glEnableVertexAttribArray(comp.attribute_location);
