@@ -94,8 +94,8 @@ bool ModelLoader::loadModelData(Model* output, const std::string& file_path) {
         fprintf(stderr, "Failed to read header of model data!\n");
         return false;
     }
-    if (strcmp(header_id, "FSOMODEL")) {
-        fprintf(stderr, "Header of model is not valid!\n");
+    if (strncmp(header_id, "FSOMODEL", 8)) {
+        fprintf(stderr, "Header of model is not valid, got %s instead of 'FSOMODEL'!\n", header_id);
         return false;
     }
 
