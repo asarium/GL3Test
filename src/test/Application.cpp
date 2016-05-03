@@ -458,11 +458,14 @@ void Application::handleEvent(SDL_Event* event) {
                     SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
                     SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_TRUE);
                     break;
-                case SDL_SCANCODE_V:
+                case SDL_SCANCODE_V: {
                     _last_vsync = !_last_vsync;
                     auto settings = _renderer->getSettingsManager()->getCurrentSettings();
                     settings.vertical_sync = _last_vsync;
                     _renderer->getSettingsManager()->changeSettings(settings);
+                    break;
+                }
+                default:
                     break;
             }
             break;

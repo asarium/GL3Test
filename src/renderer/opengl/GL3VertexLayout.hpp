@@ -22,10 +22,10 @@ class GL3VertexLayout final: public VertexLayout {
 
     std::vector<Component> _components;
 
+    GLuint _vaoHandle;
+
     bool _haveIndexBuffer;
     BufferIndex _indexBuffer;
-
-    GLuint _vaoHandle;
  public:
     GL3VertexLayout();
     virtual ~GL3VertexLayout();

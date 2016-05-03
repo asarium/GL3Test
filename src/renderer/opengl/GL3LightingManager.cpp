@@ -272,8 +272,8 @@ void GL3LightingManager::changeShadowQuality(SettingsLevel level) {
 }
 
 GL3Light::GL3Light(GL3Renderer* renderer, GL3LightingManager* manager, LightType in_type, uint32_t depthMapResolution)
-    : GL3Object(renderer), _lightingManager(manager), type(in_type), _depthTexture(0), _depthFrameBuffer(0),
-      _depthMapResolution(depthMapResolution) {
+    : GL3Object(renderer), _lightingManager(manager), _depthMapResolution(depthMapResolution), _depthTexture(0), _depthFrameBuffer(0),
+      type(in_type) {
     if (!hasShadow()) {
         return;
     }

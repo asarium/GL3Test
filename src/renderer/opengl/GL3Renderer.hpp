@@ -33,13 +33,13 @@ class GL3Renderer final: public Renderer {
 
  private:
 
+    std::unique_ptr<FileLoader> _fileLoader;
+
     GL3RenderSettingsManager _settingsManager;
 
+    SDL_Window* _window;
     bool _initialized;
     SDL_GLContext _context;
-    SDL_Window* _window;
-
-    std::unique_ptr<FileLoader> _fileLoader;
 
     std::unique_ptr<GL3DrawCallManager> _drawCallManager;
     std::unique_ptr<GL3LightingManager> _lightingManager;

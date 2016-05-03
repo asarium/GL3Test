@@ -24,6 +24,9 @@ GLenum getIndexType(IndexType type) {
             return GL_UNSIGNED_SHORT;
         case IndexType::Integer:
             return GL_UNSIGNED_INT;
+        default:
+            Assertion(false, "Unhandled index type detected!");
+            return GL_UNSIGNED_INT;
     }
     return GL_UNSIGNED_INT;
 }

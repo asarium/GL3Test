@@ -14,8 +14,8 @@ public:
     typedef T saved_type;
 
 private:
-    saved_type _saved;
     bool _dirty; // true if the saved value is not up to date
+    saved_type _saved;
 
 public:
     SavedState() : _dirty(true), _saved(T()) { }
