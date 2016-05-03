@@ -18,7 +18,7 @@ private:
     bool _dirty; // true if the saved value is not up to date
 
 public:
-    SavedState() : _dirty(true) { }
+    SavedState() : _dirty(true), _saved(T()) { }
 
     bool setIfChanged(saved_type new_val) {
         if (_dirty || new_val != _saved) {
