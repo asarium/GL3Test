@@ -6,7 +6,7 @@
 #include <renderer/Texture2D.hpp>
 #include "GL3Texture2D.hpp"
 
-class GL3RenderTarget: public RenderTarget {
+class GL3RenderTarget final: public RenderTarget {
     GLsizei _width;
     GLsizei _heigth;
 

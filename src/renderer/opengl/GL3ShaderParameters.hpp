@@ -36,11 +36,11 @@ struct ParameterValue {
     } value;
 };
 
-class GL3ShaderParameters : public ShaderParameters {
+class GL3ShaderParameters final: public ShaderParameters {
     std::vector<ParameterValue> _values;
 
     ParameterValue& getValue(GL3ShaderParameterType type);
-public:
+ public:
     GL3ShaderParameters();
 
     virtual ~GL3ShaderParameters();
@@ -55,7 +55,7 @@ public:
 
     virtual void setVec3(ShaderParameterType param, const glm::vec3& value) override;
 
-    virtual void setMat4(ShaderParameterType param, const glm::mat4 &value) override;
+    virtual void setMat4(ShaderParameterType param, const glm::mat4& value) override;
 
     virtual void setTexture(ShaderParameterType param, Texture2DHandle* value) override;
 
@@ -70,7 +70,7 @@ public:
 
     void setVec3(GL3ShaderParameterType param, const glm::vec3& value);
 
-    void setMat4(GL3ShaderParameterType param, const glm::mat4 &value);
+    void setMat4(GL3ShaderParameterType param, const glm::mat4& value);
 
     void setTexture(GL3ShaderParameterType param, GL3Texture2D* value);
 

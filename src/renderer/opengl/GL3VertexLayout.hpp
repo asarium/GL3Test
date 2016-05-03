@@ -17,8 +17,8 @@ struct Component {
     GL3BufferObject* buffer;
 };
 
-class GL3VertexLayout : public VertexLayout {
-    std::vector<GL3BufferObject *> _attachedBuffers;
+class GL3VertexLayout final: public VertexLayout {
+    std::vector<GL3BufferObject*> _attachedBuffers;
 
     std::vector<Component> _components;
 
@@ -26,13 +26,14 @@ class GL3VertexLayout : public VertexLayout {
     BufferIndex _indexBuffer;
 
     GLuint _vaoHandle;
-public:
+ public:
     GL3VertexLayout();
     virtual ~GL3VertexLayout();
 
-    virtual BufferIndex attachBufferObject(BufferObject *buffer) override;
+    virtual BufferIndex attachBufferObject(BufferObject* buffer) override;
 
-    virtual void addComponent(AttributeType type, DataFormat format, size_t stride, BufferIndex source, size_t offset) override;
+    virtual void
+        addComponent(AttributeType type, DataFormat format, size_t stride, BufferIndex source, size_t offset) override;
 
     virtual void addInstanceComponent(AttributeType type, DataFormat format, size_t instanceDivisor, size_t stride,
                                       BufferIndex source, size_t offset) override;

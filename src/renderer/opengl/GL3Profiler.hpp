@@ -10,8 +10,7 @@
 
 class GL3Profiler;
 
-class GL3ProfilingCategory : public ProfilingCategory
-{
+class GL3ProfilingCategory final: public ProfilingCategory {
     struct QueryPair {
         GLuint begin_query;
         GLuint end_query;
@@ -26,11 +25,10 @@ class GL3ProfilingCategory : public ProfilingCategory
 
     uint64_t _cpuBeginTime;
     GLuint _currentBeginQuery;
-public:
+ public:
     GL3ProfilingCategory(const std::string& name, GL3Profiler* profiler);
 
-    ~GL3ProfilingCategory()
-    {
+    ~GL3ProfilingCategory() {
     }
 
     const std::string& getName() const {
@@ -46,15 +44,14 @@ public:
     std::pair<uint64_t, uint64_t> getTimes();
 };
 
-class GL3Profiler : public Profiler, public GL3Object
-{
+class GL3Profiler final: public Profiler, public GL3Object {
     std::vector<GLuint> _queryObjects;
     std::vector<GLuint> _freeQueryObjects;
 
     std::vector<std::unique_ptr<GL3ProfilingCategory>> _categories;
 
     uint64_t _cpuTimeFrequency;
-public:
+ public:
     GL3Profiler(GL3Renderer* renderer);
 
     virtual ~GL3Profiler();

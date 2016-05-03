@@ -10,34 +10,34 @@
 
 #include <SDL_video.h>
 
-class GL3Renderer : public Renderer {
-public:
-    class GL3RenderSettingsManager : GL3Object, public RendererSettingsManager {
+class GL3Renderer final: public Renderer {
+ public:
+    class GL3RenderSettingsManager: GL3Object, public RendererSettingsManager {
         void changeResolution(uint32_t width, uint32_t height);
 
         bool _settingsSet;
         RendererSettings _currentSettings;
-    public:
-        GL3RenderSettingsManager(GL3Renderer *renderer);
+     public:
+        GL3RenderSettingsManager(GL3Renderer* renderer);
 
         virtual ~GL3RenderSettingsManager() { }
 
         bool getSettings(RendererSettings& settings);
 
-        virtual void changeSettings(const RendererSettings &settings) override;
+        virtual void changeSettings(const RendererSettings& settings) override;
 
         virtual bool supportsSetting(SettingsParameter parameter) const override;
 
         virtual RendererSettings getCurrentSettings() const override;
     };
 
-private:
+ private:
 
     GL3RenderSettingsManager _settingsManager;
 
     bool _initialized;
     SDL_GLContext _context;
-    SDL_Window *_window;
+    SDL_Window* _window;
 
     std::unique_ptr<FileLoader> _fileLoader;
 
@@ -49,24 +49,24 @@ private:
     std::unique_ptr<GL3Util> _util;
 
     NVGcontext* _nvgContext;
-public:
-    GL3Renderer(std::unique_ptr<FileLoader> &&fileLoader);
+ public:
+    GL3Renderer(std::unique_ptr<FileLoader>&& fileLoader);
 
     virtual ~GL3Renderer();
 
-    virtual SDL_Window *initialize() override;
+    virtual SDL_Window* initialize() override;
 
     virtual void deinitialize() override;
 
-    virtual RendererSettingsManager *getSettingsManager() override;
+    virtual RendererSettingsManager* getSettingsManager() override;
 
-    virtual DrawCallManager *getDrawCallManager() override;
+    virtual DrawCallManager* getDrawCallManager() override;
 
-    virtual LightingManager *getLightingManager() override;
+    virtual LightingManager* getLightingManager() override;
 
-    virtual RenderTargetManager *getRenderTargetManager() override;
+    virtual RenderTargetManager* getRenderTargetManager() override;
 
-    virtual Profiler *getProfiler() override;
+    virtual Profiler* getProfiler() override;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) override;
 
@@ -74,11 +74,11 @@ public:
 
     virtual std::unique_ptr<Texture2D> createTexture() override;
 
-    virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties &props) override;
+    virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) override;
 
     virtual bool hasCapability(GraphicsCapability capability) const override;
 
-    virtual void clear(const glm::vec4 &color) override;
+    virtual void clear(const glm::vec4& color) override;
 
     virtual void presentNextFrame() override;
 
@@ -90,17 +90,17 @@ public:
 
     int getNanoVGImageHandle(GLuint tex_handle, GLsizei width, GLsizei height);
 
-    SDL_Window *getWindow();
+    SDL_Window* getWindow();
 
-    GL3DrawCallManager *getGLDrawCallManager();
+    GL3DrawCallManager* getGLDrawCallManager();
 
-    GL3LightingManager *getGLLightingManager();
+    GL3LightingManager* getGLLightingManager();
 
-    GL3RenderTargetManager *getGLRenderTargetManager();
+    GL3RenderTargetManager* getGLRenderTargetManager();
 
-    GL3ShaderManager *getShaderManager();
+    GL3ShaderManager* getShaderManager();
 
-    GL3Util *getGLUtil() {
+    GL3Util* getGLUtil() {
         return _util.get();
     }
 };

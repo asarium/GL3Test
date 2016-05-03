@@ -4,11 +4,11 @@
 
 #include <glad/glad.h>
 
-class GL3BufferObject : public BufferObject {
+class GL3BufferObject final: public BufferObject {
     GLuint _handle;
     BufferType _type;
 
-public:
+ public:
     GL3BufferObject(BufferType type);
     ~GL3BufferObject();
 
@@ -16,9 +16,9 @@ public:
 
     virtual BufferType getType() const override;
 
-    virtual void setData(const void *data, size_t size, BufferUsage usage);
+    virtual void setData(const void* data, size_t size, BufferUsage usage);
 
-    virtual void updateData(const void *data, size_t size, size_t offset, UpdateFlags flags) override;
+    virtual void updateData(const void* data, size_t size, size_t offset, UpdateFlags flags) override;
 };
 
 

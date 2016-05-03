@@ -7,7 +7,7 @@
 #include "GL3PipelineState.hpp"
 
 struct GL3DrawCallProperties {
-    GL3VertexLayout *vertexLayout;
+    GL3VertexLayout* vertexLayout;
 
     GLenum primitive_type;
     GLsizei count;
@@ -33,13 +33,13 @@ struct GL3DrawCallProperties {
     }
 };
 
-class GL3DrawCallManager : public DrawCallManager {
-    GL3ShaderManager *_manager;
+class GL3DrawCallManager final: public DrawCallManager {
+    GL3ShaderManager* _manager;
 
-    GL3DrawCallProperties convertProperties(const DrawCallCreateProperties &props);
+    GL3DrawCallProperties convertProperties(const DrawCallCreateProperties& props);
 
-public:
-    GL3DrawCallManager(GL3ShaderManager *_manager) : _manager(_manager) { }
+ public:
+    GL3DrawCallManager(GL3ShaderManager* _manager) : _manager(_manager) { }
 
     virtual ~GL3DrawCallManager() { };
 

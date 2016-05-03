@@ -14,7 +14,7 @@
 
 class GL3LightingManager;
 
-class GL3Light: public GL3Object, public Light {
+class GL3Light final: public GL3Object, public Light {
     GL3LightingManager* _lightingManager;
 
     uint32_t _depthMapResolution;
