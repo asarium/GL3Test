@@ -55,7 +55,7 @@ inline GL3ShaderType convertShaderType(ShaderType type) {
     }
 }
 
-inline GLint mapAttributeLocation(AttributeType type) {
+inline GLuint mapAttributeLocation(AttributeType type) {
     switch (type) {
         case AttributeType::Position:
             return 0;

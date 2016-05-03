@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 
 struct Component {
-    GLint attribute_location;
+    GLuint attribute_location;
     GLenum data_type;
     GLint size;
     GLsizei stride;

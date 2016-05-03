@@ -18,7 +18,7 @@ struct ShaderFilename {
 struct AttributeBinding {
     AttributeType type;
     const char* name;
-    GLint binding_location;
+    GLuint binding_location;
 };
 
 struct UniformMapping {
