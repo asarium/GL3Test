@@ -54,7 +54,15 @@ uint16_t process_index(uint32_t index, std::pair<uint32_t, uint32_t>& min_max_pa
 
 std::string cleanup_path(const char* path) {
 #ifdef WIN32
-#error Not yet implemented!
+    std::string filename(path);
+
+    auto slash_pos = filename.find_last_of("/\\");
+    if (slash_pos != std::string::npos)
+    {
+        filename = filename.substr(slash_pos + 1);
+    }
+    
+    return filename;
 #else
     // Assume POSIX
     auto filename = std::string(basename(path));
@@ -95,7 +103,7 @@ ExportMaterial convertAssimpMaterial(aiMaterial* material) {
     return ret_val;
 }
 
-constexpr uint32_t FOURCC(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
+constexpr uint32_t make_id(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
     return ((uint32_t) ((d << 24) | (c << 16) | (b << 8) | a));
 }
 
@@ -279,10 +287,10 @@ void AssimpModelConverter::write_mesh_data(const std::string& output_file) {
     outstream.write(reinterpret_cast<const char*>(&version), sizeof(version));
 
     // Write vertex data
-    write_chunk(outstream, FOURCC('V', 'D', 'A', 'T'), vertex_data.data(), vertex_data.size() * sizeof(vertex_data[0]));
+    write_chunk(outstream, make_id('V', 'D', 'A', 'T'), vertex_data.data(), vertex_data.size() * sizeof(vertex_data[0]));
 
     // Write index data
-    write_chunk(outstream, FOURCC('I', 'N', 'D', 'X'), index_data.data(), index_data.size() * sizeof(index_data[0]));
+    write_chunk(outstream, make_id('I', 'N', 'D', 'X'), index_data.data(), index_data.size() * sizeof(index_data[0]));
 
     outstream.flush();
     outstream.close();
