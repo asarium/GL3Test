@@ -14,6 +14,8 @@ namespace {
                 return GL_ARRAY_BUFFER;
             case BufferType::Index:
                 return GL_ELEMENT_ARRAY_BUFFER;
+            case BufferType::Uniform:
+                return GL_UNIFORM_BUFFER;
         }
         return GL_INVALID_ENUM;
     }
@@ -42,6 +44,9 @@ void GL3BufferObject::bind() {
             break;
         case BufferType::Index:
             GLState->Buffer.bindElementBuffer(_handle);
+            break;
+        case BufferType::Uniform:
+            GLState->Buffer.bindUniformBuffer(_handle);
             break;
     }
 }

@@ -11,7 +11,8 @@
 enum class BufferType {
     None,
     Vertex,
-    Index
+    Index,
+    Uniform
 };
 
 enum class BufferUsage {

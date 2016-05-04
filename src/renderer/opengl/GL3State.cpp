@@ -14,6 +14,12 @@ void GL3BufferState::bindElementBuffer(GLuint buffer) {
     }
 }
 
+void GL3BufferState::bindUniformBuffer(GLuint buffer) {
+    if (_uniformBuffer.setIfChanged(buffer)) {
+        glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+    }
+}
+
 GL3TextureState::GL3TextureState() {
     GLint units;
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &units);

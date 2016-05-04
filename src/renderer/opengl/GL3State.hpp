@@ -54,10 +54,13 @@ public:
 class GL3BufferState {
     SavedState<GLuint> _arrayBuffer;
     SavedState<GLuint> _elementBuffer;
+    SavedState<GLuint> _uniformBuffer;
 public:
     void bindArrayBuffer(GLuint buffer);
 
     void bindElementBuffer(GLuint buffer);
+
+    void bindUniformBuffer(GLuint buffer);
 };
 
 class GL3TextureState {
