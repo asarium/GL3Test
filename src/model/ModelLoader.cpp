@@ -283,7 +283,7 @@ bool ModelLoader::loadMeshes(Model* output, json_t* meshes_root) {
             return false;
         }
 
-        auto& material = materials[json_integer_value(material_index_node)];
+        auto& material = materials[(size_t) json_integer_value(material_index_node)];
 
         MeshData mesh;
         mesh.mesh_name = name_node == nullptr ? "" : json_string_value(name_node);
