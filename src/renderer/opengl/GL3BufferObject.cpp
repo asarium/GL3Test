@@ -79,6 +79,9 @@ void GL3BufferObject::setData(const void *data, size_t size, BufferUsage usage) 
         case BufferType::Index:
             GLState->Buffer.bindElementBuffer(0);
             break;
+        case BufferType::Uniform:
+            GLState->Buffer.bindUniformBuffer(0);
+            break;
     }
 }
 
