@@ -106,6 +106,8 @@ void GL3VertexLayout::finalize() {
     }
 
     if (_haveIndexBuffer) {
+        Assertion(_attachedBuffers[_indexBuffer]->getType() == BufferType::Index,
+                  "Non index buffer used as index buffer!");
         _attachedBuffers[_indexBuffer]->bind();
     }
 
