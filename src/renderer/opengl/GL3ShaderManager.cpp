@@ -4,7 +4,13 @@
 #include "GL3ShaderManager.hpp"
 
 namespace {
-std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<ShaderFilename>& parts) {
+template<typename T, size_t size>
+constexpr size_t array_size(const T(&)[size])
+{
+    return size;
+}
+
+std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<ShaderFilename>& parts, const char* header) {
     std::vector<GLuint> compiled_parts;
     compiled_parts.reserve(parts.size());
 
@@ -16,7 +22,19 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<Sha
         const GLchar* contentStr = reinterpret_cast<GLchar*>(content.data());
         GLint length = static_cast<GLint>(content.size());
 
-        glShaderSource(handle, 1, &contentStr, &length);
+        const GLchar* sources[] = {
+            reinterpret_cast<const GLchar*>(header),
+            contentStr
+        };
+        GLint sizes[] = {
+            static_cast<GLint>(std::strlen(header)),
+            length
+        };
+
+        static_assert(array_size(sources) == array_size((sizes)), "Sizes of source and size array do not match!");
+        auto numParts = static_cast<GLsizei>(array_size(sources));
+
+        glShaderSource(handle, numParts, sources, sizes);
 
         glCompileShader(handle);
 
@@ -46,8 +64,8 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<Sha
     return compiled_parts;
 }
 
-GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params) {
-    auto parts = compileShaderParts(loader, params.filenames);
+GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params, const char* header) {
+    auto parts = compileShaderParts(loader, params.filenames, header);
 
     auto prog = glCreateProgram();
 
@@ -103,8 +121,9 @@ GL3ShaderProgram* GL3ShaderManager::getShader(GL3ShaderType type) {
     }
 
     auto definition = getShaderDefinition(type);
-    _programCache[static_cast<size_t>(type)].reset(new GL3ShaderProgram(compileProgram(_fileLoader, definition),
-                                                                        definition));
+
+    auto prog = compileProgram(_fileLoader, definition, "#version 330 core\n");
+    _programCache[static_cast<size_t>(type)].reset(new GL3ShaderProgram(prog, definition));
 
     return _programCache[static_cast<size_t>(type)].get();
 }

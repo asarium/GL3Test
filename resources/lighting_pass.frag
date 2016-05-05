@@ -1,5 +1,3 @@
-#version 330 core
-
 uniform sampler2D g_position;
 uniform sampler2D g_normal;
 uniform sampler2D g_albedo;

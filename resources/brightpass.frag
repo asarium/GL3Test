@@ -1,5 +1,3 @@
-#version 330 core
-
 uniform sampler2D color_texture;
 
 out vec4 color;

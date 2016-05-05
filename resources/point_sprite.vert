@@ -1,5 +1,3 @@
-#version 330 core
-
 uniform mat4 view_matrix;
 
 in vec3 in_position;
