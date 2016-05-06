@@ -102,3 +102,22 @@ void GL3ShaderParameters::setTexture(ShaderParameterType param, Texture2DHandle 
 void GL3ShaderParameters::setBoolean(ShaderParameterType param, bool value) {
     setInteger(convertParameterType(param), value ? GL_TRUE : GL_FALSE);
 }
+
+GL3Descriptor::GL3Descriptor(DescriptorSetPart part)
+{
+    _data.part = part;
+}
+
+void GL3Descriptor::setTexture(Texture2DHandle* handle)
+{
+    _data.type = DescriptorType::Texture;
+    _data.descriptor_data.texture = static_cast<GL3Texture2D*>(handle);
+}
+
+void GL3Descriptor::setUniformBuffer(BufferObject* object, size_t offset, size_t range)
+{
+    _data.type = DescriptorType::UniformBuffer;
+    _data.descriptor_data.buffer.buffer = static_cast<GL3BufferObject*>(object);
+    _data.descriptor_data.buffer.offset = static_cast<GLintptr>(offset);
+    _data.descriptor_data.buffer.size = static_cast<GLsizei>(range);
+}

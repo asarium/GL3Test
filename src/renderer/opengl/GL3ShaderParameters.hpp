@@ -9,7 +9,7 @@
 
 #include "Enums.hpp"
 #include "GL3Texture2D.hpp"
-#include "GL3RenderTarget.hpp"
+#include "GL3BufferObject.hpp"
 
 enum class ParameterDataType {
     Float,
@@ -74,9 +74,42 @@ class GL3ShaderParameters final: public ShaderParameters {
 
     void setTexture(GL3ShaderParameterType param, GL3Texture2D* value);
 
-    void setRenderTarget(GL3ShaderParameterType param, GL3RenderTarget* value);
-
     const std::vector<ParameterValue>& getValues() const;
 };
 
+
+class GL3Descriptor : public Descriptor {
+public:
+    struct Data
+    {
+        DescriptorType type;
+        DescriptorSetPart part;
+        union
+        {
+            GL3Texture2D* texture;
+            struct
+            {
+                GL3BufferObject* buffer;
+                GLintptr offset;
+                GLsizei size;
+            } buffer;
+        } descriptor_data;
+    };
+
+private:
+    Data _data;
+
+public:
+    explicit GL3Descriptor(DescriptorSetPart part);
+    virtual ~GL3Descriptor() {}
+
+    virtual void setTexture(Texture2DHandle* handle) override;
+
+    virtual void setUniformBuffer(BufferObject* object, size_t offset, size_t range) override;
+
+    const Data& getData() const
+    {
+        return _data;
+    }
+};
 
