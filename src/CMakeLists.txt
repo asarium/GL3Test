@@ -20,3 +20,5 @@ find_library(ASSIMP_LIBRARY "${ASSIMP_LIBRARIES}"
 target_link_libraries(ogl3_test PRIVATE ${ASSIMP_LIBRARY})
 
 target_link_libraries(ogl3_test PRIVATE jansson)
+
+target_compile_definitions(ogl3_test PRIVATE NOMINMAX)
