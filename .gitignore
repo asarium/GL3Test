@@ -4,3 +4,6 @@ build
 
 # CLion files
 .idea
+
+# Export files
+resources/export
