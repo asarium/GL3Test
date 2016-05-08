@@ -20,6 +20,11 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<Sha
         auto handle = glCreateShader(filename.type);
 
         auto content = loader->getFileContents(filename.filename);
+        if (content.empty())
+        {
+            throw RendererException("No shader content found!");
+        }
+
         const GLchar* contentStr = reinterpret_cast<GLchar*>(content.data());
         GLint length = static_cast<GLint>(content.size());
 
