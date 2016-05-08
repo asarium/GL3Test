@@ -3,7 +3,7 @@
 #include "GL3VertexLayout.hpp"
 #include "GL3Object.hpp"
 
-class GL3Util : public GL3Object {
+class GL3Util: public GL3Object {
     std::unique_ptr<BufferObject> _fullscreenTriBuffer;
     std::unique_ptr<GL3VertexLayout> _fullscreenTriLayout;
 
@@ -14,8 +14,8 @@ class GL3Util : public GL3Object {
     GLsizei _numSphereIndices;
     std::unique_ptr<BufferObject> _sphereIndexData;
     std::unique_ptr<GL3VertexLayout> _sphereLayout;
-public:
-    GL3Util(GL3Renderer *renderer);
+ public:
+    GL3Util(GL3Renderer* renderer);
 
     void drawFullScreenTri();
 
@@ -26,4 +26,9 @@ public:
 
 bool checkFrameBufferStatus();
 
-
+template<typename Enum>
+struct EnumClassHash: std::hash<typename std::underlying_type<Enum>::type> {
+    size_t operator()(Enum e) {
+        return std::hash<typename std::underlying_type<Enum>::type>::operator()(static_cast<typename std::underlying_type<Enum>::type>(e));
+    }
+};

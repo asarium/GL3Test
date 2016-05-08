@@ -254,8 +254,69 @@ AttributeBinding attribute_mappings[] =
     };
 }
 
+DescriptorBinding uniform_buffer_bindings[] = {
+    {
+        GL3DescriptorSetPart::ViewSet_Uniforms,
+        "ViewData",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::ViewSet_Uniforms)
+    },
+    {
+        GL3DescriptorSetPart::ModelSet_Uniforms,
+        "ModelData",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::ModelSet_Uniforms)
+    },
+    {
+        GL3DescriptorSetPart::HdrSet_Uniforms,
+        "HDRData",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::HdrSet_Uniforms)
+    },
+    {
+        GL3DescriptorSetPart::LightingSet_GlobalUniforms,
+        "GlobalLightingData",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_GlobalUniforms)
+    },
+    {
+        GL3DescriptorSetPart::LightingSet_LightUniforms,
+        "LightData",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_LightUniforms)
+    },
+};
+
+DescriptorBinding texture_bindings[] = {
+    {
+        GL3DescriptorSetPart::ModelSet_DiffuseTexture,
+        "color_texture",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::ModelSet_DiffuseTexture)
+    },
+    {
+        GL3DescriptorSetPart::HdrSet_BloomedTexture,
+        "bloomed_texture",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::HdrSet_BloomedTexture)
+    },
+    {
+        GL3DescriptorSetPart::LightingSet_PositionTexture,
+        "g_position",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_PositionTexture)
+    },
+    {
+        GL3DescriptorSetPart::LightingSet_NormalTexture,
+        "g_normal",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_NormalTexture)
+    },
+    {
+        GL3DescriptorSetPart::LightingSet_AlbedoTexture,
+        "g_albedo",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_AlbedoTexture)
+    },
+    {
+        GL3DescriptorSetPart::LightingSet_DiretionalShadowMap,
+        "directional_shadow_map",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_DiretionalShadowMap)
+    },
+};
+
 GL3ShaderDefinition getShaderDefinition(GL3ShaderType type) {
-    GL3ShaderDefinition def = GL3ShaderDefinition();
+    GL3ShaderDefinition def;
 
     for (auto& file:shader_definitions) {
         if (file.type == type) {
@@ -269,6 +330,16 @@ GL3ShaderDefinition getShaderDefinition(GL3ShaderType type) {
 
     for (auto& unif : uniform_mappings) {
         def.uniforms.push_back(unif);
+    }
+
+    for (auto& buffer : uniform_buffer_bindings)
+    {
+        def.buffer_bindings.push_back(buffer);
+    }
+
+    for (auto& buffer : texture_bindings)
+    {
+        def.texture_bindings.push_back(buffer);
     }
 
     return def;

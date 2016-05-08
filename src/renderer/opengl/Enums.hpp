@@ -40,6 +40,33 @@ enum class GL3ShaderParameterType {
     NUM_VALUES
 };
 
+enum class Gl3DescriptorSetType {
+    ViewSet,
+    ModelSet,
+    HdrSet,
+
+    // Lighting pass set
+    LightingSet,
+};
+
+enum class GL3DescriptorSetPart {
+    ViewSet_Uniforms,
+
+    ModelSet_Uniforms,
+    ModelSet_DiffuseTexture,
+
+    HdrSet_Uniforms,
+    HdrSet_BloomedTexture,
+
+    // Lighting pass parts
+    LightingSet_GlobalUniforms,
+    LightingSet_LightUniforms,
+    LightingSet_PositionTexture,
+    LightingSet_NormalTexture,
+    LightingSet_AlbedoTexture,
+    LightingSet_DiretionalShadowMap,
+};
+
 enum class GL3ShaderType {
     Mesh = 0,
     DeferredMesh,

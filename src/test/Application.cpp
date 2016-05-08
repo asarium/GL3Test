@@ -360,7 +360,7 @@ void Application::updateParticles() {
 
         ++index;
     }
-    _particleBuffer->updateData(_particles.data(), sizeof(Particle) * _particles.size(), 0,
+    _particleBuffer->updateData(_particles.data(), 0, sizeof(Particle) * _particles.size(),
                                 UpdateFlags::DiscardOldData);
 
     _particleQuadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);

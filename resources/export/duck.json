@@ -1,0 +1,84 @@
+{
+    "materials": [
+        {
+            "name": "blinn3",
+            "diffuse_texture": "duckCM.tga"
+        }
+    ],
+    "meshes": [
+        {
+            "material_index": 0,
+            "max_index": 2747,
+            "name": "LOD3spShape",
+            "offset": 0,
+            "base_index": 0,
+            "count": 12636,
+            "min_index": 0
+        }
+    ],
+    "root_node": {
+        "name": "VisualSceneNode",
+        "transform": [
+            [
+                0.0099999997764825821,
+                0.0,
+                0.0,
+                0.0
+            ],
+            [
+                0.0,
+                0.0099999997764825821,
+                0.0,
+                0.0
+            ],
+            [
+                0.0,
+                0.0,
+                0.0099999997764825821,
+                0.0
+            ],
+            [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "children": [
+            {
+                "name": "LOD3sp",
+                "transform": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "children": [],
+                "meshes": [
+                    0
+                ]
+            }
+        ],
+        "meshes": []
+    }
+}

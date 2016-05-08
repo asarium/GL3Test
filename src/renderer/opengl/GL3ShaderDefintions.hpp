@@ -26,12 +26,23 @@ struct UniformMapping {
     const char* name;
 };
 
+struct DescriptorBinding
+{
+    GL3DescriptorSetPart part;
+    const char* name;
+    GLuint location;
+};
+
 struct GL3ShaderDefinition {
     std::vector<ShaderFilename> filenames;
 
     std::vector<UniformMapping> uniforms;
 
     std::vector<AttributeBinding> attribute_bindings;
+
+    std::vector<DescriptorBinding> buffer_bindings;
+
+    std::vector<DescriptorBinding> texture_bindings;
 };
 
 GL3ShaderDefinition getShaderDefinition(GL3ShaderType type);

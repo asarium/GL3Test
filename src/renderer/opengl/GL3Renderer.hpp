@@ -76,6 +76,8 @@ class GL3Renderer final: public Renderer {
 
     virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) override;
 
+    virtual std::unique_ptr<DescriptorSet> createDescriptorSet(DescriptorSetType type) override;
+
     virtual bool hasCapability(GraphicsCapability capability) const override;
 
     virtual void clear(const glm::vec4& color) override;

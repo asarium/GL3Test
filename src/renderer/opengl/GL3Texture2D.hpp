@@ -8,6 +8,39 @@
 #include <util/Assertion.hpp>
 #include <util/UniqueHandle.hpp>
 
+struct GL3TextureHandle
+{
+protected:
+    GLenum _type;
+    GLuint _handle;
+
+public:
+    GL3TextureHandle();
+    explicit GL3TextureHandle(GLenum type, GLuint glHandle);
+
+    void bind(uint32_t tex_unit = 0);
+
+    void unbind(uint32_t tex_unit = 0);
+
+    GLuint getGLHandle();
+
+    GLenum getType();
+};
+
+struct GL3OwnedTextureHandle : GL3TextureHandle
+{
+public:
+    GL3OwnedTextureHandle();
+    GL3OwnedTextureHandle(GLenum type, GLuint glHandle);
+    ~GL3OwnedTextureHandle();
+
+    GL3OwnedTextureHandle(const GL3OwnedTextureHandle&) = delete;
+    GL3OwnedTextureHandle& operator=(const GL3OwnedTextureHandle&) = delete;
+
+    GL3OwnedTextureHandle(GL3OwnedTextureHandle&& other);
+    GL3OwnedTextureHandle& operator=(GL3OwnedTextureHandle&& other);
+};
+
 struct TextureProperties {
     GLenum internal_format;
 
@@ -18,45 +51,28 @@ struct TextureProperties {
     GLsizei height;
 };
 
-struct GL3TextureDeleter {
-    typedef UniqueHandle<GLuint, 0> pointer;
-    void operator()(pointer p) {
-        glDeleteTextures(1, &p);
-    }
-};
-typedef std::unique_ptr<GLuint, GL3TextureDeleter> Gl3TextureHandle;
-
-class GL3Texture2D final: public GL3Object, public Texture2D {
+class GL3Texture2D final: public GL3Object, public Texture2D, public GL3OwnedTextureHandle {
     TextureProperties _props;
-    Gl3TextureHandle _handle;
 
     int _nvgHandle;
  public:
     explicit GL3Texture2D(GL3Renderer* renderer);
     explicit GL3Texture2D(GL3Renderer* renderer, GLuint handle);
-    virtual ~GL3Texture2D();
-
-    GLuint getHandle();
-
-    void reset(GLuint handle = 0);
-
-    void bind(int tex_unit = 0);
+    ~GL3Texture2D();
 
     void copyDataFromFramebuffer(GLsizei width, GLsizei height);
 
     void updateSize(GLsizei width, GLsizei height);
 
-    virtual int getNanoVGHandle() override;
+    int getNanoVGHandle() override;
 
-    virtual void initialize(size_t width, size_t height, TextureFormat format, void* data) override;
+    void initialize(size_t width, size_t height, TextureFormat format, void* data) override;
 
-    virtual void updateData(void* data) override;
+    void updateData(void* data) override;
 
-    virtual void
-        initializeCompressed(size_t width, size_t height, CompressionFormat format, size_t data_size, void* data)
-        override;
+    void initializeCompressed(size_t width, size_t height, CompressionFormat format, size_t data_size, void* data) override;
 
-    virtual void updateCompressedData(size_t data_size, void* data) override;
+    void updateCompressedData(size_t data_size, void* data) override;
 
     static std::unique_ptr<GL3Texture2D> createTexture(GL3Renderer* renderer);
 };

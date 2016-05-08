@@ -89,6 +89,8 @@ class Renderer {
 
     virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) = 0;
 
+    virtual std::unique_ptr<DescriptorSet> createDescriptorSet(DescriptorSetType type) = 0;
+
     virtual bool hasCapability(GraphicsCapability capability) const = 0;
 
     virtual void clear(const glm::vec4& color) = 0;

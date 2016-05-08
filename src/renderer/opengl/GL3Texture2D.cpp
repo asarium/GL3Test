@@ -43,21 +43,72 @@ GLenum getFormat(TextureFormat format) {
 }
 }
 
-GL3Texture2D::GL3Texture2D(GL3Renderer* renderer, GLuint handle) : GL3Object(renderer), _handle(handle), _nvgHandle(0) {
+GL3TextureHandle::GL3TextureHandle() : _type(GL_TEXTURE_2D), _handle(0)
+{
 }
 
-GL3Texture2D::GL3Texture2D(GL3Renderer* renderer) : GL3Object(renderer), _handle(), _nvgHandle(0) {
+GL3TextureHandle::GL3TextureHandle(GLenum type, GLuint glHandle) : _type(type), _handle(glHandle)
+{
+}
+
+void GL3TextureHandle::bind(uint32_t tex_unit)
+{
+    GLState->Texture.bindTexture(tex_unit, _type, _handle);
+}
+
+void GL3TextureHandle::unbind(uint32_t tex_unit)
+{
+    GLState->Texture.bindTexture(tex_unit, _type, 0);
+}
+
+GLuint GL3TextureHandle::getGLHandle()
+{
+    return _handle;
+}
+
+GLenum GL3TextureHandle::getType()
+{
+    return _type;
+}
+
+GL3OwnedTextureHandle::GL3OwnedTextureHandle() : GL3TextureHandle()
+{
+}
+
+GL3OwnedTextureHandle::GL3OwnedTextureHandle(GLenum type, GLuint glHandle) : GL3TextureHandle(type, glHandle)
+{
+}
+
+GL3OwnedTextureHandle::~GL3OwnedTextureHandle()
+{
+    if (_handle != 0)
+    {
+        glDeleteTextures(1, &_handle);
+    }
+}
+
+GL3OwnedTextureHandle::GL3OwnedTextureHandle(GL3OwnedTextureHandle&& other) : GL3TextureHandle(other._type, 0)
+{
+    *this = std::move(other);
+}
+
+GL3OwnedTextureHandle& GL3OwnedTextureHandle::operator=(GL3OwnedTextureHandle&& other)
+{
+    _type = other._type;
+    _handle = other._handle;
+
+    other._handle = 0;
+
+    return *this;
+}
+
+GL3Texture2D::GL3Texture2D(GL3Renderer* renderer) : GL3Object(renderer), GL3OwnedTextureHandle(GL_TEXTURE_2D, 0), _nvgHandle(0) {
+}
+
+GL3Texture2D::GL3Texture2D(GL3Renderer* renderer, GLuint handle) : GL3Object(renderer), GL3OwnedTextureHandle(GL_TEXTURE_2D, handle), _nvgHandle(0) {
 }
 
 GL3Texture2D::~GL3Texture2D() {
-}
-
-GLuint GL3Texture2D::getHandle() {
-    return *_handle;
-}
-
-void GL3Texture2D::bind(int tex_unit) {
-    GLState->Texture.bindTexture(tex_unit, GL_TEXTURE_2D, getHandle());
 }
 
 void GL3Texture2D::initialize(size_t width, size_t height, TextureFormat format, void* data) {
@@ -167,9 +218,6 @@ void GL3Texture2D::copyDataFromFramebuffer(GLsizei width, GLsizei height) {
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, width, height, 0);
     GLState->Texture.bindTexture(0, GL_TEXTURE_2D, 0);
 }
-void GL3Texture2D::reset(GLuint handle) {
-    _handle.reset(handle);
-}
 std::unique_ptr<GL3Texture2D> GL3Texture2D::createTexture(GL3Renderer* renderer) {
     GLuint name;
     glGenTextures(1, &name);
@@ -181,13 +229,13 @@ void GL3Texture2D::updateSize(GLsizei width, GLsizei height) {
     _props.height = height;
 }
 int GL3Texture2D::getNanoVGHandle() {
-    Assertion(*_handle != 0, "Trying to get NanoVG handle from invalid texture!");
+    Assertion(_handle != 0, "Trying to get NanoVG handle from invalid texture!");
 
     if (_nvgHandle > 0) {
         return _nvgHandle;
     }
 
-    _nvgHandle = _renderer->getNanoVGImageHandle(*_handle, _props.width, _props.height);
+    _nvgHandle = _renderer->getNanoVGImageHandle(_handle, _props.width, _props.height);
     return _nvgHandle;
 }
 

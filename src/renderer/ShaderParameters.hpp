@@ -40,7 +40,7 @@ class DescriptorSet {
  public:
     virtual ~DescriptorSet() {}
 
-    virtual Descriptor* addDescriptor(DescriptorSetPart part) = 0;
+    virtual Descriptor* getDescriptor(DescriptorSetPart part) = 0;
 
     virtual void bind() = 0;
 

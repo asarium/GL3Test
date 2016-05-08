@@ -9,8 +9,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <util/Assertion.hpp>
 
+namespace
+{
+    struct GlobalParameters
+    {
+        glm::vec2 window_size;
+        glm::vec2 uv_scale;
+        glm::mat4 view_projection;
+    };
+}
+
 GL3LightingManager::GL3LightingManager(GL3Renderer* renderer) : GL3Object(renderer), _renderFrameBuffer(0),
-                                                                _gBufferTextures{ 0 }, _shadowMapResolution(0) {
+                                                                _gBufferTextures{ 0 }, _depthRenderBuffer(0),
+                                                                _lightingPassProgram(nullptr), _shadowMapResolution(0),
+                                                                _dirty(false) {
 }
 
 GL3LightingManager::~GL3LightingManager() {
@@ -31,7 +43,28 @@ bool GL3LightingManager::initialize() {
 
     _geometryPipelineState = _renderer->createPipelineState(pipelineProperties);
 
+    _globalUniformBuffer = _renderer->createBuffer(BufferType::Uniform);
+    _globalUniformBuffer->setData(nullptr, sizeof(GlobalParameters), BufferUsage::Streaming);
+
+    _lightUniformBuffer = _renderer->createBuffer(BufferType::Uniform);
+    _lightUniformBuffer->setData(nullptr, sizeof(GL3Light::LightParameters), BufferUsage::Streaming);
+
+    _lightingParameterSet.reset(new GL3DescriptorSet(Gl3DescriptorSetType::LightingSet));
+
+    _shadowMapDescriptor = _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_DiretionalShadowMap);
+    _shadowMapDescriptor->setGLTexture(GL3TextureHandle(GL_TEXTURE_2D, 0));
+
+    _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_GlobalUniforms)->
+        setUniformBuffer(_globalUniformBuffer.get(), 0, sizeof(GlobalParameters));
+    _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_LightUniforms)->
+        setUniformBuffer(_lightUniformBuffer.get(), 0, sizeof(GL3Light::LightParameters));
+
     return true;
+}
+
+void GL3LightingManager::markDirty()
+{
+    _dirty = true;
 }
 
 Light* GL3LightingManager::addLight(LightType type, bool shadows) {
@@ -40,6 +73,9 @@ Light* GL3LightingManager::addLight(LightType type, bool shadows) {
     }
 
     _lights.emplace_back(new GL3Light(this->_renderer, this, type, shadows ? _shadowMapResolution : 0));
+
+    markDirty();
+
     return _lights.back().get();
 }
 
@@ -47,6 +83,7 @@ void GL3LightingManager::removeLight(Light* light) {
     for (auto iter = _lights.begin(); iter != _lights.end(); ++iter) {
         if (iter->get() == light) {
             _lights.erase(iter);
+            markDirty();
             break;
         }
     }
@@ -90,49 +127,21 @@ void GL3LightingManager::endLightPass() {
 
     GLState->setDepthTest(false);
 
-    auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();
-    auto width = currentRenderTarget->getWidth();
-    auto height = currentRenderTarget->getHeight();
+    updateData();
 
-    glm::vec2 uv_scale = glm::vec2((float) width, (float) height) / glm::vec2(_framebufferSize);
-    _lightingPassParameters.setVec2(GL3ShaderParameterType::UVScale, uv_scale);
-    _lightingPassParameters.setMat4(GL3ShaderParameterType::ProjectionMatrix, _projectionMatrix);
-    _lightingPassParameters.setMat4(GL3ShaderParameterType::ViewMatrix, _viewMatrix);
-    _lightingPassParameters.setVec2(GL3ShaderParameterType::WindowSize, glm::vec2(width, height));
-    _lightingPassParameters.setInteger(GL3ShaderParameterType::LightHasShadow, 0);
+    GLState->Texture.unbindAll();
+    _lightingParameterSet->bind();
+    _lightingPassProgram->bind();
 
     for (auto& light : _lights) {
-        switch (light->type) {
-            case LightType::Point: {
-                _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 0);
-                _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->position);
-
-                const float cutoff = 0.01f; // Cutoff value after which this light does not affect anything anymore
-                // This depends on the formula in the shader!
-                auto scale = sqrtf((glm::length(light->color) / cutoff) - 1.f) * 1.2f;
-                glm::mat4 lightSphere;
-                lightSphere = glm::translate(lightSphere, light->position);
-                lightSphere = glm::scale(lightSphere, glm::vec3(scale));
-
-                _lightingPassParameters.setMat4(GL3ShaderParameterType::ModelMatrix, lightSphere);
-                break;
-            }
-            case LightType::Directional:
-                _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 1);
-                _lightingPassParameters.setVec3(GL3ShaderParameterType::LightVectorParameter, light->direction);
-
-                if (light->hasShadow()) {
-                    light->setParameters(&_lightingPassParameters);
-                }
-                break;
-            case LightType::Ambient:
-                _lightingPassParameters.setInteger(GL3ShaderParameterType::LightType, 2);
-                break;
+        if (light->hasShadow())
+        {
+            light->updateShadowMapDescriptor(_shadowMapDescriptor);
         }
 
-        _lightingPassParameters.setVec3(GL3ShaderParameterType::LightColor, light->color);
-
-        _lightingPassProgram->bindAndSetParameters(&_lightingPassParameters);
+        GL3Light::LightParameters lightParams;
+        light->setParameters(&lightParams);
+        _lightUniformBuffer->updateData(&lightParams, 0, sizeof(lightParams), UpdateFlags::DiscardOldData);
 
         if (light->type == LightType::Point) {
             _renderer->getGLUtil()->drawSphere();
@@ -141,9 +150,15 @@ void GL3LightingManager::endLightPass() {
         }
     }
 
+    _lightingParameterSet->unbind();
+
     // Only try to copy the depth buffer if there actually is one
+    auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();
     if (currentRenderTarget->hasDepthBuffer())
     {
+        auto width = currentRenderTarget->getWidth();
+        auto height = currentRenderTarget->getHeight();
+
         // Now copy the depth component back to the screen
         GLState->Framebuffer.pushBinding();
 
@@ -157,6 +172,7 @@ void GL3LightingManager::endLightPass() {
 
 void GL3LightingManager::freeResources() {
     if (glIsTexture(_gBufferTextures[0])) {
+        GLState->Texture.unbindAll();
         glDeleteTextures(NUM_GBUFFERS, _gBufferTextures);
         memset(_gBufferTextures, 0, sizeof(_gBufferTextures));
     }
@@ -170,6 +186,19 @@ void GL3LightingManager::freeResources() {
         glDeleteFramebuffers(1, &_renderFrameBuffer);
         _renderFrameBuffer = 0;
     }
+}
+
+void GL3LightingManager::updateData()
+{
+    auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();
+    auto width = currentRenderTarget->getWidth();
+    auto height = currentRenderTarget->getHeight();
+
+    GlobalParameters params;
+    params.uv_scale = glm::vec2((float)width, (float)height) / glm::vec2(_framebufferSize);
+    params.window_size = glm::vec2(width, height);
+    params.view_projection = _projectionMatrix * _viewMatrix;
+    _globalUniformBuffer->updateData(&params, 0, sizeof(params), UpdateFlags::DiscardOldData);
 }
 
 void GL3LightingManager::createFrameBuffer(int width, int height) {
@@ -227,10 +256,14 @@ void GL3LightingManager::createFrameBuffer(int width, int height) {
 
     checkFrameBufferStatus();
 
-    _lightingPassParameters.set2dTextureHandle(GL3ShaderParameterType::PositionTexture,
-                                               _gBufferTextures[POSITION_BUFFER]);
-    _lightingPassParameters.set2dTextureHandle(GL3ShaderParameterType::NormalTexture, _gBufferTextures[NORMAL_BUFFER]);
-    _lightingPassParameters.set2dTextureHandle(GL3ShaderParameterType::AlbedoTexture, _gBufferTextures[ALBEDO_BUFFER]);
+    _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_AlbedoTexture)
+        ->setGLTexture(GL3TextureHandle(GL_TEXTURE_2D, _gBufferTextures[ALBEDO_BUFFER]));
+
+    _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_NormalTexture)
+        ->setGLTexture(GL3TextureHandle(GL_TEXTURE_2D, _gBufferTextures[NORMAL_BUFFER]));
+
+    _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_PositionTexture)
+        ->setGLTexture(GL3TextureHandle(GL_TEXTURE_2D, _gBufferTextures[POSITION_BUFFER]));
 
     GLState->Framebuffer.popBinding();
 }
@@ -272,7 +305,7 @@ void GL3LightingManager::changeShadowQuality(SettingsLevel level) {
 }
 
 GL3Light::GL3Light(GL3Renderer* renderer, GL3LightingManager* manager, LightType in_type, uint32_t depthMapResolution)
-    : GL3Object(renderer), _lightingManager(manager), _depthMapResolution(depthMapResolution), _depthTexture(0), _depthFrameBuffer(0),
+    : GL3Object(renderer), _lightingManager(manager), _depthMapResolution(depthMapResolution), _depthTexture(GL_TEXTURE_2D, 0), _depthFrameBuffer(0),
       type(in_type) {
     if (!hasShadow()) {
         return;
@@ -298,14 +331,17 @@ GL3Light::~GL3Light() {
 
 void GL3Light::setPosition(const glm::vec3& pos) {
     position = pos;
+    _lightingManager->markDirty();
 }
 
 void GL3Light::setDirection(const glm::vec3& dir) {
     direction = glm::normalize(dir);
+    _lightingManager->markDirty();
 }
 
 void GL3Light::setColor(const glm::vec3& color) {
     this->color = color;
+    _lightingManager->markDirty();
 }
 ShadowMatrices GL3Light::beginShadowPass() {
     Assertion(hasShadow(), "beginShadowPass() called for non-shadowed light!");
@@ -333,6 +369,12 @@ void GL3Light::endShadowPass() {
 
     GLState->Framebuffer.popBinding();
 }
+
+void GL3Light::updateShadowMapDescriptor(GL3Descriptor* desc)
+{
+    desc->setGLTexture(_depthTexture);
+}
+
 void GL3Light::changeShadowMapResolution(uint32_t resolution) {
     Assertion(hasShadow(), "Shadow map resolution changed for non-shadowed light!");
 
@@ -340,10 +382,8 @@ void GL3Light::changeShadowMapResolution(uint32_t resolution) {
     createDepthBuffer(resolution);
 }
 void GL3Light::freeResources() {
-    if (glIsTexture(_depthTexture)) {
-        glDeleteTextures(1, &_depthTexture);
-        _depthTexture = 0;
-    }
+    GLState->Texture.unbindAll();
+    _depthTexture = GL3OwnedTextureHandle(GL_TEXTURE_2D, 0);
     if (glIsFramebuffer(_depthFrameBuffer)) {
         glDeleteFramebuffers(1, &_depthFrameBuffer);
         _depthFrameBuffer = 0;
@@ -355,8 +395,10 @@ void GL3Light::createDepthBuffer(uint32_t resolution) {
     // Setup shadow mapping
     glGenFramebuffers(1, &_depthFrameBuffer);
 
-    glGenTextures(1, &_depthTexture);
-    GLState->Texture.bindTexture(0, GL_TEXTURE_2D, _depthTexture);
+    GLuint handle;
+    glGenTextures(1, &handle);
+    _depthTexture = GL3OwnedTextureHandle(GL_TEXTURE_2D, handle);
+    _depthTexture.bind(0);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_DEPTH_COMPONENT,
@@ -374,10 +416,11 @@ void GL3Light::createDepthBuffer(uint32_t resolution) {
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+    _depthTexture.unbind(0);
 
     GLState->Framebuffer.pushBinding();
     GLState->Framebuffer.bind(_depthFrameBuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTexture.getGLHandle(), 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 
@@ -385,10 +428,41 @@ void GL3Light::createDepthBuffer(uint32_t resolution) {
 
     GLState->Framebuffer.popBinding();
 }
-void GL3Light::setParameters(GL3ShaderParameters* params) {
-    params->setInteger(GL3ShaderParameterType::LightHasShadow, 1);
-    params->set2dTextureHandle(GL3ShaderParameterType::DirectionalShadowMap, _depthTexture);
-    params->setMat4(GL3ShaderParameterType::LightProjectionMatrix, _matrices.projection);
-    params->setMat4(GL3ShaderParameterType::LightViewMatrix, _matrices.view);
+void GL3Light::setParameters(LightParameters* params) {
+    switch(type)
+    {
+    case LightType::Directional:
+        params->light_type = 0;
+        params->light_vector = direction;
+        break;
+    case LightType::Point:
+    {
+        params->light_type = 1;
+        params->light_vector = position;
+
+        const float cutoff = 0.01f; // Cutoff value after which this light does not affect anything anymore
+                                    // This depends on the formula in the shader!
+        auto scale = sqrtf((glm::length(color) / cutoff) - 1.f) * 1.2f;
+        glm::mat4 lightSphere;
+        lightSphere = glm::translate(lightSphere, position);
+        lightSphere = glm::scale(lightSphere, glm::vec3(scale));
+        params->model_matrix = lightSphere;
+        break;
+    }
+    case LightType::Ambient:
+        params->light_type = 2; 
+        break;
+    default:
+        params->light_type = 0;
+        break;
+    }
+
+    params->light_color = color;
+    params->light_has_shadow = hasShadow() ? GL_TRUE : GL_FALSE;
+
+    if (hasShadow())
+    {
+        params->light_view_proj_matrix = _matrices.projection * _matrices.view;
+    }
 }
 

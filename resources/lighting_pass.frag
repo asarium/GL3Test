@@ -2,27 +2,33 @@ uniform sampler2D g_position;
 uniform sampler2D g_normal;
 uniform sampler2D g_albedo;
 
-uniform int light_has_shadow;
 uniform sampler2DShadow directional_shadow_map;
-uniform mat4 light_proj_matrix;
-uniform mat4 light_view_matrix;
 
-uniform vec2 window_size;
-uniform vec2 uv_scale;
+layout(std140) uniform GlobalLightingData {
+    vec2 window_size;
+    vec2 uv_scale;
+    mat4 view_projection;
+} global;
 
-uniform int light_type;
-uniform vec3 light_vector;
-uniform vec3 light_color;
-uniform float light_intensity;
+layout(std140) uniform LightData {
+    mat4 light_view_proj_matrix;
+    mat4 model_matrix;
+
+    vec3 light_vector;
+    uint light_type;
+    
+    vec3 light_color;
+    uint light_has_shadow;
+} light;
 
 out vec4 frag_color;
 
 float calculate_directed_shadow(vec3 position) {
-    if (light_has_shadow == 0) {
+    if (light.light_has_shadow == 0) {
         return 1.f;
     }
 
-    vec4 pos_light_space = light_proj_matrix * light_view_matrix * vec4(position, 1.f);
+    vec4 pos_light_space = light.light_view_proj_matrix * vec4(position, 1.f);
 
     vec3 proj_pos = pos_light_space.xyz / pos_light_space.w;
     proj_pos = (proj_pos * 0.5f) + vec3(0.5f);
@@ -39,7 +45,7 @@ float calculate_directed_shadow(vec3 position) {
 
 void main()
 {
-    vec2 tex_coord = gl_FragCoord.xy / window_size * uv_scale;
+    vec2 tex_coord = gl_FragCoord.xy / global.window_size * global.uv_scale;
 
     // Get gBuffer data
     vec3 position = texture(g_position, tex_coord).xyz;
@@ -47,25 +53,25 @@ void main()
     vec3 color = texture(g_albedo, tex_coord).rgb;
 
     vec3 lighting = vec3(0.f);
-    if (light_type == 0)
+    if (light.light_type == 0)
+    {
+        // Directional light
+        float intens = max(dot(light.light_vector, normal), 0.f);
+        lighting = light.light_color * color * intens * calculate_directed_shadow(position);
+    }
+    else if (light.light_type == 1)
     {
         // Point light
-        vec3 diff = light_vector - position;
+        vec3 diff = light.light_vector - position;
         vec3 L = normalize(diff);
 
         float intens = max(dot(L, normal), 0.f);
-        lighting = color * ((light_color * intens) / (1 + dot(diff, diff)));
+        lighting = color * ((light.light_color * intens) / (1 + dot(diff, diff)));
     }
-    else if (light_type == 1)
-    {
-        // Directional light
-        float intens = max(dot(light_vector, normal), 0.f);
-        lighting = light_color * color * intens * calculate_directed_shadow(position);
-    }
-    else if (light_type == 2)
+    else if (light.light_type == 2)
     {
         // Ambient light
-        lighting = light_color * color;
+        lighting = light.light_color * color;
     }
     frag_color = vec4(lighting, 1.f);
 

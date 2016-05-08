@@ -312,6 +312,11 @@ std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelinePr
     return std::unique_ptr<PipelineState>(new GL3PipelineState(gl_props));
 }
 
+std::unique_ptr<DescriptorSet> GL3Renderer::createDescriptorSet(DescriptorSetType type)
+{
+    return std::unique_ptr<DescriptorSet>(new GL3DescriptorSet(convertDescriptorSetType(type)));
+}
+
 GL3ShaderManager* GL3Renderer::getShaderManager() {
     return _shaderManager.get();
 }
@@ -368,6 +373,7 @@ void GL3Renderer::nanovgEndFrame() {
     GLState->setDepthTest(false);
 
     GLState->bindVertexArray(0);
+    GLState->Buffer.bindUniformBuffer(0);
 
     GLState->Buffer.bindArrayBuffer(0);
     GLState->Program.use(nullptr);

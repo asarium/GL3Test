@@ -2,6 +2,7 @@
 //
 
 #include "GL3ShaderManager.hpp"
+#include <renderer/Renderer.hpp>
 
 namespace {
 template<typename T, size_t size>
@@ -40,13 +41,6 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<Sha
 
         compiled_parts.push_back(handle);
 #ifndef NDEBUG
-        GLint success = 0;
-        glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
-
-        if (success == GL_FALSE) {
-            printf("Shader compilation failed!\n");
-        }
-
         GLint logSize = 0;
         glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &logSize);
 
@@ -57,6 +51,13 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<Sha
             glGetShaderInfoLog(handle, logSize, &logSize, &info_log[0]);
 
             printf("Shader info log: %s\n", info_log.c_str());
+        }
+
+        GLint success = 0;
+        glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
+
+        if (success == GL_FALSE) {
+            throw RendererException("Shader compilation failed!");
         }
 #endif
     }
@@ -80,13 +81,6 @@ GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params, con
     glLinkProgram(prog);
 
 #ifndef NDEBUG
-    GLint success = 0;
-    glGetProgramiv(prog, GL_LINK_STATUS, &success);
-
-    if (success == GL_FALSE) {
-        printf("Shader linking failed!\n");
-    }
-
     GLint logSize = 0;
     glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logSize);
 
@@ -98,6 +92,13 @@ GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params, con
 
         printf("Program info log: %s\n", info_log.c_str());
     }
+
+    GLint success = 0;
+    glGetProgramiv(prog, GL_LINK_STATUS, &success);
+
+    if (success == GL_FALSE) {
+        throw RendererException("Shader linking failed!");
+    }
 #endif
 
     for (auto& part : parts) {
@@ -106,6 +107,26 @@ GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params, con
     }
 
     return prog;
+}
+
+void bindLocations(GLuint program, const GL3ShaderDefinition& def)
+{
+    for (auto& block : def.buffer_bindings)
+    {
+        auto blockIndex = glGetUniformBlockIndex(program, block.name);
+
+        if (blockIndex != GL_INVALID_INDEX)
+        {
+            glUniformBlockBinding(program, blockIndex, block.location);
+        }
+    }
+
+    glUseProgram(program);
+    for (auto& texture : def.texture_bindings) {
+        auto uniformIdx = glGetUniformLocation(program, texture.name);
+        glUniform1i(uniformIdx, texture.location);
+    }
+    glUseProgram(0);
 }
 }
 
@@ -123,6 +144,7 @@ GL3ShaderProgram* GL3ShaderManager::getShader(GL3ShaderType type) {
     auto definition = getShaderDefinition(type);
 
     auto prog = compileProgram(_fileLoader, definition, "#version 330 core\n");
+    bindLocations(prog, definition);
     _programCache[static_cast<size_t>(type)].reset(new GL3ShaderProgram(prog, definition));
 
     return _programCache[static_cast<size_t>(type)].get();

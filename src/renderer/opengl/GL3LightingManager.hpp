@@ -19,7 +19,7 @@ class GL3Light final: public GL3Object, public Light {
 
     uint32_t _depthMapResolution;
 
-    GLuint _depthTexture;
+    GL3OwnedTextureHandle _depthTexture;
     GLuint _depthFrameBuffer;
 
     std::unique_ptr<PipelineState> _shadowPipelineState;
@@ -29,6 +29,17 @@ class GL3Light final: public GL3Object, public Light {
     void freeResources();
     void createDepthBuffer(uint32_t resolution);
  public:
+     struct LightParameters
+     {
+         glm::mat4 light_view_proj_matrix;
+         glm::mat4 model_matrix;
+
+         glm::vec3 light_vector;
+         uint32_t light_type;
+         glm::vec3 light_color;
+         uint32_t light_has_shadow;
+     };
+
     GL3Light(GL3Renderer* renderer, GL3LightingManager* manager, LightType type, uint32_t shadowResolution);
     virtual ~GL3Light();
 
@@ -37,23 +48,25 @@ class GL3Light final: public GL3Object, public Light {
     glm::vec3 direction;
     glm::vec3 color;
 
-    virtual void setPosition(const glm::vec3& pos) override;
+    void setPosition(const glm::vec3& pos) override;
 
-    virtual void setDirection(const glm::vec3& pos) override;
+    void setDirection(const glm::vec3& pos) override;
 
-    virtual void setColor(const glm::vec3& color) override;
+    void setColor(const glm::vec3& color) override;
 
-    virtual ShadowMatrices beginShadowPass() override;
+    ShadowMatrices beginShadowPass() override;
 
-    virtual void endShadowPass() override;
+    void endShadowPass() override;
 
-    bool hasShadow() {
+    bool hasShadow() const {
         return _depthMapResolution != 0;
     }
 
+    void updateShadowMapDescriptor(GL3Descriptor* desc);
+
     void changeShadowMapResolution(uint32_t resolution);
 
-    void setParameters(GL3ShaderParameters* params);
+    void setParameters(LightParameters* params);
 };
 
 class GL3LightingManager: GL3Object, public LightingManager {
@@ -77,36 +90,47 @@ class GL3LightingManager: GL3Object, public LightingManager {
 
     std::unique_ptr<PipelineState> _geometryPipelineState;
 
+    std::unique_ptr<BufferObject> _globalUniformBuffer;
+    std::unique_ptr<BufferObject> _lightUniformBuffer;
+
+    std::unique_ptr<GL3DescriptorSet> _lightingParameterSet;
+    GL3Descriptor* _shadowMapDescriptor;
+
     GL3ShaderProgram* _lightingPassProgram;
-    GL3ShaderParameters _lightingPassParameters;
 
     glm::mat4 _projectionMatrix;
     glm::mat4 _viewMatrix;
 
     uint32_t _shadowMapResolution;
 
+    bool _dirty;
+
     void createFrameBuffer(int width, int height);
     void freeResources();
+
+    void updateData();
  public:
-    GL3LightingManager(GL3Renderer* renderer);
+    explicit GL3LightingManager(GL3Renderer* renderer);
 
     virtual ~GL3LightingManager();
 
     bool initialize();
 
+    void markDirty();
+
     void resizeFramebuffer(uint32_t width, uint32_t height);
 
     void changeShadowQuality(SettingsLevel level);
 
-    virtual Light* addLight(LightType type, bool shadows) override;
+    Light* addLight(LightType type, bool shadows) override;
 
-    virtual void removeLight(Light* light) override;
+    void removeLight(Light* light) override;
 
-    virtual void clearLights() override;
+    void clearLights() override;
 
-    virtual void beginLightPass(const glm::mat4& projection, const glm::mat4& view) override;
+    void beginLightPass(const glm::mat4& projection, const glm::mat4& view) override;
 
-    virtual void endLightPass() override;
+    void endLightPass() override;
 };
 
 

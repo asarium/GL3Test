@@ -217,3 +217,7 @@ void GL3FramebufferState::popBinding() {
     }
 }
 
+Gl3ContextConstants::Gl3ContextConstants()
+{
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &_uniformBufferAlignment);
+}

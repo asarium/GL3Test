@@ -119,6 +119,19 @@ public:
     void popBinding();
 };
 
+class Gl3ContextConstants
+{
+    GLint _uniformBufferAlignment;
+
+public:
+    Gl3ContextConstants();
+
+    GLint getUniformBufferAlignment() const
+    {
+        return _uniformBufferAlignment;
+    }
+};
+
 class GL3StateTracker {
     SavedState<bool> _depthTest;
     SavedState<bool> _depthMask;
@@ -135,6 +148,7 @@ public:
     GL3TextureState Texture;
     GL3ProgramState Program;
     GL3FramebufferState Framebuffer;
+    Gl3ContextConstants Constants;
 
     void setDepthTest(bool enable);
 

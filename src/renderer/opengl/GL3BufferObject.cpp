@@ -85,14 +85,14 @@ void GL3BufferObject::setData(const void *data, size_t size, BufferUsage usage) 
     }
 }
 
-void GL3BufferObject::updateData(const void *data, size_t size, size_t offset, UpdateFlags flags) {
+void GL3BufferObject::updateData(const void *data, size_t offset, size_t size, UpdateFlags flags) {
     this->bind();
     if (flags & UpdateFlags::DiscardOldData) {
-        auto ptr = glMapBufferRange(getGLType(_type), offset, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+        auto ptr = map(offset, size, BufferMapFlags::Write | BufferMapFlags::InvalidateData);
 
         std::memcpy(ptr, data, size);
 
-        if (glUnmapBuffer(getGLType(_type)) == GL_TRUE) {
+        if (unmap()) {
             // Unmap successful
             return;
         }
@@ -102,4 +102,30 @@ void GL3BufferObject::updateData(const void *data, size_t size, size_t offset, U
     glBufferSubData(getGLType(_type), offset, size, data);
 }
 
+void* GL3BufferObject::map(size_t offset, size_t size, BufferMapFlags flags)
+{
+    Assertion(size > 0, "Size may not be zero!");
 
+    GLbitfield gl_flags = 0;
+    if (flags & BufferMapFlags::Read)
+    {
+        gl_flags |= GL_MAP_READ_BIT;
+    }
+    if (flags & BufferMapFlags::Write)
+    {
+        gl_flags |= GL_MAP_WRITE_BIT;
+    }
+    if (flags & BufferMapFlags::InvalidateData)
+    {
+        gl_flags |= GL_MAP_INVALIDATE_RANGE_BIT;
+    }
+
+    this->bind();
+    return glMapBufferRange(getGLType(_type), offset, size, gl_flags);
+}
+
+bool GL3BufferObject::unmap()
+{
+    this->bind();
+    return glUnmapBuffer(getGLType(_type)) == GL_TRUE;
+}
