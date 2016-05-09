@@ -82,8 +82,6 @@ set(file_renderer_opengl
 set(file_test
         test/Application.cpp
         test/Application.hpp
-        test/AssimpModel.cpp
-        test/AssimpModel.hpp
         util/stb_image.h
         )
 
