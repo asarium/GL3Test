@@ -128,12 +128,11 @@ void bindLocations(GLuint program, const GL3ShaderDefinition& def)
         }
     }
 
-    glUseProgram(program);
+    GLState->Program.use(program);
     for (auto& texture : def.texture_bindings) {
         auto uniformIdx = glGetUniformLocation(program, texture.name);
         glUniform1i(uniformIdx, texture.location);
     }
-    glUseProgram(0);
 }
 }
 
