@@ -28,7 +28,8 @@ bool checkFrameBufferStatus();
 
 template<typename Enum>
 struct EnumClassHash: std::hash<typename std::underlying_type<Enum>::type> {
-    size_t operator()(Enum e) {
-        return std::hash<typename std::underlying_type<Enum>::type>::operator()(static_cast<typename std::underlying_type<Enum>::type>(e));
+    size_t operator()(Enum e) const {
+        return std::hash<typename std::underlying_type<Enum>::type>::operator()(static_cast<typename std::underlying_type<
+            Enum>::type>(e));
     }
 };
