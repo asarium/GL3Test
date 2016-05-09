@@ -229,7 +229,8 @@ bool ModelLoader::loadMaterials(Model* output, json_t* materials_root) {
 
         Material mat;
         mat.name = name_node == nullptr ? "" : json_string_value(name_node);
-        mat.diffuse_texture = util::load_texture(_renderer, std::string("resources/") + json_string_value(diffuse_node));
+        mat.diffuse_texture =
+            util::load_texture(_renderer, std::string("resources/") + json_string_value(diffuse_node));
 
         materials.push_back(std::move(mat));
     }
@@ -306,8 +307,9 @@ bool ModelLoader::loadMeshes(Model* output, json_t* meshes_root) {
 
         mesh.mesh_draw_call = _renderer->getDrawCallManager()->createDrawCall(props);
 
-        mesh.mesh_draw_call->getParameters()->setTexture(ShaderParameterType::ColorTexture,
-                                                         material.diffuse_texture.get());
+        mesh.model_descriptor_set = _renderer->createDescriptorSet(DescriptorSetType::ModelSet);
+        mesh.model_descriptor_set->getDescriptor(DescriptorSetPart::ModelSet_DiffuseTexture)->
+            setTexture(material.diffuse_texture.get());
 
         meshData.push_back(std::move(mesh));
     }
@@ -349,7 +351,7 @@ bool ModelLoader::parseModelNode(json_t* json_node, ModelNode& node_out) {
     node_out.name = name_node == nullptr ? "" : json_string_value(name_node);
     try {
         node_out.transform = parseMatrix(transform_node);
-    } catch(const std::runtime_error& e) {
+    } catch (const std::runtime_error& e) {
         fprintf(stderr, "Failed to parse transform matrix: %s\n", e.what());
         return false;
     }

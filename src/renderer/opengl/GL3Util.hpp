@@ -51,12 +51,13 @@ class VariableStackArray {
     }
 
     void updateData(const void* data, size_t size) {
-        if (size < StackSize) {
+        if (size <= StackSize) {
             // Copy to stack array
             _stackAllocated = true;
             memcpy(_stackData, data, size);
         } else {
             _variableData.resize(size);
+            _stackAllocated = false;
 
             auto begin = reinterpret_cast<const uint8_t*>(data);
             _variableData.assign(begin, begin + size);

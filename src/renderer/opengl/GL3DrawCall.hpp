@@ -11,8 +11,6 @@ class GL3DrawCall final: public GL3Object, public DrawCall, public VariableDrawC
                          public InstancedDrawCall, public InstancedVariableDrawCall {
     GL3DrawCallProperties _properties;
 
-    GL3ShaderParameters _parameters;
-
     VariableStackArray<> _pushConstants;
 
     void setGLState();
@@ -33,8 +31,6 @@ class GL3DrawCall final: public GL3Object, public DrawCall, public VariableDrawC
     virtual void drawInstanced(size_t num_instances) override;
 
     virtual void drawInstanced(size_t num_instances, size_t count, size_t offset) override;
-
-    virtual ShaderParameters* getParameters() override;
 
     virtual void setPushConstants(const void* data, size_t size) override;
 };

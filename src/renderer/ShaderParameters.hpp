@@ -29,10 +29,8 @@ enum class DescriptorSetType {
 enum class DescriptorSetPart {
     ViewSet_Uniforms,
 
-    ModelSet_Uniforms,
     ModelSet_DiffuseTexture,
 
-    HdrSet_Uniforms,
     HdrSet_BloomedTexture
 };
 
@@ -50,43 +48,15 @@ class DescriptorSet {
 struct ViewUniformData {
     glm::mat4 projection_matrix;
     glm::mat4 view_matrix;
+    glm::mat4 view_projection_matrix;
 };
 
 struct ModelUniformData {
     glm::mat4 model_matrix;
+    glm::mat4 normal_model_matrix;
 };
 
 struct HdrUniformData {
     float exposure;
     uint32_t bloom_horizontal;
-};
-
-enum class ShaderParameterType {
-    ModelMatrix,
-    ViewMatrix,
-    ProjectionMatrix,
-    ColorTexture,
-    WindowSize,
-    HdrExposure,
-    BloomHorizontal,
-    BloomedTexture
-};
-
-class ShaderParameters {
-public:
-    virtual ~ShaderParameters() { }
-
-    virtual void setBoolean(ShaderParameterType param, bool value) = 0;
-
-    virtual void setInteger(ShaderParameterType param, int value) = 0;
-
-    virtual void setFloat(ShaderParameterType param, float value) = 0;
-
-    virtual void setVec2(ShaderParameterType param, const glm::vec2& value) = 0;
-
-    virtual void setVec3(ShaderParameterType param, const glm::vec3& value) = 0;
-
-    virtual void setMat4(ShaderParameterType param, const glm::mat4 &value) = 0;
-
-    virtual void setTexture(ShaderParameterType param, Texture2DHandle* value) = 0;
 };

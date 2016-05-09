@@ -266,16 +266,6 @@ DescriptorBinding uniform_buffer_bindings[] = {
         mapDescriptorSetPartLocation(GL3DescriptorSetPart::ViewSet_Uniforms)
     },
     {
-        GL3DescriptorSetPart::ModelSet_Uniforms,
-        "ModelData",
-        mapDescriptorSetPartLocation(GL3DescriptorSetPart::ModelSet_Uniforms)
-    },
-    {
-        GL3DescriptorSetPart::HdrSet_Uniforms,
-        "HDRData",
-        mapDescriptorSetPartLocation(GL3DescriptorSetPart::HdrSet_Uniforms)
-    },
-    {
         GL3DescriptorSetPart::LightingSet_GlobalUniforms,
         "GlobalLightingData",
         mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_GlobalUniforms)

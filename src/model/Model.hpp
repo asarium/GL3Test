@@ -38,6 +38,7 @@ struct MeshData {
     size_t material_index;
 
     std::unique_ptr<DrawCall> mesh_draw_call;
+    std::unique_ptr<DescriptorSet> model_descriptor_set;
 };
 
 class Model {
@@ -53,8 +54,7 @@ class Model {
 
     Renderer* _renderer;
 
-    void recursiveRender(const ModelNode& node, const glm::mat4& projection, const glm::mat4& view,
-                         const glm::mat4& model);
+    void recursiveRender(const ModelNode& node, const glm::mat4& model);
  public:
     Model(Renderer* renderer);
     ~Model();
@@ -67,7 +67,7 @@ class Model {
 
     void setModelData(std::unique_ptr<BufferObject>&& data_buffer, std::unique_ptr<BufferObject>&& index_buffer);
 
-    void render(const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model);
+    void render(const glm::mat4& model);
 
     const std::vector<MeshData>& getMeshData() const {
         return _meshData;

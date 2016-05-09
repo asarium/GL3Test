@@ -149,60 +149,31 @@ Application::Application(Renderer* renderer, Timing* time) {
 
     printf("Loading: %fms\n", (end - begin) * 1000.0 / freq);
 
-    _particleBuffer = renderer->createBuffer(BufferType::Vertex);
-    _particleBuffer->setData(_particles.data(), sizeof(Particle) * _particles.size(), BufferUsage::Streaming);
-
-    _particleQuadBuffer = renderer->createBuffer(BufferType::Vertex);
+    _floorVertexDataObject = renderer->createBuffer(BufferType::Vertex);
     auto quadData = getQuadData();
-    _particleQuadBuffer->setData(quadData.data(), quadData.size() * sizeof(VertexData), BufferUsage::Static);
+    _floorVertexDataObject->setData(quadData.data(), quadData.size() * sizeof(VertexData), BufferUsage::Static);
 
-    _particleQuadLayout = renderer->createVertexLayout();
-    auto quadBufferIdx = _particleQuadLayout->attachBufferObject(_particleQuadBuffer.get());
-    _particleQuadLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), quadBufferIdx,
+    _floorVertexLayout = renderer->createVertexLayout();
+    auto quadBufferIdx = _floorVertexLayout->attachBufferObject(_floorVertexDataObject.get());
+    _floorVertexLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), quadBufferIdx,
                                       offsetof(VertexData, position));
-    _particleQuadLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), quadBufferIdx,
+    _floorVertexLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), quadBufferIdx,
                                       offsetof(VertexData, tex_coord));
-    _particleQuadLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), quadBufferIdx,
+    _floorVertexLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), quadBufferIdx,
                                       offsetof(VertexData, normal));
-
-    auto infoBufferIdx = _particleQuadLayout->attachBufferObject(_particleBuffer.get());
-    _particleQuadLayout->addInstanceComponent(AttributeType::PositionOffset, DataFormat::Vec3, 1, sizeof(Particle),
-                                              infoBufferIdx,
-                                              offsetof(Particle, position));
-    _particleQuadLayout->addInstanceComponent(AttributeType::Radius, DataFormat::Float, 1, sizeof(Particle),
-                                              infoBufferIdx,
-                                              offsetof(Particle, radius));
-
-    _particleQuadLayout->finalize();
-
-    PipelineProperties pipelineProperties;
-    pipelineProperties.shaderType = ShaderType::InstancedSprite;
-
-    pipelineProperties.blendFunction = BlendFunction::Additive;
-    pipelineProperties.blending = true;
-
-    pipelineProperties.depthMode = DepthMode::Read;
-    pipelineProperties.depthFunction = DepthFunction::Less;
-    _particleQuadPipelineState = renderer->createPipelineState(pipelineProperties);
-
-    DrawCallCreateProperties drawCallProperties;
-    drawCallProperties.vertexLayout = _particleQuadLayout.get();
-    drawCallProperties.primitive_type = PrimitiveType::TriangleStrip;
-    drawCallProperties.offset = 0;
-    drawCallProperties.count = quadData.size();
-    drawCallProperties.index_type = IndexType::None;
-    _particleQuadDrawCall = renderer->getDrawCallManager()->createInstancedDrawCall(drawCallProperties);
-    _particleQuadDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _particleTexture.get());
+    _floorVertexLayout->finalize();
 
     _floorTexture = util::load_texture(renderer, "resources/wood.png");
     DrawCallCreateProperties props;
-    props.vertexLayout = _particleQuadLayout.get();
+    props.vertexLayout = _floorVertexLayout.get();
     props.primitive_type = PrimitiveType::TriangleStrip;
     props.offset = 0;
     props.count = quadData.size();
     props.index_type = IndexType::None;
     _floorDrawCall = _renderer->getDrawCallManager()->createDrawCall(props);
-    _floorDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture, _floorTexture.get());
+
+    _floorModelDescriptorSet = _renderer->createDescriptorSet(DescriptorSetType::ModelSet);
+    _floorModelDescriptorSet->getDescriptor(DescriptorSetPart::ModelSet_DiffuseTexture)->setTexture(_floorTexture.get());
 
     _sunLight = _renderer->getLightingManager()->addLight(LightType::Directional, true);
     _sunLight->setDirection(glm::vec3(10.f, 5.f, 0.f));
@@ -215,10 +186,7 @@ Application::Application(Renderer* renderer, Timing* time) {
     int width, height;
     SDL_GL_GetDrawableSize(SDL_GL_GetCurrentWindow(), &width, &height);
 
-    _viewMx = glm::translate(mat4(), -glm::vec3(0.0f, 0.0f, 180.0f));
-    _modelMx = mat4();
-
-    _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
+    _viewUniforms.projection_matrix = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
 
     _wholeFrameCategory = _renderer->getProfiler()->createCategory("Whole frame");
     nvgCreateFont(_renderer->getNanovgContext(), "sans", "resources/Roboto-Regular.ttf");
@@ -269,6 +237,14 @@ Application::Application(Renderer* renderer, Timing* time) {
     bloomProps.shaderType = ShaderType::HdrBloom;
 
     _bloomPassState = _renderer->createPipelineState(bloomProps);
+
+
+    _viewUniformBuffer = _renderer->createBuffer(BufferType::Uniform);
+    _viewUniformBuffer->setData(nullptr, sizeof(ViewUniformData), BufferUsage::Streaming);
+
+    _viewDescriptorSet = _renderer->createDescriptorSet(DescriptorSetType::ViewSet);
+    auto descriptor = _viewDescriptorSet->getDescriptor(DescriptorSetPart::ViewSet_Uniforms);
+    descriptor->setUniformBuffer(_viewUniformBuffer.get(), 0, sizeof(ViewUniformData));
 }
 
 Application::~Application() {
@@ -278,21 +254,33 @@ void Application::render(Renderer* renderer) {
     float radius = 3.0f;
     float camX = sin(_timing->getTotalTime()) * radius;
     float camZ = cos(_timing->getTotalTime()) * radius;
-    _viewMx = glm::lookAt(glm::vec3(camX, 3.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
     _wholeFrameCategory->begin();
-    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
 //    _renderer->getRenderTargetManager()->useRenderTarget(_hdrRenderTarget.get());
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     auto matrices = _sunLight->beginShadowPass();
-    renderScene(matrices.projection, matrices.view);
+    ViewUniformData shadowView;
+    shadowView.projection_matrix = matrices.projection;
+    shadowView.view_matrix = matrices.view;
+    shadowView.view_projection_matrix = shadowView.projection_matrix * shadowView.view_matrix;
+    _viewUniformBuffer->updateData(&shadowView, 0, sizeof(shadowView), UpdateFlags::DiscardOldData);
+
+    _viewDescriptorSet->bind();
+    renderScene();
+    _viewDescriptorSet->unbind();
+
     _sunLight->endShadowPass();
 
-    renderer->getLightingManager()->beginLightPass(_projMx, _viewMx);
+    _viewUniforms.view_matrix = glm::lookAt(glm::vec3(camX, 3.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    _viewUniforms.view_projection_matrix = _viewUniforms.projection_matrix * _viewUniforms.view_matrix;
+    _viewUniformBuffer->updateData(&_viewUniforms, 0, sizeof(_viewUniforms), UpdateFlags::DiscardOldData);
 
-    renderScene(_projMx, _viewMx);
+    _viewDescriptorSet->bind();
+    renderer->getLightingManager()->beginLightPass(_viewUniforms.projection_matrix, _viewUniforms.view_matrix);
+
+    renderScene();
 
     renderer->getLightingManager()->endLightPass();
 
@@ -309,6 +297,7 @@ void Application::render(Renderer* renderer) {
 
 //    updateParticles();
 //    _particleQuadDrawCall->drawInstanced(_particles.size());
+    _viewDescriptorSet->unbind();
 
     renderUI();
 
@@ -344,27 +333,9 @@ void Application::changeResolution(uint32_t width, uint32_t height) {
     settings.resolution = glm::uvec2(width, height);
     _renderer->getSettingsManager()->changeSettings(settings);
 
-    _projMx = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
+    _viewUniforms.projection_matrix = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
 
     _hdrRenderTarget = createHDRRenderTarget(width, height);
-}
-
-void Application::updateParticles() {
-    size_t index = 0;
-    for (auto& particle : _particles) {
-        float time = _timing->getTotalTime() + particle.radius;
-
-        float y = (float) std::sin(time * M_PI_2);
-        particle.position.y = y;
-        _particleLights[index]->setPosition(particle.position);
-
-        ++index;
-    }
-    _particleBuffer->updateData(_particles.data(), 0, sizeof(Particle) * _particles.size(),
-                                UpdateFlags::DiscardOldData);
-
-    _particleQuadDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, _projMx);
-    _particleQuadDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, _viewMx);
 }
 
 void Application::renderUI() {
@@ -386,52 +357,58 @@ void Application::renderUI() {
 
     _renderer->nanovgEndFrame();
 }
-void Application::renderScene(const glm::mat4& projMx, const glm::mat4& viewMx) {
-    _model->render(projMx, viewMx, _modelMx);
+void Application::renderScene() {
+    _model->render(mat4());
 
     auto floorMatrix = mat4();
     floorMatrix = glm::translate(floorMatrix, vec3(0.f, 0.f, 0.f));
     floorMatrix = glm::rotate(floorMatrix, radians(90.f), vec3(1.f, 0.f, 0.f));
     floorMatrix = glm::scale(floorMatrix, vec3(10.f, 10.f, 10.f));
 
-    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ModelMatrix, floorMatrix);
-    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ProjectionMatrix, projMx);
-    _floorDrawCall->getParameters()->setMat4(ShaderParameterType::ViewMatrix, viewMx);
+    _floorModelDescriptorSet->bind();
+    ModelUniformData data;
+    data.model_matrix = floorMatrix;
+    data.normal_model_matrix = glm::transpose(glm::inverse(floorMatrix));
+
+    _floorDrawCall->setPushConstants(&data, sizeof(data));
     _floorDrawCall->draw();
+
+    _floorModelDescriptorSet->unbind();
 }
 
 Texture2DHandle* Application::doBloomPass() {
-    _renderer->getRenderTargetManager()->useRenderTarget(_bloomRenderTargets[0].get());
-    _brightPassState->bind();
-
-    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture,
-                                                        _hdrRenderTarget->getColorTexture());
-    _fullscreenTriDrawCall->draw();
-
-    // bloom target 0 now contains the parts of the scene that are bright
-    bool first_iter = true;
-    bool horizontal = true;
-
-    _bloomPassState->bind();
-    auto amount = 10;
-    for (auto i = 0; i < amount; ++i) {
-        auto index = horizontal ? 1 : 0;
-        auto other_index = horizontal ? 0 : 1;
-
-        _renderer->getRenderTargetManager()->useRenderTarget(_bloomRenderTargets[index].get());
-        _fullscreenTriDrawCall->getParameters()->setBoolean(ShaderParameterType::BloomHorizontal, horizontal);
-        _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture,
-                                                            _bloomRenderTargets[other_index]->getColorTexture());
-        _fullscreenTriDrawCall->draw();
-
-        horizontal = !horizontal;
-        if (first_iter) {
-            first_iter = false;
-        }
-    }
-
-
-    return _bloomRenderTargets[horizontal ? 1 : 0]->getColorTexture();
+//    _renderer->getRenderTargetManager()->useRenderTarget(_bloomRenderTargets[0].get());
+//    _brightPassState->bind();
+//
+//    _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture,
+//                                                        _hdrRenderTarget->getColorTexture());
+//    _fullscreenTriDrawCall->draw();
+//
+//    // bloom target 0 now contains the parts of the scene that are bright
+//    bool first_iter = true;
+//    bool horizontal = true;
+//
+//    _bloomPassState->bind();
+//    auto amount = 10;
+//    for (auto i = 0; i < amount; ++i) {
+//        auto index = horizontal ? 1 : 0;
+//        auto other_index = horizontal ? 0 : 1;
+//
+//        _renderer->getRenderTargetManager()->useRenderTarget(_bloomRenderTargets[index].get());
+//        _fullscreenTriDrawCall->getParameters()->setBoolean(ShaderParameterType::BloomHorizontal, horizontal);
+//        _fullscreenTriDrawCall->getParameters()->setTexture(ShaderParameterType::ColorTexture,
+//                                                            _bloomRenderTargets[other_index]->getColorTexture());
+//        _fullscreenTriDrawCall->draw();
+//
+//        horizontal = !horizontal;
+//        if (first_iter) {
+//            first_iter = false;
+//        }
+//    }
+//
+//
+//    return _bloomRenderTargets[horizontal ? 1 : 0]->getColorTexture();
+    return nullptr;
 }
 
 void Application::handleEvent(SDL_Event* event) {

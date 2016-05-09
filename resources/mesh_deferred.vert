@@ -1,6 +1,14 @@
-uniform mat4 model_matrix;
-uniform mat4 view_matrix;
-uniform mat4 proj_matrix;
+
+layout(std140) uniform ViewData {
+    mat4 projection_matrix;
+    mat4 view_matrix;
+    mat4 view_projection_matrix;
+} view;
+
+layout(std140) uniform PushConstants {
+    mat4 model_matrix;
+    mat4 normal_model_matrix;
+} push;
 
 in vec4 in_position;
 in vec2 in_tex_coord;
@@ -14,9 +22,9 @@ out VertexData {
 
 void main()
 {
-    gl_Position = proj_matrix*view_matrix*model_matrix*in_position;
+    gl_Position = view.view_projection_matrix * push.model_matrix * in_position;
 
-    vertOut.position = (model_matrix*in_position).xyz;
+    vertOut.position = (push.model_matrix * in_position).xyz;
     vertOut.tex_coord = in_tex_coord;
-    vertOut.normal = transpose(inverse(mat3(model_matrix))) * in_normal;
+    vertOut.normal = normalize(push.normal_model_matrix * vec4(in_normal, 0.f)).xyz;
 }

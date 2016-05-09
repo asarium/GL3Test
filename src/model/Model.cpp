@@ -59,28 +59,28 @@ void Model::setMeshData(std::vector<MeshData>&& data) {
 void Model::setMaterials(std::vector<Material>&& data) {
     _materials = std::move(data);
 }
-void Model::render(const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) {
-    recursiveRender(_rootNode, projection, view, model);
+void Model::render(const glm::mat4& model) {
+    recursiveRender(_rootNode, model);
 }
 void Model::recursiveRender(const ModelNode& node,
-                            const glm::mat4& projection,
-                            const glm::mat4& view,
                             const glm::mat4& model) {
     auto final_transform = model * node.transform;
 
     for (auto& mesh_idx : node.mesh_indices) {
         auto& mesh = _meshData[mesh_idx];
 
-        auto params = mesh.mesh_draw_call->getParameters();
-        params->setMat4(ShaderParameterType::ProjectionMatrix, projection);
-        params->setMat4(ShaderParameterType::ViewMatrix, view);
-        params->setMat4(ShaderParameterType::ModelMatrix, final_transform);
+        ModelUniformData data;
+        data.model_matrix = final_transform;
+        data.normal_model_matrix = glm::transpose(glm::inverse(final_transform));
 
+        mesh.model_descriptor_set->bind();
+        mesh.mesh_draw_call->setPushConstants(&data, sizeof(data));
         mesh.mesh_draw_call->draw();
+        mesh.model_descriptor_set->unbind();
     }
 
     for (auto& child : node.child_nodes) {
-        recursiveRender(*child, projection, view, final_transform);
+        recursiveRender(*child, final_transform);
     }
 }
 

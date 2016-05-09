@@ -54,10 +54,8 @@ enum class GL3DescriptorSetPart {
 
     ViewSet_Uniforms,
 
-    ModelSet_Uniforms,
     ModelSet_DiffuseTexture,
 
-    HdrSet_Uniforms,
     HdrSet_BloomedTexture,
 
     // Lighting pass parts

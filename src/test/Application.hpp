@@ -16,19 +16,12 @@ struct Particle {
 class Application {
     std::unique_ptr<Model> _model;
 
-    std::unique_ptr<Texture2D> _particleTexture;
-    std::unique_ptr<BufferObject> _particleBuffer;
-
-    std::vector<Light*> _particleLights;
-    std::vector<Particle> _particles;
-
-    std::unique_ptr<PipelineState> _particleQuadPipelineState;
-    std::unique_ptr<BufferObject> _particleQuadBuffer;
-    std::unique_ptr<VertexLayout> _particleQuadLayout;
-    std::unique_ptr<InstancedDrawCall> _particleQuadDrawCall;
-
+    std::unique_ptr<BufferObject> _floorVertexDataObject;
+    std::unique_ptr<VertexLayout> _floorVertexLayout;
     std::unique_ptr<Texture2D> _floorTexture;
     std::unique_ptr<DrawCall> _floorDrawCall;
+
+    std::unique_ptr<DescriptorSet> _floorModelDescriptorSet;
 
     std::unique_ptr<BufferObject> _fullscreenTriBuffer;
     std::unique_ptr<VertexLayout> _fullscreenTriLayout;
@@ -42,14 +35,15 @@ class Application {
 
     std::unique_ptr<RenderTarget> _hdrRenderTarget;
 
+    std::unique_ptr<BufferObject> _viewUniformBuffer;
+    std::unique_ptr<DescriptorSet> _viewDescriptorSet;
+
     ProfilingCategory* _wholeFrameCategory;
 
     Timing *_timing;
     Renderer *_renderer;
 
-    glm::mat4 _projMx;
-    glm::mat4 _viewMx;
-    glm::mat4 _modelMx;
+    ViewUniformData _viewUniforms;
 
     Light* _sunLight;
 
@@ -66,7 +60,7 @@ class Application {
     std::deque<float> _gpuTimes;
     void renderUI();
 
-    void renderScene(const glm::mat4& projMx, const glm::mat4& viewMx);
+    void renderScene();
 
     Texture2DHandle* doBloomPass();
 public:

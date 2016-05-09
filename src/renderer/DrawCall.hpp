@@ -6,8 +6,6 @@ class GenericDrawCall {
 public:
     virtual ~GenericDrawCall() { }
 
-    virtual ShaderParameters* getParameters() = 0;
-
     virtual void setPushConstants(const void* data, size_t size) = 0;
 };
 

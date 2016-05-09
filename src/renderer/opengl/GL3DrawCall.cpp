@@ -34,8 +34,6 @@ void GL3DrawCall::setGLState() {
     if (_pushConstants.getSize() > 0) {
         _renderer->getPushConstantManager()->setConstants(_pushConstants.getData(), _pushConstants.getSize());
     }
-
-    GLState->Program.getCurrentProgram()->bindAndSetParameters(&_parameters);
 }
 
 void GL3DrawCall::draw() {
@@ -95,10 +93,6 @@ void GL3DrawCall::drawInstanced(size_t num_instances) {
 
 void GL3DrawCall::drawInstanced(size_t num_instances, size_t count, size_t offset) {
     actualDrawInstanced(static_cast<GLsizei>(num_instances), (GLsizei) count, (GLint) offset);
-}
-
-ShaderParameters* GL3DrawCall::getParameters() {
-    return &_parameters;
 }
 
 void GL3DrawCall::actualDrawInstanced(GLsizei instances, GLsizei count, GLint offset) {

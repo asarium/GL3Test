@@ -7,30 +7,6 @@
 
 #include <util/Assertion.hpp>
 
-inline GL3ShaderParameterType convertParameterType(ShaderParameterType type) {
-    switch (type) {
-        case ShaderParameterType::ModelMatrix:
-            return GL3ShaderParameterType::ModelMatrix;
-        case ShaderParameterType::ViewMatrix:
-            return GL3ShaderParameterType::ViewMatrix;
-        case ShaderParameterType::ProjectionMatrix:
-            return GL3ShaderParameterType::ProjectionMatrix;
-        case ShaderParameterType::ColorTexture:
-            return GL3ShaderParameterType::ColorTexture;
-        case ShaderParameterType::WindowSize:
-            return GL3ShaderParameterType::WindowSize;
-        case ShaderParameterType::HdrExposure:
-            return GL3ShaderParameterType::HdrExposure;
-        case ShaderParameterType::BloomHorizontal:
-            return GL3ShaderParameterType::BloomHorizontal;
-        case ShaderParameterType::BloomedTexture:
-            return GL3ShaderParameterType::BloomedTexture;
-        default:
-            Assertion(false, "Unhandled shader parameter type translation!");
-            return GL3ShaderParameterType::ModelMatrix;
-    }
-}
-
 inline GL3ShaderType convertShaderType(ShaderType type) {
     switch (type) {
         case ShaderType::Mesh:
@@ -73,12 +49,8 @@ inline GL3DescriptorSetPart convertDescriptorSetPart(DescriptorSetPart type) {
     switch (type) {
         case DescriptorSetPart::ViewSet_Uniforms:
             return GL3DescriptorSetPart::ViewSet_Uniforms;
-        case DescriptorSetPart::ModelSet_Uniforms:
-            return GL3DescriptorSetPart::ModelSet_Uniforms;
         case DescriptorSetPart::ModelSet_DiffuseTexture:
             return GL3DescriptorSetPart::ModelSet_DiffuseTexture;
-        case DescriptorSetPart::HdrSet_Uniforms:
-            return GL3DescriptorSetPart::HdrSet_Uniforms;
         case DescriptorSetPart::HdrSet_BloomedTexture:
             return GL3DescriptorSetPart::HdrSet_BloomedTexture;
         default:
@@ -95,14 +67,10 @@ inline GLuint mapDescriptorSetPartLocation(GL3DescriptorSetPart part) {
             return 0;
         case GL3DescriptorSetPart::ViewSet_Uniforms:
             return 1;
-        case GL3DescriptorSetPart::ModelSet_Uniforms:
-            return 2;
-        case GL3DescriptorSetPart::HdrSet_Uniforms:
-            return 3;
         case GL3DescriptorSetPart::LightingSet_GlobalUniforms:
-            return 4;
+            return 2;
         case GL3DescriptorSetPart::LightingSet_LightUniforms:
-            return 5;
+            return 3;
 
         case GL3DescriptorSetPart::HdrSet_BloomedTexture:
             return 0;
