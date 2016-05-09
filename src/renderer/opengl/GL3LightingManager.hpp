@@ -1,10 +1,10 @@
 #pragma once
 
 #include "renderer/LightingManager.hpp"
-#include "GL3ShaderProgram.hpp"
 #include "GL3BufferObject.hpp"
 #include "GL3VertexLayout.hpp"
 #include "GL3Object.hpp"
+#include "GL3ShaderParameters.hpp"
 
 #include <renderer/Renderer.hpp>
 
@@ -95,8 +95,6 @@ class GL3LightingManager: GL3Object, public LightingManager {
 
     std::unique_ptr<GL3DescriptorSet> _lightingParameterSet;
     GL3Descriptor* _shadowMapDescriptor;
-
-    GL3ShaderProgram* _lightingPassProgram;
 
     glm::mat4 _projectionMatrix;
     glm::mat4 _viewMatrix;

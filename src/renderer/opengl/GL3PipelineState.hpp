@@ -1,10 +1,13 @@
 #pragma once
 
 #include "renderer/PipelineState.hpp"
-#include "GL3ShaderProgram.hpp"
+#include "Enums.hpp"
+#include "GL3Object.hpp"
+
+#include <glad/glad.h>
 
 struct GL3PipelineProperties {
-    GL3ShaderProgram* shader;
+    GL3ShaderType shaderType;
 
     DepthMode depthMode;
     DepthFunction depthFunction;
@@ -13,10 +16,10 @@ struct GL3PipelineProperties {
     BlendFunction blendFunction;
 };
 
-class GL3PipelineState final: public PipelineState {
+class GL3PipelineState final: public GL3Object, public PipelineState {
     GL3PipelineProperties _props;
  public:
-    GL3PipelineState(const GL3PipelineProperties& props) : _props(props) { }
+    GL3PipelineState(GL3Renderer* renderer, const GL3PipelineProperties& props) : GL3Object(renderer), _props(props) { }
 
     virtual ~GL3PipelineState() { }
 

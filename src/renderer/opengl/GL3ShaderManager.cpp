@@ -2,6 +2,8 @@
 //
 
 #include "GL3ShaderManager.hpp"
+#include "GL3ShaderDefintions.hpp"
+#include "GL3State.hpp"
 #include <renderer/Renderer.hpp>
 
 namespace {
@@ -135,23 +137,30 @@ void bindLocations(GLuint program, const GL3ShaderDefinition& def)
 }
 }
 
-GL3ShaderManager::GL3ShaderManager(FileLoader* fileLoader) : _fileLoader(fileLoader) {
+GL3ShaderManager::GL3ShaderManager(FileLoader* fileLoader) : _programCache{0}, _fileLoader(fileLoader) {
 }
 
 GL3ShaderManager::~GL3ShaderManager() {
+    for (auto prog : _programCache) {
+        if (prog != 0) {
+            glDeleteProgram(prog);
+        }
+    }
 }
 
-GL3ShaderProgram* GL3ShaderManager::getShader(GL3ShaderType type) {
-    if (_programCache[static_cast<size_t>(type)]) {
-        return _programCache[static_cast<size_t>(type)].get();
+GLuint GL3ShaderManager::getProgram(GL3ShaderType type) {
+    if (_programCache[static_cast<size_t>(type)] != 0) {
+        return _programCache[static_cast<size_t>(type)];
     }
 
     auto definition = getShaderDefinition(type);
 
     auto prog = compileProgram(_fileLoader, definition, "#version 330 core\n#line 1\n");
     bindLocations(prog, definition);
-    _programCache[static_cast<size_t>(type)].reset(new GL3ShaderProgram(prog, definition));
+    _programCache[static_cast<size_t>(type)] = prog;
 
-    return _programCache[static_cast<size_t>(type)].get();
+    return _programCache[static_cast<size_t>(type)];
 }
-
+void GL3ShaderManager::bindProgram(GL3ShaderType type) {
+    GLState->Program.use(getProgram(type));
+}

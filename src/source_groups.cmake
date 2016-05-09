@@ -69,8 +69,6 @@ set(file_renderer_opengl
         renderer/opengl/GL3ShaderManager.hpp
         renderer/opengl/GL3ShaderParameters.cpp
         renderer/opengl/GL3ShaderParameters.hpp
-        renderer/opengl/GL3ShaderProgram.cpp
-        renderer/opengl/GL3ShaderProgram.hpp
         renderer/opengl/GL3State.cpp
         renderer/opengl/GL3State.hpp
         renderer/opengl/GL3Texture2D.cpp

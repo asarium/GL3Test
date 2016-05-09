@@ -6,7 +6,6 @@
 #include <vector>
 #include <stack>
 #include <renderer/PipelineState.hpp>
-#include "GL3ShaderProgram.hpp"
 
 template<typename T>
 class SavedState {
@@ -85,14 +84,9 @@ public:
 };
 
 class GL3ProgramState {
-    SavedState<GL3ShaderProgram*> _activeProgram;
+    SavedState<GLuint> _activeProgram;
 public:
-    // TODO: Improve this state handling. I don't like using the actual shader program pointer here.
-    void use(GL3ShaderProgram* program);
-
-    GL3ShaderProgram* getCurrentProgram() {
-        return *_activeProgram;
-    }
+    void use(GLuint program);
 };
 
 class GL3FramebufferState {

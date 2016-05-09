@@ -3,13 +3,14 @@
 
 #include "GL3PipelineState.hpp"
 #include "GL3State.hpp"
+#include "GL3Renderer.hpp"
 
 #include <glad/glad.h>
 
 #include <util/Assertion.hpp>
 
 void GL3PipelineState::setupState() {
-    _props.shader->bind();
+    _renderer->getShaderManager()->bindProgram(_props.shaderType);
 
     switch (_props.depthMode) {
         case DepthMode::None:

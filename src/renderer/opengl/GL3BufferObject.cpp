@@ -2,6 +2,7 @@
 //
 
 #include <cstring>
+#include <util/Assertion.hpp>
 #include "GL3BufferObject.hpp"
 #include "GL3State.hpp"
 

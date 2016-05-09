@@ -4,6 +4,7 @@
 #include "GL3Renderer.hpp"
 #include "GL3State.hpp"
 #include "EnumTranslation.hpp"
+#include "GL3ShaderDefintions.hpp"
 
 #include <glad/glad.h>
 
@@ -237,7 +238,7 @@ SDL_Window* GL3Renderer::initialize() {
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
     // Preload the shaders
     for (auto type : getDefinedShaderTypes()) {
-        _shaderManager->getShader(type);
+        _shaderManager->getProgram(type);
     }
 
     _drawCallManager.reset(new GL3DrawCallManager(this, _shaderManager.get()));
@@ -304,14 +305,14 @@ std::unique_ptr<Texture2D> GL3Renderer::createTexture() {
 
 std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelineProperties& props) {
     GL3PipelineProperties gl_props;
-    gl_props.shader = _shaderManager->getShader(convertShaderType(props.shaderType));
+    gl_props.shaderType = convertShaderType(props.shaderType);
 
     gl_props.blending = props.blending;
     gl_props.blendFunction = props.blendFunction;
     gl_props.depthMode = props.depthMode;
     gl_props.depthFunction = props.depthFunction;
 
-    return std::unique_ptr<PipelineState>(new GL3PipelineState(gl_props));
+    return std::unique_ptr<PipelineState>(new GL3PipelineState(this, gl_props));
 }
 
 std::unique_ptr<DescriptorSet> GL3Renderer::createDescriptorSet(DescriptorSetType type) {
@@ -377,7 +378,7 @@ void GL3Renderer::nanovgEndFrame() {
     GLState->Buffer.bindUniformBuffer(0);
 
     GLState->Buffer.bindArrayBuffer(0);
-    GLState->Program.use(nullptr);
+    GLState->Program.use(0);
 
     GLState->Texture.setActiveUnit(0);
 }

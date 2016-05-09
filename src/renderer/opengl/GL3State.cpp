@@ -158,13 +158,9 @@ void GL3StateTracker::setBlendFunc(BlendFunction mode) {
     }
 }
 
-void GL3ProgramState::use(GL3ShaderProgram* program) {
+void GL3ProgramState::use(GLuint program) {
     if (_activeProgram.setIfChanged(program)) {
-        if (program){
-            glUseProgram(program->getHandle());
-        } else {
-            glUseProgram(0);
-        }
+        glUseProgram(program);
     }
 }
 

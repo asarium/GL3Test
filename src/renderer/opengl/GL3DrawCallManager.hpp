@@ -2,9 +2,9 @@
 
 #include "renderer/DrawCallManager.hpp"
 #include "GL3VertexLayout.hpp"
-#include "GL3ShaderProgram.hpp"
 #include "GL3ShaderManager.hpp"
 #include "GL3PipelineState.hpp"
+#include "GL3Object.hpp"
 
 struct GL3DrawCallProperties {
     GL3VertexLayout* vertexLayout;

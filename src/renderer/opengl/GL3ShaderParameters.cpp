@@ -2,7 +2,6 @@
 //
 
 #include "GL3ShaderParameters.hpp"
-#include "GL3ShaderProgram.hpp"
 
 #include "EnumTranslation.hpp"
 #include "GL3State.hpp"

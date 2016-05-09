@@ -21,7 +21,7 @@ namespace
 
 GL3LightingManager::GL3LightingManager(GL3Renderer* renderer) : GL3Object(renderer), _renderFrameBuffer(0),
                                                                 _gBufferTextures{ 0 }, _depthRenderBuffer(0),
-                                                                _lightingPassProgram(nullptr), _shadowMapResolution(0),
+                                                                _shadowMapResolution(0),
                                                                 _dirty(false) {
 }
 
@@ -30,8 +30,6 @@ GL3LightingManager::~GL3LightingManager() {
 }
 
 bool GL3LightingManager::initialize() {
-    _lightingPassProgram = _renderer->getShaderManager()->getShader(GL3ShaderType::LightingPass);
-
     PipelineProperties pipelineProperties;
     pipelineProperties.shaderType = ShaderType::LightedMesh;
 
@@ -131,7 +129,7 @@ void GL3LightingManager::endLightPass() {
 
     GLState->Texture.unbindAll();
     _lightingParameterSet->bind();
-    _lightingPassProgram->bind();
+    _renderer->getShaderManager()->bindProgram(GL3ShaderType::LightingPass);
 
     for (auto& light : _lights) {
         if (light->hasShadow())
