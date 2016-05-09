@@ -15,16 +15,16 @@ layout(std140) uniform LightData {
     mat4 model_matrix;
 
     vec3 light_vector;
-    uint light_type;
+    int light_type;
     
     vec3 light_color;
-    uint light_has_shadow;
+    bool light_has_shadow;
 } light;
 
 out vec4 frag_color;
 
 float calculate_directed_shadow(vec3 position) {
-    if (light.light_has_shadow == 0) {
+    if (!light.light_has_shadow) {
         return 1.f;
     }
 

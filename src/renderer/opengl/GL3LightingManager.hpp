@@ -35,7 +35,7 @@ class GL3Light final: public GL3Object, public Light {
          glm::mat4 model_matrix;
 
          glm::vec3 light_vector;
-         uint32_t light_type;
+         int32_t light_type;
          glm::vec3 light_color;
          uint32_t light_has_shadow;
      };

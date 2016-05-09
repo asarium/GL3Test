@@ -10,10 +10,10 @@ layout(std140) uniform LightData {
     mat4 model_matrix;
 
     vec3 light_vector;
-    uint light_type;
+    int light_type;
     
     vec3 light_color;
-    uint light_has_shadow;
+    bool light_has_shadow;
 } light;
 
 in vec3 in_position;
