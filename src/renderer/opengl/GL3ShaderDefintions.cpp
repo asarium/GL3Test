@@ -3,8 +3,8 @@
 
 namespace {
 struct ShaderDefinition {
-  GL3ShaderType type;
-  std::vector<ShaderFilename> files;
+    GL3ShaderType type;
+    std::vector<ShaderFilename> files;
 };
 ShaderDefinition shader_definitions[] =
     {
@@ -256,6 +256,11 @@ AttributeBinding attribute_mappings[] =
 
 DescriptorBinding uniform_buffer_bindings[] = {
     {
+        GL3DescriptorSetPart::PushConstantSet_Uniforms,
+        "PushConstants",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::PushConstantSet_Uniforms)
+    },
+    {
         GL3DescriptorSetPart::ViewSet_Uniforms,
         "ViewData",
         mapDescriptorSetPartLocation(GL3DescriptorSetPart::ViewSet_Uniforms)
@@ -332,13 +337,11 @@ GL3ShaderDefinition getShaderDefinition(GL3ShaderType type) {
         def.uniforms.push_back(unif);
     }
 
-    for (auto& buffer : uniform_buffer_bindings)
-    {
+    for (auto& buffer : uniform_buffer_bindings) {
         def.buffer_bindings.push_back(buffer);
     }
 
-    for (auto& buffer : texture_bindings)
-    {
+    for (auto& buffer : texture_bindings) {
         def.texture_bindings.push_back(buffer);
     }
 

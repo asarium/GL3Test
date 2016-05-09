@@ -3,6 +3,7 @@
 
 #include "GL3DrawCallManager.hpp"
 #include "GL3DrawCall.hpp"
+#include "GL3Renderer.hpp"
 #include "EnumTranslation.hpp"
 
 namespace {
@@ -57,7 +58,7 @@ std::unique_ptr<DrawCall> GL3DrawCallManager::createDrawCall(const DrawCallCreat
     gl_props.offset = static_cast<GLint>(props.offset);
     gl_props.instanced = false;
 
-    return std::unique_ptr<DrawCall>(new GL3DrawCall(gl_props));
+    return std::unique_ptr<DrawCall>(new GL3DrawCall(_renderer, gl_props));
 }
 
 std::unique_ptr<VariableDrawCall> GL3DrawCallManager::createVariableDrawCall(const DrawCallCreateProperties& props) {
@@ -67,7 +68,7 @@ std::unique_ptr<VariableDrawCall> GL3DrawCallManager::createVariableDrawCall(con
     gl_props.offset = 0;
     gl_props.instanced = false;
 
-    return std::unique_ptr<VariableDrawCall>(new GL3DrawCall(gl_props));
+    return std::unique_ptr<VariableDrawCall>(new GL3DrawCall(_renderer, gl_props));
 }
 
 std::unique_ptr<InstancedDrawCall> GL3DrawCallManager::createInstancedDrawCall(const DrawCallCreateProperties& props) {
@@ -77,7 +78,7 @@ std::unique_ptr<InstancedDrawCall> GL3DrawCallManager::createInstancedDrawCall(c
     gl_props.offset = static_cast<GLint>(props.offset);
     gl_props.instanced = true;
 
-    return std::unique_ptr<InstancedDrawCall>(new GL3DrawCall(gl_props));
+    return std::unique_ptr<InstancedDrawCall>(new GL3DrawCall(_renderer, gl_props));
 }
 
 std::unique_ptr<InstancedVariableDrawCall> GL3DrawCallManager::createInstancedVariableDrawCall(const DrawCallCreateProperties& props) {
@@ -87,5 +88,5 @@ std::unique_ptr<InstancedVariableDrawCall> GL3DrawCallManager::createInstancedVa
     gl_props.offset = 0;
     gl_props.instanced = true;
 
-    return std::unique_ptr<InstancedVariableDrawCall>(new GL3DrawCall(gl_props));
+    return std::unique_ptr<InstancedVariableDrawCall>(new GL3DrawCall(_renderer, gl_props));
 }

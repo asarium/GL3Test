@@ -153,6 +153,7 @@ void GL3Renderer::deinitialize() {
     _renderTargetManager.reset();
     _profiler.reset();
     _util.reset();
+    _pushConstantManager.reset();
 
     SDL_GL_DeleteContext(_context);
     _context = nullptr;
@@ -230,6 +231,7 @@ SDL_Window* GL3Renderer::initialize() {
 #endif
     GLState.reset(new GL3StateTracker());
     _util.reset(new GL3Util(this));
+    _pushConstantManager.reset(new GL3PushConstantManager(this));
     _profiler.reset(new GL3Profiler(this));
 
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
@@ -238,7 +240,7 @@ SDL_Window* GL3Renderer::initialize() {
         _shaderManager->getShader(type);
     }
 
-    _drawCallManager.reset(new GL3DrawCallManager(_shaderManager.get()));
+    _drawCallManager.reset(new GL3DrawCallManager(this, _shaderManager.get()));
     _lightingManager.reset(new GL3LightingManager(this));
     _lightingManager->initialize();
 
@@ -312,8 +314,7 @@ std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelinePr
     return std::unique_ptr<PipelineState>(new GL3PipelineState(gl_props));
 }
 
-std::unique_ptr<DescriptorSet> GL3Renderer::createDescriptorSet(DescriptorSetType type)
-{
+std::unique_ptr<DescriptorSet> GL3Renderer::createDescriptorSet(DescriptorSetType type) {
     return std::unique_ptr<DescriptorSet>(new GL3DescriptorSet(convertDescriptorSetType(type)));
 }
 
@@ -382,6 +383,9 @@ void GL3Renderer::nanovgEndFrame() {
 }
 int GL3Renderer::getNanoVGImageHandle(GLuint tex_handle, GLsizei width, GLsizei height) {
     return nvglCreateImageFromHandleGL3(_nvgContext, tex_handle, width, height, NVG_IMAGE_NODELETE);
+}
+GL3PushConstantManager* GL3Renderer::getPushConstantManager() {
+    return _pushConstantManager.get();
 }
 
 GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer* renderer) : GL3Object(renderer),

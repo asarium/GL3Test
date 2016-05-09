@@ -5,6 +5,7 @@
 #include "GL3DrawCall.hpp"
 #include "GL3DrawCallManager.hpp"
 #include "GL3State.hpp"
+#include "GL3Renderer.hpp"
 
 namespace {
 size_t getTypeSize(GLenum type) {
@@ -19,7 +20,8 @@ size_t getTypeSize(GLenum type) {
 }
 }
 
-GL3DrawCall::GL3DrawCall(const GL3DrawCallProperties& props) : _properties(props) {
+GL3DrawCall::GL3DrawCall(GL3Renderer* renderer, const GL3DrawCallProperties& props)
+    : GL3Object(renderer), _properties(props) {
 }
 
 GL3DrawCall::~GL3DrawCall() {
@@ -28,6 +30,11 @@ GL3DrawCall::~GL3DrawCall() {
 
 void GL3DrawCall::setGLState() {
     _properties.vertexLayout->bind();
+
+    if (_pushConstants.getSize() > 0) {
+        _renderer->getPushConstantManager()->setConstants(_pushConstants.getData(), _pushConstants.getSize());
+    }
+
     GLState->Program.getCurrentProgram()->bindAndSetParameters(&_parameters);
 }
 
@@ -132,5 +139,6 @@ void GL3DrawCall::actualDrawInstanced(GLsizei instances, GLsizei count, GLint of
         glDrawArraysInstanced(_properties.primitive_type, offset, count, instances);
     }
 }
-
-
+void GL3DrawCall::setPushConstants(const void* data, size_t size) {
+    _pushConstants.updateData(data, size);
+}

@@ -33,13 +33,13 @@ struct GL3DrawCallProperties {
     }
 };
 
-class GL3DrawCallManager final: public DrawCallManager {
+class GL3DrawCallManager final: public GL3Object, public DrawCallManager {
     GL3ShaderManager* _manager;
 
     GL3DrawCallProperties convertProperties(const DrawCallCreateProperties& props);
 
  public:
-    GL3DrawCallManager(GL3ShaderManager* _manager) : _manager(_manager) { }
+    GL3DrawCallManager(GL3Renderer* renderer, GL3ShaderManager* _manager) : GL3Object(renderer), _manager(_manager) { }
 
     virtual ~GL3DrawCallManager() { };
 

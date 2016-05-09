@@ -55,6 +55,8 @@ set(file_renderer_opengl
         renderer/opengl/GL3PipelineState.hpp
         renderer/opengl/GL3Profiler.cpp
         renderer/opengl/GL3Profiler.hpp
+        renderer/opengl/GL3PushConstantManager.cpp
+        renderer/opengl/GL3PushConstantManager.hpp
         renderer/opengl/GL3Renderer.cpp
         renderer/opengl/GL3Renderer.hpp
         renderer/opengl/GL3RenderTarget.cpp

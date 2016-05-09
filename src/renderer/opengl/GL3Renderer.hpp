@@ -7,6 +7,7 @@
 #include "GL3RenderTargetManager.hpp"
 #include "GL3Util.hpp"
 #include "GL3Profiler.hpp"
+#include "GL3PushConstantManager.hpp"
 
 #include <SDL_video.h>
 
@@ -47,6 +48,7 @@ class GL3Renderer final: public Renderer {
     std::unique_ptr<GL3RenderTargetManager> _renderTargetManager;
     std::unique_ptr<GL3Profiler> _profiler;
     std::unique_ptr<GL3Util> _util;
+    std::unique_ptr<GL3PushConstantManager> _pushConstantManager;
 
     NVGcontext* _nvgContext;
  public:
@@ -101,6 +103,8 @@ class GL3Renderer final: public Renderer {
     GL3RenderTargetManager* getGLRenderTargetManager();
 
     GL3ShaderManager* getShaderManager();
+
+    GL3PushConstantManager* getPushConstantManager();
 
     GL3Util* getGLUtil() {
         return _util.get();

@@ -4,13 +4,16 @@
 #include "GL3ShaderProgram.hpp"
 #include "GL3VertexLayout.hpp"
 #include "GL3DrawCallManager.hpp"
+#include "GL3Util.hpp"
 
 
-class GL3DrawCall final: public DrawCall, public VariableDrawCall,
+class GL3DrawCall final: public GL3Object, public DrawCall, public VariableDrawCall,
                          public InstancedDrawCall, public InstancedVariableDrawCall {
     GL3DrawCallProperties _properties;
 
     GL3ShaderParameters _parameters;
+
+    VariableStackArray<> _pushConstants;
 
     void setGLState();
 
@@ -19,7 +22,7 @@ class GL3DrawCall final: public DrawCall, public VariableDrawCall,
     void actualDrawInstanced(GLsizei instances, GLsizei count, GLint offset);
 
  public:
-    GL3DrawCall(const GL3DrawCallProperties&);
+    GL3DrawCall(GL3Renderer* renderer, const GL3DrawCallProperties&);
 
     ~GL3DrawCall();
 
@@ -32,6 +35,8 @@ class GL3DrawCall final: public DrawCall, public VariableDrawCall,
     virtual void drawInstanced(size_t num_instances, size_t count, size_t offset) override;
 
     virtual ShaderParameters* getParameters() override;
+
+    virtual void setPushConstants(const void* data, size_t size) override;
 };
 
 

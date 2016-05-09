@@ -50,6 +50,8 @@ enum class Gl3DescriptorSetType {
 };
 
 enum class GL3DescriptorSetPart {
+    PushConstantSet_Uniforms,
+
     ViewSet_Uniforms,
 
     ModelSet_Uniforms,
