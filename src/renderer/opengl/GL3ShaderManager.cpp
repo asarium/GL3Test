@@ -148,7 +148,7 @@ GL3ShaderProgram* GL3ShaderManager::getShader(GL3ShaderType type) {
 
     auto definition = getShaderDefinition(type);
 
-    auto prog = compileProgram(_fileLoader, definition, "#version 330 core\n");
+    auto prog = compileProgram(_fileLoader, definition, "#version 330 core\n#line 1\n");
     bindLocations(prog, definition);
     _programCache[static_cast<size_t>(type)].reset(new GL3ShaderProgram(prog, definition));
 
