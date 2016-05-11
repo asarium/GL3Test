@@ -46,8 +46,7 @@ GL3OwnedTextureHandle::GL3OwnedTextureHandle(GL3OwnedTextureHandle&& other) : GL
 }
 
 GL3OwnedTextureHandle& GL3OwnedTextureHandle::operator=(GL3OwnedTextureHandle&& other) {
-    _target = other._target;
-    _handle = other._handle;
+    reset(other._target, other._handle);
 
     other._handle = 0;
 
