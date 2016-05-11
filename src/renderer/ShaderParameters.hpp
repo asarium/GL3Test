@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Texture2D.hpp"
+#include "Texture.hpp"
 #include "RenderTarget.hpp"
 #include "BufferObject.hpp"
 
@@ -15,7 +15,7 @@ class Descriptor {
  public:
     virtual ~Descriptor() {}
 
-    virtual void setTexture(Texture2DHandle* handle) = 0;
+    virtual void setTexture(TextureHandle* handle) = 0;
 
     virtual void setUniformBuffer(BufferObject* object, size_t offset, size_t range) = 0;
 };

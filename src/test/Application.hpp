@@ -18,7 +18,7 @@ class Application {
 
     std::unique_ptr<BufferObject> _floorVertexDataObject;
     std::unique_ptr<VertexLayout> _floorVertexLayout;
-    std::unique_ptr<Texture2D> _floorTexture;
+    std::unique_ptr<Texture> _floorTexture;
     std::unique_ptr<DrawCall> _floorDrawCall;
 
     std::unique_ptr<DescriptorSet> _floorModelDescriptorSet;
@@ -62,7 +62,7 @@ class Application {
 
     void renderScene();
 
-    Texture2DHandle* doBloomPass();
+    TextureHandle* doBloomPass();
 public:
     Application(Renderer *renderer, Timing *timimg);
 

@@ -85,7 +85,7 @@ class Renderer {
 
     virtual std::unique_ptr<VertexLayout> createVertexLayout() = 0;
 
-    virtual std::unique_ptr<Texture2D> createTexture() = 0;
+    virtual std::unique_ptr<Texture> createTexture() = 0;
 
     virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) = 0;
 

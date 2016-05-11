@@ -9,7 +9,7 @@
 
 #include "util/stb_image.h"
 
-std::unique_ptr<Texture2D> util::load_texture(Renderer* renderer, const std::string& path) {
+std::unique_ptr<Texture> util::load_texture(Renderer* renderer, const std::string& path) {
 
     auto render_texture = renderer->createTexture();
     int width, height, components;

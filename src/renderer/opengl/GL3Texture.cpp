@@ -1,7 +1,7 @@
 //
 //
 
-#include "GL3Texture2D.hpp"
+#include "GL3Texture.hpp"
 #include "GL3State.hpp"
 #include "GL3Renderer.hpp"
 
@@ -63,18 +63,18 @@ void GL3OwnedTextureHandle::reset(GLenum target, GLuint handle) {
     _handle = handle;
 }
 
-GL3Texture2D::GL3Texture2D(GL3Renderer* renderer)
+GL3Texture::GL3Texture(GL3Renderer* renderer)
     : GL3Object(renderer), GL3OwnedTextureHandle(GL_TEXTURE_2D, 0), _nvgHandle(0) {
 }
 
-GL3Texture2D::GL3Texture2D(GL3Renderer* renderer, GLuint handle)
+GL3Texture::GL3Texture(GL3Renderer* renderer, GLuint handle)
     : GL3Object(renderer), GL3OwnedTextureHandle(GL_TEXTURE_2D, handle), _nvgHandle(0) {
 }
 
-GL3Texture2D::~GL3Texture2D() {
+GL3Texture::~GL3Texture() {
 }
 
-void GL3Texture2D::copyDataFromFramebuffer(GLsizei width, GLsizei height) {
+void GL3Texture::copyDataFromFramebuffer(GLsizei width, GLsizei height) {
     reset(GL_TEXTURE_2D, _handle);
     this->bind();
 
@@ -91,20 +91,20 @@ void GL3Texture2D::copyDataFromFramebuffer(GLsizei width, GLsizei height) {
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, width, height, 0);
     GLState->Texture.bindTexture(0, GL_TEXTURE_2D, 0);
 }
-std::unique_ptr<GL3Texture2D> GL3Texture2D::createTexture(GL3Renderer* renderer) {
+std::unique_ptr<GL3Texture> GL3Texture::createTexture(GL3Renderer* renderer) {
     GLuint name;
     glGenTextures(1, &name);
-    return std::unique_ptr<GL3Texture2D>(new GL3Texture2D(renderer, name));
+    return std::unique_ptr<GL3Texture>(new GL3Texture(renderer, name));
 }
 
-void GL3Texture2D::updateSize(GLsizei width, GLsizei height) {
+void GL3Texture::updateSize(GLsizei width, GLsizei height) {
     _extent.x = width;
     _extent.y = height;
 
     // Implicitly makes this texture 2D
     reset(GL_TEXTURE_2D, _handle);
 }
-int GL3Texture2D::getNanoVGHandle() {
+int GL3Texture::getNanoVGHandle() {
     Assertion(_handle != 0, "Trying to get NanoVG handle from invalid texture!");
 
     if (_nvgHandle > 0) {
@@ -114,7 +114,7 @@ int GL3Texture2D::getNanoVGHandle() {
     _nvgHandle = _renderer->getNanoVGImageHandle(_handle, _extent.x, _extent.y);
     return _nvgHandle;
 }
-void GL3Texture2D::initialize(const gli::texture& texture) {
+void GL3Texture::initialize(const gli::texture& texture) {
     gli::gl GL(gli::gl::PROFILE_GL33);
     gli::gl::format const format = GL.translate(texture.format(), texture.swizzles());
     GLenum target = GL.translate(texture.target());

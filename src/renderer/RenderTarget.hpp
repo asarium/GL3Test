@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Texture2D.hpp"
+#include "Texture.hpp"
 
 class RenderTarget {
 public:
@@ -12,11 +12,11 @@ public:
 
     virtual size_t getHeight() const = 0;
 
-    virtual void copyToTexture(Texture2D* target) = 0;
+    virtual void copyToTexture(Texture* target) = 0;
 
-    virtual Texture2DHandle* getColorTexture() = 0;
+    virtual TextureHandle* getColorTexture() = 0;
 
-    virtual Texture2DHandle* getDepthTexture() = 0;
+    virtual TextureHandle* getDepthTexture() = 0;
 };
 
 

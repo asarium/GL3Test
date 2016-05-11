@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/Texture2D.hpp"
+#include "renderer/Texture.hpp"
 
 #include <glad/glad.h>
 #include "GL3Object.hpp"
@@ -45,15 +45,15 @@ public:
     GL3OwnedTextureHandle& operator=(GL3OwnedTextureHandle&& other);
 };
 
-class GL3Texture2D final: public GL3Object, public Texture2D, public GL3OwnedTextureHandle {
+class GL3Texture final: public GL3Object, public Texture, public GL3OwnedTextureHandle {
     gli::texture::extent_type _extent;
     gli::texture::format_type _format;
 
     int _nvgHandle;
  public:
-    explicit GL3Texture2D(GL3Renderer* renderer);
-    explicit GL3Texture2D(GL3Renderer* renderer, GLuint handle);
-    ~GL3Texture2D();
+    explicit GL3Texture(GL3Renderer* renderer);
+    explicit GL3Texture(GL3Renderer* renderer, GLuint handle);
+    ~GL3Texture();
 
     void copyDataFromFramebuffer(GLsizei width, GLsizei height);
 
@@ -63,6 +63,6 @@ class GL3Texture2D final: public GL3Object, public Texture2D, public GL3OwnedTex
 
     void initialize(const gli::texture& texture) override;
 
-    static std::unique_ptr<GL3Texture2D> createTexture(GL3Renderer* renderer);
+    static std::unique_ptr<GL3Texture> createTexture(GL3Renderer* renderer);
 };
 

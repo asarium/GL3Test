@@ -3,7 +3,7 @@
 
 #include "GL3RenderTarget.hpp"
 #include "GL3State.hpp"
-#include "GL3Texture2D.hpp"
+#include "GL3Texture.hpp"
 
 GL3RenderTarget::GL3RenderTarget(GL3Renderer* renderer,
                                  GLsizei width,
@@ -37,8 +37,8 @@ void GL3RenderTarget::bindFramebuffer() {
     glViewport(0, 0, (GLsizei) _width, (GLsizei) _heigth);
 }
 
-void GL3RenderTarget::copyToTexture(Texture2D* target) {
-    auto glTexture = static_cast<GL3Texture2D*>(target);
+void GL3RenderTarget::copyToTexture(Texture* target) {
+    auto glTexture = static_cast<GL3Texture*>(target);
 
     GLState->Framebuffer.pushBinding();
 
@@ -48,11 +48,11 @@ void GL3RenderTarget::copyToTexture(Texture2D* target) {
     GLState->Framebuffer.popBinding();
 }
 
-Texture2DHandle* GL3RenderTarget::getColorTexture() {
+TextureHandle* GL3RenderTarget::getColorTexture() {
     return &_colorTexture;
 }
 
-Texture2DHandle* GL3RenderTarget::getDepthTexture() {
+TextureHandle* GL3RenderTarget::getDepthTexture() {
     return &_depthTexture;
 }
 

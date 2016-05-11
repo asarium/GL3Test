@@ -5,7 +5,7 @@
 #include "renderer/ShaderParameters.hpp"
 
 #include "Enums.hpp"
-#include "GL3Texture2D.hpp"
+#include "GL3Texture.hpp"
 #include "GL3BufferObject.hpp"
 #include "GL3Util.hpp"
 
@@ -40,7 +40,7 @@ public:
     explicit GL3Descriptor(GL3DescriptorSetPart part);
     virtual ~GL3Descriptor() {}
 
-    void setTexture(Texture2DHandle* handle) override;
+    void setTexture(TextureHandle* handle) override;
 
     void setGLTexture(const GL3TextureHandle& handle);
 

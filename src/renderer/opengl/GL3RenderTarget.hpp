@@ -3,8 +3,8 @@
 #include "renderer/RenderTarget.hpp"
 
 #include <glad/glad.h>
-#include <renderer/Texture2D.hpp>
-#include "GL3Texture2D.hpp"
+#include <renderer/Texture.hpp>
+#include "GL3Texture.hpp"
 
 class GL3RenderTarget final: public RenderTarget {
     GLsizei _width;
@@ -12,9 +12,9 @@ class GL3RenderTarget final: public RenderTarget {
 
     GLuint _renderFramebuffer;
 
-    GL3Texture2D _colorTexture;
+    GL3Texture _colorTexture;
 
-    GL3Texture2D _depthTexture;
+    GL3Texture _depthTexture;
  public:
     GL3RenderTarget(GL3Renderer* renderer,
                     GLsizei width,
@@ -29,11 +29,11 @@ class GL3RenderTarget final: public RenderTarget {
 
     virtual size_t getHeight() const override;
 
-    virtual void copyToTexture(Texture2D* target) override;
+    virtual void copyToTexture(Texture* target) override;
 
-    Texture2DHandle* getColorTexture() override;
+    TextureHandle* getColorTexture() override;
 
-    Texture2DHandle* getDepthTexture() override;
+    TextureHandle* getDepthTexture() override;
 
     bool hasDepthBuffer();
 

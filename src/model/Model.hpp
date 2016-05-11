@@ -29,7 +29,7 @@ struct ModelNode {
 
 struct Material {
     std::string name;
-    std::unique_ptr<Texture2D> diffuse_texture;
+    std::unique_ptr<Texture> diffuse_texture;
 };
 
 struct MeshData {

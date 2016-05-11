@@ -24,7 +24,7 @@ set(file_renderer
         renderer/RenderTarget.hpp
         renderer/RenderTargetManager.hpp
         renderer/ShaderParameters.hpp
-        renderer/Texture2D.hpp
+    renderer/Texture.hpp
         renderer/VertexLayout.hpp
         )
 
@@ -71,8 +71,8 @@ set(file_renderer_opengl
         renderer/opengl/GL3ShaderParameters.hpp
         renderer/opengl/GL3State.cpp
         renderer/opengl/GL3State.hpp
-        renderer/opengl/GL3Texture2D.cpp
-        renderer/opengl/GL3Texture2D.hpp
+    renderer/opengl/GL3Texture.cpp
+    renderer/opengl/GL3Texture.hpp
         renderer/opengl/GL3Util.cpp
         renderer/opengl/GL3Util.hpp
         renderer/opengl/GL3VertexLayout.cpp

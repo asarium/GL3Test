@@ -3,17 +3,17 @@
 #include <cstddef>
 #include <gli/texture.hpp>
 
-class Texture2DHandle {
+class TextureHandle {
 protected:
-    Texture2DHandle() {}
+    TextureHandle() {}
 public:
-    virtual ~Texture2DHandle() {}
+    virtual ~TextureHandle() {}
 
     virtual int getNanoVGHandle() = 0;
 };
 
-class Texture2D : public Texture2DHandle {
+class Texture : public TextureHandle {
 public:
-    virtual ~Texture2D() { }
+    virtual ~Texture() { }
     virtual void initialize(const gli::texture& texture) = 0;
 };

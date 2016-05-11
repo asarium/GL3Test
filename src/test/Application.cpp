@@ -376,7 +376,7 @@ void Application::renderScene() {
     _floorModelDescriptorSet->unbind();
 }
 
-Texture2DHandle* Application::doBloomPass() {
+TextureHandle* Application::doBloomPass() {
 //    _renderer->getRenderTargetManager()->useRenderTarget(_bloomRenderTargets[0].get());
 //    _brightPassState->bind();
 //

@@ -10,8 +10,8 @@ GL3Descriptor::GL3Descriptor(GL3DescriptorSetPart part) : _active(false) {
     _data.part = part;
 }
 
-void GL3Descriptor::setTexture(Texture2DHandle* handle) {
-    setGLTexture(*static_cast<GL3Texture2D*>(handle));
+void GL3Descriptor::setTexture(TextureHandle* handle) {
+    setGLTexture(*static_cast<GL3Texture*>(handle));
 }
 
 void GL3Descriptor::setGLTexture(const GL3TextureHandle& handle)

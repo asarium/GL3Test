@@ -74,7 +74,7 @@ class GL3Renderer final: public Renderer {
 
     virtual std::unique_ptr<VertexLayout> createVertexLayout() override;
 
-    virtual std::unique_ptr<Texture2D> createTexture() override;
+    virtual std::unique_ptr<Texture> createTexture() override;
 
     virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) override;
 
