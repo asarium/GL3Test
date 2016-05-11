@@ -8,10 +8,12 @@
 #include <util/Assertion.hpp>
 #include <util/UniqueHandle.hpp>
 
+#include <gli/texture.hpp>
+
 struct GL3TextureHandle
 {
 protected:
-    GLenum _type;
+    GLenum _target;
     GLuint _handle;
 
 public:
@@ -24,11 +26,13 @@ public:
 
     GLuint getGLHandle();
 
-    GLenum getType();
+    GLenum getTarget();
 };
 
 struct GL3OwnedTextureHandle : GL3TextureHandle
 {
+ protected:
+    void reset(GLenum target, GLuint handle);
 public:
     GL3OwnedTextureHandle();
     GL3OwnedTextureHandle(GLenum type, GLuint glHandle);
@@ -41,18 +45,9 @@ public:
     GL3OwnedTextureHandle& operator=(GL3OwnedTextureHandle&& other);
 };
 
-struct TextureProperties {
-    GLenum internal_format;
-
-    bool is_compressed;
-    GLenum format;
-
-    GLsizei width;
-    GLsizei height;
-};
-
 class GL3Texture2D final: public GL3Object, public Texture2D, public GL3OwnedTextureHandle {
-    TextureProperties _props;
+    gli::texture::extent_type _extent;
+    gli::texture::format_type _format;
 
     int _nvgHandle;
  public:
@@ -66,13 +61,7 @@ class GL3Texture2D final: public GL3Object, public Texture2D, public GL3OwnedTex
 
     int getNanoVGHandle() override;
 
-    void initialize(size_t width, size_t height, TextureFormat format, void* data) override;
-
-    void updateData(void* data) override;
-
-    void initializeCompressed(size_t width, size_t height, CompressionFormat format, size_t data_size, void* data) override;
-
-    void updateCompressedData(size_t data_size, void* data) override;
+    void initialize(const gli::texture& texture) override;
 
     static std::unique_ptr<GL3Texture2D> createTexture(GL3Renderer* renderer);
 };
