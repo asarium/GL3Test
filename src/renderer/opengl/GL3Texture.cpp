@@ -129,6 +129,12 @@ void GL3Texture::initialize(const gli::texture& texture) {
     glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, format.Swizzles[2]);
     glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, format.Swizzles[3]);
 
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
     GLsizei const faceTotal = static_cast<GLsizei>(texture.layers() * texture.faces());
 
     // First allocate store for all mipmap levels
