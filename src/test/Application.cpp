@@ -156,11 +156,11 @@ Application::Application(Renderer* renderer, Timing* time) {
     _floorVertexLayout = renderer->createVertexLayout();
     auto quadBufferIdx = _floorVertexLayout->attachBufferObject(_floorVertexDataObject.get());
     _floorVertexLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), quadBufferIdx,
-                                      offsetof(VertexData, position));
+                                     offsetof(VertexData, position));
     _floorVertexLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), quadBufferIdx,
-                                      offsetof(VertexData, tex_coord));
+                                     offsetof(VertexData, tex_coord));
     _floorVertexLayout->addComponent(AttributeType::Normal, DataFormat::Vec3, sizeof(VertexData), quadBufferIdx,
-                                      offsetof(VertexData, normal));
+                                     offsetof(VertexData, normal));
     _floorVertexLayout->finalize();
 
     _floorTexture = util::load_texture(renderer, "resources/wood.png");
@@ -172,7 +172,21 @@ Application::Application(Renderer* renderer, Timing* time) {
     props.index_type = IndexType::None;
     _floorDrawCall = _renderer->getDrawCallManager()->createDrawCall(props);
 
+    auto floorMatrix = mat4();
+    floorMatrix = glm::translate(floorMatrix, vec3(0.f, 0.f, 0.f));
+    floorMatrix = glm::rotate(floorMatrix, radians(90.f), vec3(1.f, 0.f, 0.f));
+    floorMatrix = glm::scale(floorMatrix, vec3(10.f, 10.f, 10.f));
+
+    ModelUniformData data;
+    data.model_matrix = floorMatrix;
+    data.normal_model_matrix = glm::transpose(glm::inverse(floorMatrix));
+    _floorUniformObject = _renderer->createBuffer(BufferType::Uniform);
+    _floorUniformObject->setData(&data, sizeof(ModelUniformData), BufferUsage::Static);
+
     _floorModelDescriptorSet = _renderer->createDescriptorSet(DescriptorSetType::ModelSet);
+    _floorModelDescriptorSet->getDescriptor(DescriptorSetPart::ModelSet_Uniforms)->setUniformBuffer(_floorUniformObject.get(),
+                                                                                                    0,
+                                                                                                    sizeof(data));
     _floorModelDescriptorSet->getDescriptor(DescriptorSetPart::ModelSet_DiffuseTexture)->setTexture(_floorTexture.get());
 
     _sunLight = _renderer->getLightingManager()->addLight(LightType::Directional, true);
@@ -273,7 +287,8 @@ void Application::render(Renderer* renderer) {
 
     _sunLight->endShadowPass();
 
-    _viewUniforms.view_matrix = glm::lookAt(glm::vec3(camX, 3.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+    _viewUniforms.view_matrix =
+        glm::lookAt(glm::vec3(camX, 3.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
     _viewUniforms.view_projection_matrix = _viewUniforms.projection_matrix * _viewUniforms.view_matrix;
     _viewUniformBuffer->updateData(&_viewUniforms, 0, sizeof(_viewUniforms), UpdateFlags::DiscardOldData);
 
@@ -358,21 +373,12 @@ void Application::renderUI() {
     _renderer->nanovgEndFrame();
 }
 void Application::renderScene() {
-    _model->render(mat4());
+    _model->prepareData(mat4());
 
-    auto floorMatrix = mat4();
-    floorMatrix = glm::translate(floorMatrix, vec3(0.f, 0.f, 0.f));
-    floorMatrix = glm::rotate(floorMatrix, radians(90.f), vec3(1.f, 0.f, 0.f));
-    floorMatrix = glm::scale(floorMatrix, vec3(10.f, 10.f, 10.f));
+    _model->render();
 
     _floorModelDescriptorSet->bind();
-    ModelUniformData data;
-    data.model_matrix = floorMatrix;
-    data.normal_model_matrix = glm::transpose(glm::inverse(floorMatrix));
-
-    _floorDrawCall->setPushConstants(&data, sizeof(data));
     _floorDrawCall->draw();
-
     _floorModelDescriptorSet->unbind();
 }
 

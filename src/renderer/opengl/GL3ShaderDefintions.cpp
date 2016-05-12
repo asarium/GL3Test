@@ -131,89 +131,6 @@ ShaderDefinition shader_definitions[] =
         }
     };
 
-UniformMapping uniform_mappings[] = {
-    {
-        GL3ShaderParameterType::ViewMatrix,
-        "view_matrix"
-    },
-    {
-        GL3ShaderParameterType::ModelMatrix,
-        "model_matrix"
-    },
-    {
-        GL3ShaderParameterType::ProjectionMatrix,
-        "proj_matrix"
-    },
-    {
-        GL3ShaderParameterType::ColorTexture,
-        "color_texture"
-    },
-    {
-        GL3ShaderParameterType::WindowSize,
-        "window_size"
-    },
-    {
-        GL3ShaderParameterType::UVScale,
-        "uv_scale"
-    },
-    {
-        GL3ShaderParameterType::PositionTexture,
-        "g_position"
-    },
-    {
-        GL3ShaderParameterType::NormalTexture,
-        "g_normal"
-    },
-    {
-        GL3ShaderParameterType::AlbedoTexture,
-        "g_albedo"
-    },
-    {
-        GL3ShaderParameterType::LightType,
-        "light_type"
-    },
-    {
-        GL3ShaderParameterType::LightVectorParameter,
-        "light_vector"
-    },
-    {
-        GL3ShaderParameterType::LightColor,
-        "light_color"
-    },
-    {
-        GL3ShaderParameterType::LightIntensitiy,
-        "light_intensity"
-    },
-    {
-        GL3ShaderParameterType::LightHasShadow,
-        "light_has_shadow"
-    },
-    {
-        GL3ShaderParameterType::DirectionalShadowMap,
-        "directional_shadow_map"
-    },
-    {
-        GL3ShaderParameterType::LightProjectionMatrix,
-        "light_proj_matrix"
-    },
-    {
-        GL3ShaderParameterType::LightViewMatrix,
-        "light_view_matrix"
-    },
-    {
-        GL3ShaderParameterType::HdrExposure,
-        "hdr_exposure"
-    },
-    {
-        GL3ShaderParameterType::BloomHorizontal,
-        "horizontal"
-    },
-    {
-        GL3ShaderParameterType::BloomedTexture,
-        "bloomed_texture"
-    }
-};
-
 AttributeBinding attribute_mappings[] =
     {
         {
@@ -266,6 +183,11 @@ DescriptorBinding uniform_buffer_bindings[] = {
         mapDescriptorSetPartLocation(GL3DescriptorSetPart::ViewSet_Uniforms)
     },
     {
+        GL3DescriptorSetPart::ModelSet_Uniforms,
+        "ModelData",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::ModelSet_Uniforms)
+    },
+    {
         GL3DescriptorSetPart::LightingSet_GlobalUniforms,
         "GlobalLightingData",
         mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_GlobalUniforms)
@@ -316,15 +238,12 @@ GL3ShaderDefinition getShaderDefinition(GL3ShaderType type) {
     for (auto& file:shader_definitions) {
         if (file.type == type) {
             def.filenames = file.files;
+            break;
         }
     }
 
     for (auto& attr : attribute_mappings) {
         def.attribute_bindings.push_back(attr);
-    }
-
-    for (auto& unif : uniform_mappings) {
-        def.uniforms.push_back(unif);
     }
 
     for (auto& buffer : uniform_buffer_bindings) {

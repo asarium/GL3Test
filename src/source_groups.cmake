@@ -94,6 +94,7 @@ set(file_util
         util/textures.cpp
         util/Timing.hpp
         util/Timing.cpp
+        util/UniformAligner.hpp
         util/UniqueHandle.hpp
         )
 

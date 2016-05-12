@@ -127,7 +127,6 @@ void GL3LightingManager::endLightPass() {
 
     updateData();
 
-    GLState->Texture.unbindAll();
     _lightingParameterSet->bind();
     _renderer->getShaderManager()->bindProgram(GL3ShaderType::LightingPass);
 

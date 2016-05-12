@@ -7,17 +7,19 @@
 class ModelLoader {
     Renderer* _renderer;
 
-    bool loadMetaData(Model* output, json_t* metadata);
+    std::unique_ptr<Model> _currentModel;
 
-    bool loadMaterials(Model* output, json_t* materials_root);
+    bool loadMetaData(json_t* metadata);
 
-    bool loadMeshes(Model* output, json_t* meshes_root);
+    bool loadMaterials(json_t* materials_root);
 
-    bool loadNodes(Model* output, json_t* nodes_root);
+    bool loadMeshes(json_t* meshes_root);
+
+    bool loadNodes(json_t* nodes_root);
 
     bool parseModelNode(json_t* json_node, ModelNode & node_out);
 
-    bool loadModelData(Model* output, const std::string& file_path);
+    bool loadModelData(const std::string& file_path);
  public:
     ModelLoader(Renderer* renderer);
 

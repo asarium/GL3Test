@@ -21,11 +21,6 @@ struct AttributeBinding {
     GLuint binding_location;
 };
 
-struct UniformMapping {
-    GL3ShaderParameterType parameter;
-    const char* name;
-};
-
 struct DescriptorBinding
 {
     GL3DescriptorSetPart part;
@@ -35,8 +30,6 @@ struct DescriptorBinding
 
 struct GL3ShaderDefinition {
     std::vector<ShaderFilename> filenames;
-
-    std::vector<UniformMapping> uniforms;
 
     std::vector<AttributeBinding> attribute_bindings;
 

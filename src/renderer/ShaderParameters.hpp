@@ -29,6 +29,7 @@ enum class DescriptorSetType {
 enum class DescriptorSetPart {
     ViewSet_Uniforms,
 
+    ModelSet_Uniforms,
     ModelSet_DiffuseTexture,
 
     HdrSet_BloomedTexture

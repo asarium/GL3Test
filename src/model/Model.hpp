@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <vector>
+#include <util/UniformAligner.hpp>
 
 struct ModelVertexData {
     glm::vec3 position;
@@ -17,14 +18,6 @@ struct ModelVertexData {
     glm::vec3 normal;
     glm::vec3 tangent;
     glm::vec3 bitangent;
-};
-
-struct ModelNode {
-    std::string name;
-    glm::mat4 transform;
-
-    std::vector<size_t> mesh_indices;
-    std::vector<std::unique_ptr<ModelNode>> child_nodes;
 };
 
 struct Material {
@@ -38,23 +31,52 @@ struct MeshData {
     size_t material_index;
 
     std::unique_ptr<DrawCall> mesh_draw_call;
+
+    MeshData() : material_index(0) { }
+};
+
+struct NodeMeshData {
+    size_t mesh_index;
     std::unique_ptr<DescriptorSet> model_descriptor_set;
+};
+
+struct ModelNode {
+    std::string name;
+    glm::mat4 transform;
+
+    size_t index;
+
+    std::vector<NodeMeshData> mesh_data;
+    std::vector<std::unique_ptr<ModelNode>> child_nodes;
+
+    ModelNode() : index(0) { }
 };
 
 class Model {
     std::unique_ptr<BufferObject> _modelData;
     std::unique_ptr<BufferObject> _indexData;
+    std::unique_ptr<BufferObject> _nodeUniformData;
 
     std::unique_ptr<VertexLayout> _vertexLayout;
+
+    Renderer* _renderer;
+
+    UniformAligner<ModelUniformData> _alignedUniformData;
 
     std::vector<MeshData> _meshData;
     std::vector<Material> _materials;
 
     ModelNode _rootNode;
 
-    Renderer* _renderer;
+    size_t _numDrawCalls;
 
-    void recursiveRender(const ModelNode& node, const glm::mat4& model);
+    size_t updateNodeIndices(ModelNode& node, size_t nextIndex);
+
+    void initializeDescriptorSets(ModelNode& node);
+
+    void updateUniformData(const ModelNode& node, const glm::mat4& model);
+
+    void recursiveRender(const ModelNode& node);
  public:
     Model(Renderer* renderer);
     ~Model();
@@ -67,7 +89,9 @@ class Model {
 
     void setModelData(std::unique_ptr<BufferObject>&& data_buffer, std::unique_ptr<BufferObject>&& index_buffer);
 
-    void render(const glm::mat4& model);
+    void prepareData(const glm::mat4& world_transform);
+
+    void render();
 
     const std::vector<MeshData>& getMeshData() const {
         return _meshData;

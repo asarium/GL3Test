@@ -5,7 +5,7 @@ layout(std140) uniform ViewData {
     mat4 view_projection_matrix;
 } view;
 
-layout(std140) uniform PushConstants {
+layout(std140) uniform ModelData {
     mat4 model_matrix;
     mat4 normal_model_matrix;
 } push;

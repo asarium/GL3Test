@@ -388,6 +388,13 @@ int GL3Renderer::getNanoVGImageHandle(GLuint tex_handle, GLsizei width, GLsizei 
 GL3PushConstantManager* GL3Renderer::getPushConstantManager() {
     return _pushConstantManager.get();
 }
+RendererLimits GL3Renderer::getLimits() const {
+    RendererLimits limits;
+
+    limits.uniform_offset_alignment = (size_t) GLState->Constants.getUniformBufferAlignment();
+
+    return limits;
+}
 
 GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer* renderer) : GL3Object(renderer),
                                                                                          _settingsSet(false) {

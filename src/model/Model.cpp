@@ -3,7 +3,8 @@
 
 #include "Model.hpp"
 
-Model::Model(Renderer* renderer) : _renderer(renderer) {
+Model::Model(Renderer* renderer)
+    : _renderer(renderer), _alignedUniformData(renderer->getLimits().uniform_offset_alignment), _numDrawCalls(0) {
 
 }
 
@@ -12,6 +13,15 @@ Model::~Model() {
 }
 void Model::setRootNode(ModelNode&& node) {
     _rootNode = std::move(node);
+
+    _numDrawCalls = updateNodeIndices(_rootNode, 0);
+
+    _alignedUniformData.allocate(_numDrawCalls);
+
+    _nodeUniformData = _renderer->createBuffer(BufferType::Uniform);
+    _nodeUniformData->setData(nullptr, _alignedUniformData.getSize(), BufferUsage::Streaming);
+
+    initializeDescriptorSets(_rootNode);
 }
 
 void Model::setModelData(std::unique_ptr<BufferObject>&& data_buffer, std::unique_ptr<BufferObject>&& index_buffer) {
@@ -59,29 +69,71 @@ void Model::setMeshData(std::vector<MeshData>&& data) {
 void Model::setMaterials(std::vector<Material>&& data) {
     _materials = std::move(data);
 }
-void Model::render(const glm::mat4& model) {
-    recursiveRender(_rootNode, model);
+void Model::render() {
+    recursiveRender(_rootNode);
 }
-void Model::recursiveRender(const ModelNode& node,
-                            const glm::mat4& model) {
-    auto final_transform = model * node.transform;
+void Model::recursiveRender(const ModelNode& node) {
+    for (auto& node_data : node.mesh_data) {
+        auto& mesh = _meshData[node_data.mesh_index];
 
-    for (auto& mesh_idx : node.mesh_indices) {
-        auto& mesh = _meshData[mesh_idx];
-
-        ModelUniformData data;
-        data.model_matrix = final_transform;
-        data.normal_model_matrix = glm::transpose(glm::inverse(final_transform));
-
-        mesh.model_descriptor_set->bind();
-        mesh.mesh_draw_call->setPushConstants(&data, sizeof(data));
+        node_data.model_descriptor_set->bind();
         mesh.mesh_draw_call->draw();
-        mesh.model_descriptor_set->unbind();
+        node_data.model_descriptor_set->unbind();
     }
 
     for (auto& child : node.child_nodes) {
-        recursiveRender(*child, final_transform);
+        recursiveRender(*child);
     }
 }
 
+void Model::prepareData(const glm::mat4& world_transform) {
+    updateUniformData(_rootNode, world_transform);
 
+    _nodeUniformData->updateData(_alignedUniformData.getData(),
+                                 0,
+                                 _alignedUniformData.getSize(),
+                                 UpdateFlags::DiscardOldData);
+}
+size_t Model::updateNodeIndices(ModelNode& node, size_t nextIndex) {
+    node.index = nextIndex;
+    nextIndex += node.mesh_data.size();
+
+    for (auto& child : node.child_nodes) {
+        nextIndex = updateNodeIndices(*child, nextIndex);
+    }
+
+    return nextIndex;
+}
+void Model::initializeDescriptorSets(ModelNode& node) {
+    size_t i = 0;
+    for (auto& node_data : node.mesh_data) {
+        auto& mesh = _meshData[node_data.mesh_index];
+        auto& material = _materials[mesh.material_index];
+
+        auto descriptor_set = _renderer->createDescriptorSet(DescriptorSetType::ModelSet);
+        descriptor_set->getDescriptor(DescriptorSetPart::ModelSet_DiffuseTexture)->setTexture(material.diffuse_texture.get());
+        descriptor_set->getDescriptor(DescriptorSetPart::ModelSet_Uniforms)->setUniformBuffer(_nodeUniformData.get(),
+                                                                                              _alignedUniformData.getOffset(
+                                                                                                  node.index + i),
+                                                                                              sizeof(ModelUniformData));
+
+        node_data.model_descriptor_set = std::move(descriptor_set);
+
+        ++i;
+    }
+
+    for (auto& child : node.child_nodes) {
+        initializeDescriptorSets(*child);
+    }
+}
+void Model::updateUniformData(const ModelNode& node, const glm::mat4& model) {
+    auto final_transform = model * node.transform;
+
+    auto data = _alignedUniformData.getElement(node.index);
+    data->model_matrix = final_transform;
+    data->normal_model_matrix = glm::transpose(glm::inverse(final_transform));
+
+    for (auto& child : node.child_nodes) {
+        updateUniformData(*child, final_transform);
+    }
+}

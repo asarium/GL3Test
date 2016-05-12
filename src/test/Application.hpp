@@ -21,6 +21,7 @@ class Application {
     std::unique_ptr<Texture> _floorTexture;
     std::unique_ptr<DrawCall> _floorDrawCall;
 
+    std::unique_ptr<BufferObject> _floorUniformObject;
     std::unique_ptr<DescriptorSet> _floorModelDescriptorSet;
 
     std::unique_ptr<BufferObject> _fullscreenTriBuffer;
@@ -53,8 +54,6 @@ class Application {
     std::unique_ptr<RenderTarget> createHDRRenderTarget(uint32_t width, uint32_t height);
 
     void changeResolution(uint32_t width, uint32_t height);
-
-    void updateParticles();
 
     std::deque<float> _cpuTimes;
     std::deque<float> _gpuTimes;

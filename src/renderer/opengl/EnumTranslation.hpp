@@ -49,6 +49,8 @@ inline GL3DescriptorSetPart convertDescriptorSetPart(DescriptorSetPart type) {
     switch (type) {
         case DescriptorSetPart::ViewSet_Uniforms:
             return GL3DescriptorSetPart::ViewSet_Uniforms;
+        case DescriptorSetPart::ModelSet_Uniforms:
+            return GL3DescriptorSetPart::ModelSet_Uniforms;
         case DescriptorSetPart::ModelSet_DiffuseTexture:
             return GL3DescriptorSetPart::ModelSet_DiffuseTexture;
         case DescriptorSetPart::HdrSet_BloomedTexture:
@@ -67,10 +69,12 @@ inline GLuint mapDescriptorSetPartLocation(GL3DescriptorSetPart part) {
             return 0;
         case GL3DescriptorSetPart::ViewSet_Uniforms:
             return 1;
-        case GL3DescriptorSetPart::LightingSet_GlobalUniforms:
+        case GL3DescriptorSetPart::ModelSet_Uniforms:
             return 2;
-        case GL3DescriptorSetPart::LightingSet_LightUniforms:
+        case GL3DescriptorSetPart::LightingSet_GlobalUniforms:
             return 3;
+        case GL3DescriptorSetPart::LightingSet_LightUniforms:
+            return 4;
 
         case GL3DescriptorSetPart::HdrSet_BloomedTexture:
             return 0;

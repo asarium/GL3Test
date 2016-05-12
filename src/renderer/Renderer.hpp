@@ -65,6 +65,10 @@ enum class GraphicsCapability {
     FloatingPointTextures
 };
 
+struct RendererLimits {
+    size_t uniform_offset_alignment;
+};
+
 class Renderer {
  public:
     virtual ~Renderer() { }
@@ -92,6 +96,8 @@ class Renderer {
     virtual std::unique_ptr<DescriptorSet> createDescriptorSet(DescriptorSetType type) = 0;
 
     virtual bool hasCapability(GraphicsCapability capability) const = 0;
+
+    virtual RendererLimits getLimits() const = 0;
 
     virtual void clear(const glm::vec4& color) = 0;
 

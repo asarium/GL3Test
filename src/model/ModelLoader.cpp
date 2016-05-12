@@ -52,11 +52,11 @@ ModelLoader::ModelLoader(Renderer* renderer) : _renderer(renderer) {
 
 }
 std::unique_ptr<Model> ModelLoader::loadModel(const std::string& model_name) {
-    std::unique_ptr<Model> out_model(new Model(_renderer));
+    _currentModel.reset(new Model(_renderer));
 
     std::stringstream name_stream;
     name_stream << model_name << ".fom";
-    if (!loadModelData(out_model.get(), name_stream.str())) {
+    if (!loadModelData(name_stream.str())) {
         return nullptr;
     }
 
@@ -71,16 +71,18 @@ std::unique_ptr<Model> ModelLoader::loadModel(const std::string& model_name) {
         return nullptr;
     }
 
-    if (!loadMetaData(out_model.get(), metadata)) {
+    if (!loadMetaData(metadata)) {
         json_decref(metadata);
         return nullptr;
     }
     json_decref(metadata);
 
-    return out_model;
+    std::unique_ptr<Model> retVal = std::move(_currentModel);
+    _currentModel.reset();
+    return retVal;
 }
 
-bool ModelLoader::loadModelData(Model* output, const std::string& file_path) {
+bool ModelLoader::loadModelData(const std::string& file_path) {
     std::ifstream model_data_stream;
     model_data_stream.open(file_path, std::ios_base::in | std::ios_base::binary);
     if (!model_data_stream.good()) {
@@ -179,18 +181,18 @@ bool ModelLoader::loadModelData(Model* output, const std::string& file_path) {
                 break;
         }
     }
-    output->setModelData(std::move(vertexObject), std::move(indexObject));
+    _currentModel->setModelData(std::move(vertexObject), std::move(indexObject));
 
     return true;
 }
 
-bool ModelLoader::loadMetaData(Model* output, json_t* metadata) {
+bool ModelLoader::loadMetaData(json_t* metadata) {
     auto materials = json_object_get(metadata, "materials");
     if (!materials) {
         fprintf(stderr, "Materials key could not be found!\n");
         return false;
     }
-    if (!loadMaterials(output, materials)) {
+    if (!loadMaterials(materials)) {
         return false;
     }
 
@@ -199,7 +201,7 @@ bool ModelLoader::loadMetaData(Model* output, json_t* metadata) {
         fprintf(stderr, "Meshes key could not be found!\n");
         return false;
     }
-    if (!loadMeshes(output, meshes)) {
+    if (!loadMeshes(meshes)) {
         return false;
     }
 
@@ -207,13 +209,13 @@ bool ModelLoader::loadMetaData(Model* output, json_t* metadata) {
     if (!root_node) {
         fprintf(stderr, "Root node value is missing!\n");
     }
-    if (!loadNodes(output, root_node)) {
+    if (!loadNodes(root_node)) {
         return false;
     }
 
     return true;
 }
-bool ModelLoader::loadMaterials(Model* output, json_t* materials_root) {
+bool ModelLoader::loadMaterials(json_t* materials_root) {
     std::vector<Material> materials;
 
     size_t index;
@@ -235,13 +237,11 @@ bool ModelLoader::loadMaterials(Model* output, json_t* materials_root) {
         materials.push_back(std::move(mat));
     }
 
-    output->setMaterials(std::move(materials));
+    _currentModel->setMaterials(std::move(materials));
     return true;
 }
-bool ModelLoader::loadMeshes(Model* output, json_t* meshes_root) {
+bool ModelLoader::loadMeshes(json_t* meshes_root) {
     std::vector<MeshData> meshData;
-
-    auto& materials = output->getMaterials();
 
     size_t index;
     json_t* value;
@@ -284,14 +284,12 @@ bool ModelLoader::loadMeshes(Model* output, json_t* meshes_root) {
             return false;
         }
 
-        auto& material = materials[(size_t) json_integer_value(material_index_node)];
-
         MeshData mesh;
         mesh.mesh_name = name_node == nullptr ? "" : json_string_value(name_node);
         mesh.material_index = (size_t) json_integer_value(material_index_node);
 
         DrawCallCreateProperties props;
-        props.vertexLayout = output->getVertexLayout().get();
+        props.vertexLayout = _currentModel->getVertexLayout().get();
 
         props.primitive_type = PrimitiveType::Triangle;
 
@@ -307,24 +305,20 @@ bool ModelLoader::loadMeshes(Model* output, json_t* meshes_root) {
 
         mesh.mesh_draw_call = _renderer->getDrawCallManager()->createDrawCall(props);
 
-        mesh.model_descriptor_set = _renderer->createDescriptorSet(DescriptorSetType::ModelSet);
-        mesh.model_descriptor_set->getDescriptor(DescriptorSetPart::ModelSet_DiffuseTexture)->
-            setTexture(material.diffuse_texture.get());
-
         meshData.push_back(std::move(mesh));
     }
 
-    output->setMeshData(std::move(meshData));
+    _currentModel->setMeshData(std::move(meshData));
     return true;
 }
 
-bool ModelLoader::loadNodes(Model* output, json_t* nodes_root) {
+bool ModelLoader::loadNodes(json_t* nodes_root) {
     ModelNode rootNode;
     if (!parseModelNode(nodes_root, rootNode)) {
         return false;
     }
 
-    output->setRootNode(std::move(rootNode));
+    _currentModel->setRootNode(std::move(rootNode));
     return true;
 }
 bool ModelLoader::parseModelNode(json_t* json_node, ModelNode& node_out) {
@@ -359,7 +353,10 @@ bool ModelLoader::parseModelNode(json_t* json_node, ModelNode& node_out) {
     size_t index;
     json_t* value;
     json_array_foreach(meshes_node, index, value) {
-        node_out.mesh_indices.push_back((size_t) json_integer_value(value));
+        NodeMeshData node_data;
+        node_data.mesh_index = (size_t) json_integer_value(value);
+
+        node_out.mesh_data.push_back(std::move(node_data));
     }
 
     json_array_foreach(children_node, index, value) {
