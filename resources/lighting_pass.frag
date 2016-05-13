@@ -7,7 +7,6 @@ uniform sampler2DShadow directional_shadow_map;
 layout(std140) uniform GlobalLightingData {
     vec2 window_size;
     vec2 uv_scale;
-    mat4 view_projection;
 } global;
 
 layout(std140) uniform LightData {

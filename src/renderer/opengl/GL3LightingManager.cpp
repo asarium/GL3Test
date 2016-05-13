@@ -15,7 +15,6 @@ namespace
     {
         glm::vec2 window_size;
         glm::vec2 uv_scale;
-        glm::mat4 view_projection;
     };
 }
 
@@ -194,7 +193,6 @@ void GL3LightingManager::updateData()
     GlobalParameters params;
     params.uv_scale = glm::vec2((float)width, (float)height) / glm::vec2(_framebufferSize);
     params.window_size = glm::vec2(width, height);
-    params.view_projection = _projectionMatrix * _viewMatrix;
     _globalUniformBuffer->updateData(&params, 0, sizeof(params), UpdateFlags::DiscardOldData);
 }
 

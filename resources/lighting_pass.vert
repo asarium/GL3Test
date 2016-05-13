@@ -1,8 +1,13 @@
 
+layout(std140) uniform ViewData {
+    mat4 projection_matrix;
+    mat4 view_matrix;
+    mat4 view_projection_matrix;
+} view;
+
 layout(std140) uniform GlobalLightingData {
     vec2 window_size;
     vec2 uv_scale;
-    mat4 view_projection;
 } global;
 
 layout(std140) uniform LightData {
@@ -22,7 +27,7 @@ void main()
 {
     if (light.light_type == 1) {
         // Point lights use a sphere geometry
-        gl_Position = global.view_projection * light.model_matrix * vec4(in_position, 1.f);
+        gl_Position = view.view_projection_matrix * light.model_matrix * vec4(in_position, 1.f);
     } else {
         gl_Position = vec4(in_position, 1.f);
     }
