@@ -96,9 +96,6 @@ class GL3LightingManager: GL3Object, public LightingManager {
     std::unique_ptr<GL3DescriptorSet> _lightingParameterSet;
     GL3Descriptor* _shadowMapDescriptor;
 
-    glm::mat4 _projectionMatrix;
-    glm::mat4 _viewMatrix;
-
     uint32_t _shadowMapResolution;
 
     bool _dirty;
@@ -126,7 +123,7 @@ class GL3LightingManager: GL3Object, public LightingManager {
 
     void clearLights() override;
 
-    void beginLightPass(const glm::mat4& projection, const glm::mat4& view) override;
+    void beginLightPass() override;
 
     void endLightPass() override;
 };

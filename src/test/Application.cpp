@@ -11,6 +11,7 @@
 #include <ctime>
 #include <model/AssimpModelConverter.hpp>
 #include <model/ModelLoader.hpp>
+#include <renderer/RenderTargetManager.hpp>
 
 #include "util/textures.hpp"
 
@@ -293,7 +294,7 @@ void Application::render(Renderer* renderer) {
     _viewUniformBuffer->updateData(&_viewUniforms, 0, sizeof(_viewUniforms), UpdateFlags::DiscardOldData);
 
     _viewDescriptorSet->bind();
-    renderer->getLightingManager()->beginLightPass(_viewUniforms.projection_matrix, _viewUniforms.view_matrix);
+    renderer->getLightingManager()->beginLightPass();
 
     renderScene();
 
@@ -337,8 +338,9 @@ std::unique_ptr<RenderTarget> Application::createHDRRenderTarget(uint32_t width,
     RenderTargetProperties props;
     props.width = width;
     props.height = height;
-    props.floating_point = true;
-    props.with_depth_buffer = false;
+    props.color_buffers = {ColorBufferFormat::RGB16F};
+    props.depth.enable = false;
+    props.depth.make_texture_handle = true;
 
     return _renderer->getRenderTargetManager()->createRenderTarget(props);
 }

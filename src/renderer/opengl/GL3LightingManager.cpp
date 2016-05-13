@@ -90,10 +90,7 @@ void GL3LightingManager::clearLights() {
     _lights.clear();
 }
 
-void GL3LightingManager::beginLightPass(const glm::mat4& projection, const glm::mat4& view) {
-    _projectionMatrix = projection;
-    _viewMatrix = view;
-
+void GL3LightingManager::beginLightPass() {
     auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();
     auto width = currentRenderTarget->getWidth();
     auto height = currentRenderTarget->getHeight();
