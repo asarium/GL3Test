@@ -11,16 +11,19 @@ GL3Descriptor::GL3Descriptor(GL3DescriptorSetPart part) : _active(false) {
 }
 
 void GL3Descriptor::setTexture(TextureHandle* handle) {
-    setGLTexture(*static_cast<GL3Texture*>(handle));
+    if (handle == nullptr) {
+        // No texture
+        setGLTexture(GL3TextureHandle(GL_TEXTURE_2D, 0));
+    } else {
+        setGLTexture(*static_cast<GL3Texture*>(handle));
+    }
 }
 
-void GL3Descriptor::setGLTexture(const GL3TextureHandle& handle)
-{
+void GL3Descriptor::setGLTexture(const GL3TextureHandle& handle) {
     _data.type = DescriptorType::Texture;
     _data.descriptor_data.texture = handle;
 
-    if (_active)
-    {
+    if (_active) {
         // Update bound values
         bind();
     }
@@ -28,47 +31,45 @@ void GL3Descriptor::setGLTexture(const GL3TextureHandle& handle)
 
 void GL3Descriptor::setUniformBuffer(BufferObject* object, size_t offset, size_t range) {
     Assertion(object->getType() == BufferType::Uniform, "Buffer must be a uniform buffer!");
-    Assertion((offset & GLState->Constants.getUniformBufferAlignment()) == 0, "The uniform offset must be properly aligned!");
+    Assertion((offset & GLState->Constants.getUniformBufferAlignment()) == 0,
+              "The uniform offset must be properly aligned!");
 
     _data.type = DescriptorType::UniformBuffer;
     _data.descriptor_data.buffer.buffer = static_cast<GL3BufferObject*>(object);
     _data.descriptor_data.buffer.offset = static_cast<GLintptr>(offset);
     _data.descriptor_data.buffer.size = static_cast<GLsizei>(range);
 
-    if (_active)
-    {
+    if (_active) {
         // Update bound values
         bind();
     }
 }
 
-void GL3Descriptor::bind()
-{
+void GL3Descriptor::bind() {
     switch (_data.type) {
-    case DescriptorType::UniformBuffer:
-        glBindBufferRange(GL_UNIFORM_BUFFER,
-            mapDescriptorSetPartLocation(_data.part),
-            _data.descriptor_data.buffer.buffer->getHandle(),
-            _data.descriptor_data.buffer.offset,
-            _data.descriptor_data.buffer.size);
-        break;
-    case DescriptorType::Texture:
-        _data.descriptor_data.texture.bind(mapDescriptorSetPartLocation(_data.part));
-        break;
+        case DescriptorType::UniformBuffer:
+            glBindBufferRange(GL_UNIFORM_BUFFER,
+                              mapDescriptorSetPartLocation(_data.part),
+                              _data.descriptor_data.buffer.buffer->getHandle(),
+                              _data.descriptor_data.buffer.offset,
+                              _data.descriptor_data.buffer.size);
+            break;
+        case DescriptorType::Texture:
+            _data.descriptor_data.texture.bind(mapDescriptorSetPartLocation(_data.part));
+            break;
     }
 
     _active = true;
 }
 
-void GL3Descriptor::unbind()
-{
+void GL3Descriptor::unbind() {
     switch (_data.type) {
-    case DescriptorType::UniformBuffer:
-        break;
-    case DescriptorType::Texture:
-        // Unbind this texture type
-        GLState->Texture.bindTexture(mapDescriptorSetPartLocation(_data.part), GL_TEXTURE_2D, 0);
-        break;
+        case DescriptorType::UniformBuffer:
+            break;
+        case DescriptorType::Texture:
+            // Unbind this texture type
+            GLState->Texture.bindTexture(mapDescriptorSetPartLocation(_data.part), GL_TEXTURE_2D, 0);
+            break;
     }
 
     _active = false;
@@ -81,7 +82,7 @@ Descriptor* GL3DescriptorSet::getDescriptor(DescriptorSetPart part) {
     return getDescriptor(convertDescriptorSetPart(part));
 }
 GL3Descriptor* GL3DescriptorSet::getDescriptor(GL3DescriptorSetPart part) {
-    auto iter  = _descriptors.find(part);
+    auto iter = _descriptors.find(part);
 
     if (iter != _descriptors.end()) {
         return iter->second.get();

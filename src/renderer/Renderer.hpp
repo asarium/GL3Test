@@ -14,12 +14,12 @@
 #include "DrawCall.hpp"
 #include "DrawCallManager.hpp"
 #include "ShaderParameters.hpp"
-#include "LightingManager.hpp"
 #include "RenderTargetManager.hpp"
 #include "Exceptions.hpp"
 #include "Profiler.hpp"
 
 #include "nanovg/nanovg.h"
+#include "PipelineState.hpp"
 
 enum class SettingsLevel {
     Disabled,
@@ -78,8 +78,6 @@ class Renderer {
     virtual RendererSettingsManager* getSettingsManager() = 0;
 
     virtual DrawCallManager* getDrawCallManager() = 0;
-
-    virtual LightingManager* getLightingManager() = 0;
 
     virtual RenderTargetManager* getRenderTargetManager() = 0;
 

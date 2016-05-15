@@ -14,7 +14,7 @@ public:
 
     virtual void copyToTexture(Texture* target) = 0;
 
-    virtual TextureHandle* getColorTexture() = 0;
+    virtual std::vector<TextureHandle*> getColorTextures() = 0;
 
     virtual TextureHandle* getDepthTexture() = 0;
 };

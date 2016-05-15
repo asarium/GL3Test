@@ -9,15 +9,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <util/Assertion.hpp>
 
-namespace
-{
-    struct GlobalParameters
-    {
-        glm::vec2 window_size;
-        glm::vec2 uv_scale;
-    };
-}
-
 GL3LightingManager::GL3LightingManager(GL3Renderer* renderer) : GL3Object(renderer), _renderFrameBuffer(0),
                                                                 _gBufferTextures{ 0 }, _depthRenderBuffer(0),
                                                                 _shadowMapResolution(0),
@@ -40,19 +31,14 @@ bool GL3LightingManager::initialize() {
 
     _geometryPipelineState = _renderer->createPipelineState(pipelineProperties);
 
-    _globalUniformBuffer = _renderer->createBuffer(BufferType::Uniform);
-    _globalUniformBuffer->setData(nullptr, sizeof(GlobalParameters), BufferUsage::Streaming);
-
     _lightUniformBuffer = _renderer->createBuffer(BufferType::Uniform);
     _lightUniformBuffer->setData(nullptr, sizeof(GL3Light::LightParameters), BufferUsage::Streaming);
 
     _lightingParameterSet.reset(new GL3DescriptorSet(Gl3DescriptorSetType::LightingSet));
 
-    _shadowMapDescriptor = _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_DiretionalShadowMap);
+    _shadowMapDescriptor = _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_DirectionalShadowMap);
     _shadowMapDescriptor->setGLTexture(GL3TextureHandle(GL_TEXTURE_2D, 0));
 
-    _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_GlobalUniforms)->
-        setUniformBuffer(_globalUniformBuffer.get(), 0, sizeof(GlobalParameters));
     _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_LightUniforms)->
         setUniformBuffer(_lightUniformBuffer.get(), 0, sizeof(GL3Light::LightParameters));
 
@@ -121,7 +107,14 @@ void GL3LightingManager::endLightPass() {
 
     GLState->setDepthTest(false);
 
-    updateData();
+    auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();
+    auto width = currentRenderTarget->getWidth();
+    auto height = currentRenderTarget->getHeight();
+
+    auto uv_scale = glm::vec2((float)width, (float)height) / glm::vec2(_framebufferSize);
+    auto inverse_window_size = 1.f / glm::vec2(width, height);
+
+    auto frag_coord_scale = inverse_window_size * uv_scale;
 
     _lightingParameterSet->bind();
     _renderer->getShaderManager()->bindProgram(GL3ShaderType::LightingPass);
@@ -133,6 +126,7 @@ void GL3LightingManager::endLightPass() {
         }
 
         GL3Light::LightParameters lightParams;
+        lightParams.frag_coord_scale = frag_coord_scale;
         light->setParameters(&lightParams);
         _lightUniformBuffer->updateData(&lightParams, 0, sizeof(lightParams), UpdateFlags::DiscardOldData);
 
@@ -146,12 +140,8 @@ void GL3LightingManager::endLightPass() {
     _lightingParameterSet->unbind();
 
     // Only try to copy the depth buffer if there actually is one
-    auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();
-    if (currentRenderTarget->hasDepthBuffer())
+    if (currentRenderTarget->getDepthTexture())
     {
-        auto width = currentRenderTarget->getWidth();
-        auto height = currentRenderTarget->getHeight();
-
         // Now copy the depth component back to the screen
         GLState->Framebuffer.pushBinding();
 
@@ -179,18 +169,6 @@ void GL3LightingManager::freeResources() {
         glDeleteFramebuffers(1, &_renderFrameBuffer);
         _renderFrameBuffer = 0;
     }
-}
-
-void GL3LightingManager::updateData()
-{
-    auto currentRenderTarget = _renderer->getGLRenderTargetManager()->getCurrentRenderTarget();
-    auto width = currentRenderTarget->getWidth();
-    auto height = currentRenderTarget->getHeight();
-
-    GlobalParameters params;
-    params.uv_scale = glm::vec2((float)width, (float)height) / glm::vec2(_framebufferSize);
-    params.window_size = glm::vec2(width, height);
-    _globalUniformBuffer->updateData(&params, 0, sizeof(params), UpdateFlags::DiscardOldData);
 }
 
 void GL3LightingManager::createFrameBuffer(int width, int height) {
@@ -442,7 +420,7 @@ void GL3Light::setParameters(LightParameters* params) {
         break;
     }
     case LightType::Ambient:
-        params->light_type = 2; 
+        params->light_type = 2;
         break;
     default:
         params->light_type = 0;

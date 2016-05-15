@@ -5,11 +5,6 @@ layout(std140) uniform ViewData {
     mat4 view_projection_matrix;
 } view;
 
-layout(std140) uniform GlobalLightingData {
-    vec2 window_size;
-    vec2 uv_scale;
-} global;
-
 layout(std140) uniform LightData {
     mat4 light_view_proj_matrix;
     mat4 model_matrix;
@@ -19,6 +14,8 @@ layout(std140) uniform LightData {
     
     vec3 light_color;
     bool light_has_shadow;
+
+    vec2 frag_coord_scale;
 } light;
 
 in vec3 in_position;

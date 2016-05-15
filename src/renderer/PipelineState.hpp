@@ -36,6 +36,7 @@ enum class ShaderType {
     HdrPostProcessing,
     HdrBrightpass,
     HdrBloom,
+    LightingPass,
 };
 
 struct PipelineProperties {

@@ -23,7 +23,8 @@ class Descriptor {
 enum class DescriptorSetType {
     ViewSet,
     ModelSet,
-    HdrSet
+    HdrSet,
+    LightingSet
 };
 
 enum class DescriptorSetPart {
@@ -32,7 +33,14 @@ enum class DescriptorSetPart {
     ModelSet_Uniforms,
     ModelSet_DiffuseTexture,
 
-    HdrSet_BloomedTexture
+    HdrSet_BloomedTexture,
+
+    // Lighting pass parts
+    LightingSet_LightUniforms,
+    LightingSet_PositionTexture,
+    LightingSet_NormalTexture,
+    LightingSet_AlbedoTexture,
+    LightingSet_DirectionalShadowMap,
 };
 
 class DescriptorSet {

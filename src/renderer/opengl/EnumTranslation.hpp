@@ -25,6 +25,8 @@ inline GL3ShaderType convertShaderType(ShaderType type) {
             return GL3ShaderType::HdrBrightpass;
         case ShaderType::HdrBloom:
             return GL3ShaderType::HdrBloom;
+        case ShaderType::LightingPass:
+            return GL3ShaderType::LightingPass;
         default:
             Assertion(false, "Unhandled shader type translation!");
             return GL3ShaderType::Mesh;
@@ -39,6 +41,8 @@ inline Gl3DescriptorSetType convertDescriptorSetType(DescriptorSetType type) {
             return Gl3DescriptorSetType::ModelSet;
         case DescriptorSetType::HdrSet:
             return Gl3DescriptorSetType::HdrSet;
+        case DescriptorSetType::LightingSet:
+            return Gl3DescriptorSetType::LightingSet;
         default:
             Assertion(false, "Unhandled descriptor set type!");
             return Gl3DescriptorSetType::ViewSet;
@@ -55,6 +59,16 @@ inline GL3DescriptorSetPart convertDescriptorSetPart(DescriptorSetPart type) {
             return GL3DescriptorSetPart::ModelSet_DiffuseTexture;
         case DescriptorSetPart::HdrSet_BloomedTexture:
             return GL3DescriptorSetPart::HdrSet_BloomedTexture;
+        case DescriptorSetPart::LightingSet_LightUniforms:
+            return GL3DescriptorSetPart::LightingSet_LightUniforms;
+        case DescriptorSetPart::LightingSet_PositionTexture:
+            return GL3DescriptorSetPart::LightingSet_PositionTexture;
+        case DescriptorSetPart::LightingSet_NormalTexture:
+            return GL3DescriptorSetPart::LightingSet_NormalTexture;
+        case DescriptorSetPart::LightingSet_AlbedoTexture:
+            return GL3DescriptorSetPart::LightingSet_AlbedoTexture;
+        case DescriptorSetPart::LightingSet_DirectionalShadowMap:
+            return GL3DescriptorSetPart::LightingSet_DirectionalShadowMap;
         default:
             Assertion(false, "Unhandled descriptor set part!");
             return GL3DescriptorSetPart::ViewSet_Uniforms;
@@ -71,10 +85,8 @@ inline GLuint mapDescriptorSetPartLocation(GL3DescriptorSetPart part) {
             return 1;
         case GL3DescriptorSetPart::ModelSet_Uniforms:
             return 2;
-        case GL3DescriptorSetPart::LightingSet_GlobalUniforms:
-            return 3;
         case GL3DescriptorSetPart::LightingSet_LightUniforms:
-            return 4;
+            return 3;
 
         case GL3DescriptorSetPart::HdrSet_BloomedTexture:
             return 0;
@@ -86,7 +98,7 @@ inline GLuint mapDescriptorSetPartLocation(GL3DescriptorSetPart part) {
             return 3;
         case GL3DescriptorSetPart::LightingSet_AlbedoTexture:
             return 4;
-        case GL3DescriptorSetPart::LightingSet_DiretionalShadowMap:
+        case GL3DescriptorSetPart::LightingSet_DirectionalShadowMap:
             return 5;
 
         default:

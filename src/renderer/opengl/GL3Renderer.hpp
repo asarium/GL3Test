@@ -64,8 +64,6 @@ class GL3Renderer final: public Renderer {
 
     virtual DrawCallManager* getDrawCallManager() override;
 
-    virtual LightingManager* getLightingManager() override;
-
     virtual RenderTargetManager* getRenderTargetManager() override;
 
     virtual Profiler* getProfiler() override;

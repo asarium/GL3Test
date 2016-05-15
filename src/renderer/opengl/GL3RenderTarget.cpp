@@ -8,14 +8,9 @@
 GL3RenderTarget::GL3RenderTarget(GL3Renderer* renderer,
                                  GLsizei width,
                                  GLsizei height,
-                                 GLuint framebuffer,
-                                 GLuint colorTexture,
-                                 GLuint depthTexture) : _width(width), _heigth(height),
-                                                        _renderFramebuffer(framebuffer),
-                                                        _colorTexture(renderer, colorTexture),
-                                                        _depthTexture(renderer, depthTexture) {
-    _colorTexture.updateSize(width, height);
-    _depthTexture.updateSize(width, height);
+                                 GLuint framebuffer)
+    : GL3Object(renderer), _width(width), _heigth(height), _renderFramebuffer(framebuffer) {
+
 }
 
 GL3RenderTarget::~GL3RenderTarget() {
@@ -48,14 +43,27 @@ void GL3RenderTarget::copyToTexture(Texture* target) {
     GLState->Framebuffer.popBinding();
 }
 
-TextureHandle* GL3RenderTarget::getColorTexture() {
-    return &_colorTexture;
-}
-
 TextureHandle* GL3RenderTarget::getDepthTexture() {
-    return &_depthTexture;
+    return _depthTexture.get();
 }
 
 bool GL3RenderTarget::hasDepthBuffer() {
-    return _depthTexture.getGLHandle() != 0;
+    return (bool) _depthTexture;
+}
+std::vector<TextureHandle*> GL3RenderTarget::getColorTextures() {
+    std::vector<TextureHandle*> handles;
+    for (auto& tex : _colorTextures) {
+        handles.push_back(tex.get());
+    }
+    return handles;
+}
+void GL3RenderTarget::setDepthTexture(GLuint handle) {
+    _depthTexture.reset(new GL3Texture(_renderer, handle));
+    _depthTexture->updateSize(_width, _heigth);
+}
+void GL3RenderTarget::addColorTexture(GLuint handle) {
+    std::unique_ptr<GL3Texture> texture(new GL3Texture(_renderer, handle));
+    texture->updateSize(_width, _heigth);
+
+    _colorTextures.push_back(std::move(texture));
 }

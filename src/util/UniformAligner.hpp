@@ -14,7 +14,7 @@ class UniformAligner {
 
     std::vector<uint8_t> _buffer;
 
-    constexpr size_t alignSize(size_t size, size_t align) {
+    static size_t alignSize(size_t size, size_t align) {
         if (align == 0) {
             return size;
         }

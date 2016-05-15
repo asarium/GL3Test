@@ -71,8 +71,8 @@ set(file_renderer_opengl
         renderer/opengl/GL3ShaderParameters.hpp
         renderer/opengl/GL3State.cpp
         renderer/opengl/GL3State.hpp
-    renderer/opengl/GL3Texture.cpp
-    renderer/opengl/GL3Texture.hpp
+        renderer/opengl/GL3Texture.cpp
+        renderer/opengl/GL3Texture.hpp
         renderer/opengl/GL3Util.cpp
         renderer/opengl/GL3Util.hpp
         renderer/opengl/GL3VertexLayout.cpp
@@ -82,7 +82,10 @@ set(file_renderer_opengl
 set(file_test
         test/Application.cpp
         test/Application.hpp
-        util/stb_image.h
+        test/DrawUtil.cpp
+        test/DrawUtil.hpp
+        test/LightingManager.cpp
+        test/LightingManager.hpp
         )
 
 set(file_util
@@ -96,6 +99,7 @@ set(file_util
         util/Timing.cpp
         util/UniformAligner.hpp
         util/UniqueHandle.hpp
+    util/stb_image.h
         )
 
 # the source groups

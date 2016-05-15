@@ -5,23 +5,19 @@
 #include <glad/glad.h>
 #include <renderer/Texture.hpp>
 #include "GL3Texture.hpp"
+#include "GL3State.hpp"
 
-class GL3RenderTarget final: public RenderTarget {
+class GL3RenderTarget final: public GL3Object, public RenderTarget {
     GLsizei _width;
     GLsizei _heigth;
 
     GLuint _renderFramebuffer;
 
-    GL3Texture _colorTexture;
+    std::vector<std::unique_ptr<GL3Texture>> _colorTextures;
 
-    GL3Texture _depthTexture;
+    std::unique_ptr<GL3Texture> _depthTexture;
  public:
-    GL3RenderTarget(GL3Renderer* renderer,
-                    GLsizei width,
-                    GLsizei height,
-                    GLuint framebuffer,
-                    GLuint colorTexture,
-                    GLuint depthTexture);
+    GL3RenderTarget(GL3Renderer* renderer, GLsizei width, GLsizei height, GLuint framebuffer);
 
     virtual ~GL3RenderTarget();
 
@@ -31,12 +27,16 @@ class GL3RenderTarget final: public RenderTarget {
 
     virtual void copyToTexture(Texture* target) override;
 
-    TextureHandle* getColorTexture() override;
+    std::vector<TextureHandle*> getColorTextures() override;
 
     TextureHandle* getDepthTexture() override;
 
     bool hasDepthBuffer();
 
     void bindFramebuffer();
+
+    void setDepthTexture(GLuint handle);
+
+    void addColorTexture(GLuint handle);
 };
 

@@ -4,11 +4,6 @@ uniform sampler2D g_albedo;
 
 uniform sampler2DShadow directional_shadow_map;
 
-layout(std140) uniform GlobalLightingData {
-    vec2 window_size;
-    vec2 uv_scale;
-} global;
-
 layout(std140) uniform LightData {
     mat4 light_view_proj_matrix;
     mat4 model_matrix;
@@ -18,6 +13,8 @@ layout(std140) uniform LightData {
     
     vec3 light_color;
     bool light_has_shadow;
+
+    vec2 frag_coord_scale;
 } light;
 
 out vec4 frag_color;
@@ -44,7 +41,7 @@ float calculate_directed_shadow(vec3 position) {
 
 void main()
 {
-    vec2 tex_coord = gl_FragCoord.xy / global.window_size * global.uv_scale;
+    vec2 tex_coord = gl_FragCoord.xy * light.frag_coord_scale;
 
     // Get gBuffer data
     vec3 position = texture(g_position, tex_coord).xyz;

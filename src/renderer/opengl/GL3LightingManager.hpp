@@ -29,16 +29,18 @@ class GL3Light final: public GL3Object, public Light {
     void freeResources();
     void createDepthBuffer(uint32_t resolution);
  public:
-     struct LightParameters
-     {
-         glm::mat4 light_view_proj_matrix;
-         glm::mat4 model_matrix;
+    struct LightParameters
+    {
+        glm::mat4 light_view_proj_matrix;
+        glm::mat4 model_matrix;
 
-         glm::vec3 light_vector;
-         int32_t light_type;
-         glm::vec3 light_color;
-         uint32_t light_has_shadow;
-     };
+        glm::vec3 light_vector;
+        int32_t light_type;
+        glm::vec3 light_color;
+        uint32_t light_has_shadow;
+
+        glm::vec2 frag_coord_scale;
+    };
 
     GL3Light(GL3Renderer* renderer, GL3LightingManager* manager, LightType type, uint32_t shadowResolution);
     virtual ~GL3Light();
@@ -90,7 +92,6 @@ class GL3LightingManager: GL3Object, public LightingManager {
 
     std::unique_ptr<PipelineState> _geometryPipelineState;
 
-    std::unique_ptr<BufferObject> _globalUniformBuffer;
     std::unique_ptr<BufferObject> _lightUniformBuffer;
 
     std::unique_ptr<GL3DescriptorSet> _lightingParameterSet;
@@ -102,8 +103,6 @@ class GL3LightingManager: GL3Object, public LightingManager {
 
     void createFrameBuffer(int width, int height);
     void freeResources();
-
-    void updateData();
  public:
     explicit GL3LightingManager(GL3Renderer* renderer);
 

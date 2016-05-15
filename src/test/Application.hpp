@@ -7,6 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <deque>
+#include "LightingManager.hpp"
 
 struct Particle {
     glm::vec3 position;
@@ -14,6 +15,9 @@ struct Particle {
 };
 
 class Application {
+    Timing *_timing;
+    Renderer *_renderer;
+
     std::unique_ptr<Model> _model;
 
     std::unique_ptr<BufferObject> _floorVertexDataObject;
@@ -39,14 +43,13 @@ class Application {
     std::unique_ptr<BufferObject> _viewUniformBuffer;
     std::unique_ptr<DescriptorSet> _viewDescriptorSet;
 
-    ProfilingCategory* _wholeFrameCategory;
+    lighting::LightingManager _lightingManager;
 
-    Timing *_timing;
-    Renderer *_renderer;
+    ProfilingCategory* _wholeFrameCategory;
 
     ViewUniformData _viewUniforms;
 
-    Light* _sunLight;
+    lighting::Light* _sunLight;
 
     int _resolution_index = 0;
     bool _last_vsync = true;

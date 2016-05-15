@@ -295,10 +295,6 @@ DrawCallManager* GL3Renderer::getDrawCallManager() {
     return _drawCallManager.get();
 }
 
-LightingManager* GL3Renderer::getLightingManager() {
-    return _lightingManager.get();
-}
-
 std::unique_ptr<Texture> GL3Renderer::createTexture() {
     return GL3Texture::createTexture(this);
 }
