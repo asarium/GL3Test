@@ -1,4 +1,5 @@
 #include "GL3State.hpp"
+#include "EnumTranslation.hpp"
 
 thread_local std::unique_ptr<GL3StateTracker> GLState;
 
@@ -82,38 +83,9 @@ void GL3StateTracker::setDepthMask(bool flag) {
     }
 }
 
-void GL3StateTracker::setDepthFunc(DepthFunction mode) {
+void GL3StateTracker::setDepthFunc(ComparisionFunction mode) {
     if (_depthFunction.setIfChanged(mode)) {
-        GLint depthMode;
-
-        switch (mode) {
-            case DepthFunction::Always:
-                depthMode = GL_ALWAYS;
-                break;
-            case DepthFunction::Equal:
-                depthMode = GL_EQUAL;
-                break;
-            case DepthFunction::Greater:
-                depthMode = GL_GREATER;
-                break;
-            case DepthFunction::GreaterOrEqual:
-                depthMode = GL_GEQUAL;
-                break;
-            case DepthFunction::Less:
-                depthMode = GL_LESS;
-                break;
-            case DepthFunction::LessOrEqual:
-                depthMode = GL_LEQUAL;
-                break;
-            case DepthFunction::Never:
-                depthMode = GL_NEVER;
-                break;
-            case DepthFunction::NotEqual:
-                depthMode = GL_NOTEQUAL;
-                break;
-        }
-
-        glDepthFunc(depthMode);
+        glDepthFunc(convertComparisionFunction(mode));
     }
 }
 

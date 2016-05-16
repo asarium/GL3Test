@@ -14,6 +14,7 @@ enum class Gl3DescriptorSetType {
 
     // Lighting pass set
     LightingSet,
+    LightSet
 };
 
 enum class GL3DescriptorSetPart {
@@ -27,11 +28,12 @@ enum class GL3DescriptorSetPart {
     HdrSet_BloomedTexture,
 
     // Lighting pass parts
-    LightingSet_LightUniforms,
     LightingSet_PositionTexture,
     LightingSet_NormalTexture,
     LightingSet_AlbedoTexture,
-    LightingSet_DirectionalShadowMap,
+
+    LightSet_Uniforms,
+    LightSet_DirectionalShadowMap,
 };
 
 enum class GL3ShaderType {

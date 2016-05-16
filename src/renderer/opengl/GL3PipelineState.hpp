@@ -10,7 +10,7 @@ struct GL3PipelineProperties {
     GL3ShaderType shaderType;
 
     DepthMode depthMode;
-    DepthFunction depthFunction;
+    ComparisionFunction depthFunction;
 
     bool blending;
     BlendFunction blendFunction;

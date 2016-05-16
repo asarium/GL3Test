@@ -16,15 +16,15 @@ class GL3RenderTargetManager final: GL3Object, public RenderTargetManager {
 
     void updateDefaultTarget(uint32_t width, uint32_t height);
 
-    virtual std::unique_ptr<RenderTarget> createRenderTarget(const RenderTargetProperties& properties) override;
+    std::unique_ptr<RenderTarget> createRenderTarget(RenderTargetProperties&& properties) override;
 
-    virtual void useRenderTarget(RenderTarget* target) override;
+    void useRenderTarget(RenderTarget* target) override;
 
-    virtual RenderTarget* getCurrentRenderTarget() override;
+    RenderTarget* getCurrentRenderTarget() override;
 
-    virtual void pushRenderTargetBinding() override;
+    void pushRenderTargetBinding() override;
 
-    virtual void popRenderTargetBinding() override;
+    void popRenderTargetBinding() override;
 };
 
 

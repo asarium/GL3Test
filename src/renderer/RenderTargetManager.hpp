@@ -16,19 +16,16 @@ enum class ColorBufferFormat {
 struct RenderTargetProperties {
     size_t width;
     size_t height;
-    std::vector<ColorBufferFormat> color_buffers;
+    std::vector<std::unique_ptr<Texture>> color_buffers;
 
-    struct {
-        bool enable;
-        bool make_texture_handle;
-    } depth;
+    std::unique_ptr<Texture> depth_texture;
 };
 
 class RenderTargetManager {
  public:
     virtual ~RenderTargetManager() { }
 
-    virtual std::unique_ptr<RenderTarget> createRenderTarget(const RenderTargetProperties& properties) = 0;
+    virtual std::unique_ptr<RenderTarget> createRenderTarget(RenderTargetProperties&& properties) = 0;
 
     virtual void useRenderTarget(RenderTarget* target) = 0;
 

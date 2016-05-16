@@ -188,9 +188,9 @@ DescriptorBinding uniform_buffer_bindings[] = {
         mapDescriptorSetPartLocation(GL3DescriptorSetPart::ModelSet_Uniforms)
     },
     {
-        GL3DescriptorSetPart::LightingSet_LightUniforms,
+        GL3DescriptorSetPart::LightSet_Uniforms,
         "LightData",
-        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_LightUniforms)
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightSet_Uniforms)
     },
 };
 
@@ -221,9 +221,9 @@ DescriptorBinding texture_bindings[] = {
         mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_AlbedoTexture)
     },
     {
-        GL3DescriptorSetPart::LightingSet_DirectionalShadowMap,
+        GL3DescriptorSetPart::LightSet_DirectionalShadowMap,
         "directional_shadow_map",
-        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightingSet_DirectionalShadowMap)
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightSet_DirectionalShadowMap)
     },
 };
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DrawCallManager.hpp"
+#include "Enums.hpp"
 
 enum class BlendFunction {
     None,
@@ -14,17 +15,6 @@ enum class DepthMode {
     Read,
     Write,
     ReadWrite
-};
-
-enum class DepthFunction {
-    Never,
-    Always,
-    Less,
-    Greater,
-    Equal,
-    NotEqual,
-    LessOrEqual,
-    GreaterOrEqual
 };
 
 enum class ShaderType {
@@ -43,13 +33,13 @@ struct PipelineProperties {
     ShaderType shaderType;
 
     DepthMode depthMode;
-    DepthFunction depthFunction;
+    ComparisionFunction depthFunction;
 
     bool blending;
     BlendFunction blendFunction;
 
 
-    PipelineProperties() : shaderType(ShaderType::Mesh), depthMode(DepthMode::None), depthFunction(DepthFunction::Less),
+    PipelineProperties() : shaderType(ShaderType::Mesh), depthMode(DepthMode::None), depthFunction(ComparisionFunction::Less),
                            blending(false), blendFunction(BlendFunction::None) { }
 };
 

@@ -24,7 +24,7 @@ bool GL3LightingManager::initialize() {
     pipelineProperties.shaderType = ShaderType::LightedMesh;
 
     pipelineProperties.depthMode = DepthMode::ReadWrite;
-    pipelineProperties.depthFunction = DepthFunction::Less;
+    pipelineProperties.depthFunction = ComparisionFunction::Less;
 
     pipelineProperties.blending = false;
     pipelineProperties.blendFunction = BlendFunction::None;
@@ -36,10 +36,10 @@ bool GL3LightingManager::initialize() {
 
     _lightingParameterSet.reset(new GL3DescriptorSet(Gl3DescriptorSetType::LightingSet));
 
-    _shadowMapDescriptor = _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_DirectionalShadowMap);
+    _shadowMapDescriptor = _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightSet_DirectionalShadowMap);
     _shadowMapDescriptor->setGLTexture(GL3TextureHandle(GL_TEXTURE_2D, 0));
 
-    _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightingSet_LightUniforms)->
+    _lightingParameterSet->getDescriptor(GL3DescriptorSetPart::LightSet_Uniforms)->
         setUniformBuffer(_lightUniformBuffer.get(), 0, sizeof(GL3Light::LightParameters));
 
     return true;
@@ -288,7 +288,7 @@ GL3Light::GL3Light(GL3Renderer* renderer, GL3LightingManager* manager, LightType
     props.blendFunction = BlendFunction::None;
     props.blending = false;
 
-    props.depthFunction = DepthFunction::Less;
+    props.depthFunction = ComparisionFunction::Less;
     props.depthMode = DepthMode::ReadWrite;
 
     props.shaderType = ShaderType::ShadowMesh;

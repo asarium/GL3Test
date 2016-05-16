@@ -16,6 +16,7 @@ set(file_renderer
         renderer/BufferObject.hpp
         renderer/DrawCall.hpp
         renderer/DrawCallManager.hpp
+        renderer/Enums.hpp
         renderer/Exceptions.hpp
         renderer/LightingManager.hpp
         renderer/PipelineState.hpp

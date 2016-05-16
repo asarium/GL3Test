@@ -24,7 +24,8 @@ enum class DescriptorSetType {
     ViewSet,
     ModelSet,
     HdrSet,
-    LightingSet
+    LightingSet,
+    LightSet
 };
 
 enum class DescriptorSetPart {
@@ -36,11 +37,12 @@ enum class DescriptorSetPart {
     HdrSet_BloomedTexture,
 
     // Lighting pass parts
-    LightingSet_LightUniforms,
     LightingSet_PositionTexture,
     LightingSet_NormalTexture,
     LightingSet_AlbedoTexture,
-    LightingSet_DirectionalShadowMap,
+
+    LightSet_Uniforms,
+    LightSet_DirectionalShadowMap,
 };
 
 class DescriptorSet {

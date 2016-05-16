@@ -36,7 +36,7 @@ struct GL3OwnedTextureHandle : GL3TextureHandle
 public:
     GL3OwnedTextureHandle();
     GL3OwnedTextureHandle(GLenum type, GLuint glHandle);
-    ~GL3OwnedTextureHandle();
+    virtual ~GL3OwnedTextureHandle();
 
     GL3OwnedTextureHandle(const GL3OwnedTextureHandle&) = delete;
     GL3OwnedTextureHandle& operator=(const GL3OwnedTextureHandle&) = delete;
@@ -60,6 +60,8 @@ class GL3Texture final: public GL3Object, public Texture, public GL3OwnedTexture
     void updateSize(GLsizei width, GLsizei height);
 
     int getNanoVGHandle() override;
+
+    void allocate(const AllocationProperties& props) override;
 
     void initialize(const gli::texture& texture) override;
 

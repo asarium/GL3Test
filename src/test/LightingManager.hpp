@@ -19,6 +19,11 @@ struct LightParameters
     glm::vec2 frag_coord_scale;
 };
 
+struct ShadowMatrices {
+    glm::mat4 projection;
+    glm::mat4 view;
+};
+
 enum class LightType {
     Directional,
     Point,
@@ -35,8 +40,17 @@ class Light {
     glm::vec3 _position;
     glm::vec3 _direction;
     glm::vec3 _color;
+
+    bool _shadowing;
+    std::unique_ptr<PipelineState> _shadowPassPipelinestate;
+    std::unique_ptr<DescriptorSet> _lightDescriptorSet;
+    Descriptor* _uniformDescriptor;
+
+    std::unique_ptr<RenderTarget> _shadowMapTarget;
+
+    ShadowMatrices _matricies;
  public:
-    Light(Renderer* renderer, LightingManager* manager, LightType type);
+    Light(Renderer* renderer, LightingManager* manager, LightType type, bool shadowing);
     ~Light() { }
 
     void setPosition(const glm::vec3& pos);
@@ -48,6 +62,15 @@ class Light {
     void setParameters(LightParameters* params);
 
     LightType getType();
+
+    void updateDescriptor(BufferObject* uniforms, size_t offset, size_t size);
+
+    void bindDescriptorSet();
+    void unbindDescriptorSet();
+
+    ShadowMatrices beginShadowPass();
+
+    void endShadowPass();
 };
 
 class LightingManager {
@@ -62,7 +85,6 @@ class LightingManager {
     UniformAligner<LightParameters> _alignedUniformData;
 
     std::unique_ptr<DescriptorSet> _lightingDescriptorSet;
-    Descriptor* _lightingDataDescriptor;
 
     std::unique_ptr<PipelineState> _geometryPipelinestate;
     std::unique_ptr<PipelineState> _lightingPassPipelineState;
@@ -71,7 +93,7 @@ class LightingManager {
 
     void ensureRenderTargetSize(size_t width, size_t height);
  public:
-    LightingManager(Renderer* renderer);
+    explicit LightingManager(Renderer* renderer);
     ~LightingManager() { };
 
     Light* addLight(LightType type, bool shadowing);

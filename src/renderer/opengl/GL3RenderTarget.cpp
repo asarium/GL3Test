@@ -57,13 +57,12 @@ std::vector<TextureHandle*> GL3RenderTarget::getColorTextures() {
     }
     return handles;
 }
-void GL3RenderTarget::setDepthTexture(GLuint handle) {
-    _depthTexture.reset(new GL3Texture(_renderer, handle));
+void GL3RenderTarget::setDepthTexture(std::unique_ptr<GL3Texture>&& handle) {
+    _depthTexture = std::move(handle);
     _depthTexture->updateSize(_width, _heigth);
 }
-void GL3RenderTarget::addColorTexture(GLuint handle) {
-    std::unique_ptr<GL3Texture> texture(new GL3Texture(_renderer, handle));
-    texture->updateSize(_width, _heigth);
+void GL3RenderTarget::addColorTexture(std::unique_ptr<GL3Texture>&& handle) {
+    handle->updateSize(_width, _heigth);
 
-    _colorTextures.push_back(std::move(texture));
+    _colorTextures.push_back(std::move(handle));
 }

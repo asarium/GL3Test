@@ -35,8 +35,8 @@ class GL3RenderTarget final: public GL3Object, public RenderTarget {
 
     void bindFramebuffer();
 
-    void setDepthTexture(GLuint handle);
+    void setDepthTexture(std::unique_ptr<GL3Texture>&& handle);
 
-    void addColorTexture(GLuint handle);
+    void addColorTexture(std::unique_ptr<GL3Texture>&& handle);
 };
 

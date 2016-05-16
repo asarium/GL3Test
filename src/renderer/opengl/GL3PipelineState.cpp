@@ -30,7 +30,7 @@ void GL3PipelineState::setupState() {
             // From the OpenGL Spec. That means that we have to enable the depth test even though we don't want to use it
             // instead we set the depth function to always accept which should have the same effect
             GLState->setDepthTest(true);
-            GLState->setDepthFunc(DepthFunction::Always);
+            GLState->setDepthFunc(ComparisionFunction::Always);
             GLState->setDepthMask(true);
             break;
         case DepthMode::ReadWrite:

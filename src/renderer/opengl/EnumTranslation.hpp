@@ -2,8 +2,8 @@
 
 #include "Enums.hpp"
 
-#include <renderer/ShaderParameters.hpp>
 #include <renderer/PipelineState.hpp>
+#include <renderer/VertexLayout.hpp>
 
 #include <util/Assertion.hpp>
 
@@ -43,6 +43,8 @@ inline Gl3DescriptorSetType convertDescriptorSetType(DescriptorSetType type) {
             return Gl3DescriptorSetType::HdrSet;
         case DescriptorSetType::LightingSet:
             return Gl3DescriptorSetType::LightingSet;
+        case DescriptorSetType::LightSet:
+            return Gl3DescriptorSetType::LightSet;
         default:
             Assertion(false, "Unhandled descriptor set type!");
             return Gl3DescriptorSetType::ViewSet;
@@ -59,16 +61,16 @@ inline GL3DescriptorSetPart convertDescriptorSetPart(DescriptorSetPart type) {
             return GL3DescriptorSetPart::ModelSet_DiffuseTexture;
         case DescriptorSetPart::HdrSet_BloomedTexture:
             return GL3DescriptorSetPart::HdrSet_BloomedTexture;
-        case DescriptorSetPart::LightingSet_LightUniforms:
-            return GL3DescriptorSetPart::LightingSet_LightUniforms;
         case DescriptorSetPart::LightingSet_PositionTexture:
             return GL3DescriptorSetPart::LightingSet_PositionTexture;
         case DescriptorSetPart::LightingSet_NormalTexture:
             return GL3DescriptorSetPart::LightingSet_NormalTexture;
         case DescriptorSetPart::LightingSet_AlbedoTexture:
             return GL3DescriptorSetPart::LightingSet_AlbedoTexture;
-        case DescriptorSetPart::LightingSet_DirectionalShadowMap:
-            return GL3DescriptorSetPart::LightingSet_DirectionalShadowMap;
+        case DescriptorSetPart::LightSet_Uniforms:
+            return GL3DescriptorSetPart::LightSet_Uniforms;
+        case DescriptorSetPart::LightSet_DirectionalShadowMap:
+            return GL3DescriptorSetPart::LightSet_DirectionalShadowMap;
         default:
             Assertion(false, "Unhandled descriptor set part!");
             return GL3DescriptorSetPart::ViewSet_Uniforms;
@@ -85,7 +87,7 @@ inline GLuint mapDescriptorSetPartLocation(GL3DescriptorSetPart part) {
             return 1;
         case GL3DescriptorSetPart::ModelSet_Uniforms:
             return 2;
-        case GL3DescriptorSetPart::LightingSet_LightUniforms:
+        case GL3DescriptorSetPart::LightSet_Uniforms:
             return 3;
 
         case GL3DescriptorSetPart::HdrSet_BloomedTexture:
@@ -98,7 +100,7 @@ inline GLuint mapDescriptorSetPartLocation(GL3DescriptorSetPart part) {
             return 3;
         case GL3DescriptorSetPart::LightingSet_AlbedoTexture:
             return 4;
-        case GL3DescriptorSetPart::LightingSet_DirectionalShadowMap:
+        case GL3DescriptorSetPart::LightSet_DirectionalShadowMap:
             return 5;
 
         default:
@@ -129,4 +131,39 @@ inline GLuint mapAttributeLocation(AttributeType type) {
             Assertion(false, "Unhandled attribute location mapping!");
             return 0;
     }
+}
+
+inline GLenum convertComparisionFunction(ComparisionFunction func) {
+    GLenum mode;
+    switch (func) {
+        case ComparisionFunction::Always:
+            mode = GL_ALWAYS;
+            break;
+        case ComparisionFunction::Equal:
+            mode = GL_EQUAL;
+            break;
+        case ComparisionFunction::Greater:
+            mode = GL_GREATER;
+            break;
+        case ComparisionFunction::GreaterOrEqual:
+            mode = GL_GEQUAL;
+            break;
+        case ComparisionFunction::Less:
+            mode = GL_LESS;
+            break;
+        case ComparisionFunction::LessOrEqual:
+            mode = GL_LEQUAL;
+            break;
+        case ComparisionFunction::Never:
+            mode = GL_NEVER;
+            break;
+        case ComparisionFunction::NotEqual:
+            mode = GL_NOTEQUAL;
+            break;
+        default:
+            Assertion(false, "Unhandled comparision function value!");
+            mode = GL_ALWAYS;
+            break;
+    }
+    return mode;
 }

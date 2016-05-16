@@ -42,7 +42,7 @@ void GL3RenderTargetManager::useRenderTarget(RenderTarget* target) {
     _currentRenderTarget->bindFramebuffer();
 }
 
-std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(const RenderTargetProperties& properties) {
+std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(RenderTargetProperties&& properties) {
     // Make sure we don't interfere with any already bound framebuffer
     GLState->Framebuffer.pushBinding();
     GLuint framebuffer;
@@ -56,63 +56,33 @@ std::unique_ptr<RenderTarget> GL3RenderTargetManager::createRenderTarget(const R
                                                                 (GLsizei) properties.height, framebuffer));
 
     std::vector<GLenum> draw_buffers;
-    for (auto& colorFmt : properties.color_buffers) {
-        auto internal_color = convertColorFormat(colorFmt);
-
-        GLState->Texture.unbindAll();
-        GLuint colorTexture;
-        glGenTextures(1, &colorTexture);
-        GLState->Texture.bindTexture(GL_TEXTURE_2D, colorTexture);
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     internal_color,
-                     (GLint) properties.width,
-                     (GLint) properties.height,
-                     0,
-                     GL_RGB,
-                     GL_FLOAT,
-                     nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-        target->addColorTexture(colorTexture);
+    for (auto& texture : properties.color_buffers) {
+        std::unique_ptr<GL3Texture> glTexture(static_cast<GL3Texture*>(texture.release()));
         auto attachment = (GLenum) (GL_COLOR_ATTACHMENT0 + draw_buffers.size());
         glFramebufferTexture2D(GL_FRAMEBUFFER,
                                attachment,
-                               GL_TEXTURE_2D,
-                               colorTexture,
+                               glTexture->getTarget(),
+                               glTexture->getGLHandle(),
                                0);
+
+        target->addColorTexture(std::move(glTexture));
         draw_buffers.push_back(attachment);
     }
 
-    glDrawBuffers((GLsizei) draw_buffers.size(), draw_buffers.data());
-
-    if (properties.depth.enable) {
-        GLuint depthTexture = 0;
-        glGenTextures(1, &depthTexture);
-        GLState->Texture.bindTexture(0, GL_TEXTURE_2D, depthTexture);
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     GL_DEPTH_COMPONENT,
-                     (GLint) properties.width,
-                     (GLint) properties.height,
-                     0,
-                     GL_DEPTH_COMPONENT,
-                     GL_FLOAT,
-                     nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
-        target->setDepthTexture(depthTexture);
+    if (draw_buffers.empty()) {
+        // If there are no color buffers, don't use it
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+    } else {
+        glDrawBuffers((GLsizei) draw_buffers.size(), draw_buffers.data());
     }
-    GLState->Texture.unbindAll();
+
+    if (properties.depth_texture) {
+        std::unique_ptr<GL3Texture> glTexture(static_cast<GL3Texture*>(properties.depth_texture.release()));
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, glTexture->getTarget(), glTexture->getGLHandle(), 0);
+
+        target->setDepthTexture(std::move(glTexture));
+    }
 
     checkFrameBufferStatus();
 

@@ -94,8 +94,6 @@ GL3Descriptor* GL3DescriptorSet::getDescriptor(GL3DescriptorSetPart part) {
 
 
 void GL3DescriptorSet::bind() {
-    Assertion(!_active, "Descriptor set is already bound!");
-
     for (auto& entry : _descriptors) {
         entry.second->bind();
     }
@@ -103,8 +101,6 @@ void GL3DescriptorSet::bind() {
     _active = true;
 }
 void GL3DescriptorSet::unbind() {
-    Assertion(_active, "Descriptor set wasn't bound when unbind was called!");
-
     for (auto& entry : _descriptors) {
         entry.second->unbind();
     }

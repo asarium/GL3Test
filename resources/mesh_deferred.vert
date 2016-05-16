@@ -8,7 +8,7 @@ layout(std140) uniform ViewData {
 layout(std140) uniform ModelData {
     mat4 model_matrix;
     mat4 normal_model_matrix;
-} push;
+} model;
 
 in vec4 in_position;
 in vec2 in_tex_coord;
@@ -22,9 +22,9 @@ out VertexData {
 
 void main()
 {
-    gl_Position = view.view_projection_matrix * push.model_matrix * in_position;
+    gl_Position = view.view_projection_matrix * model.model_matrix * in_position;
 
-    vertOut.position = (push.model_matrix * in_position).xyz;
+    vertOut.position = (model.model_matrix * in_position).xyz;
     vertOut.tex_coord = in_tex_coord;
-    vertOut.normal = normalize(push.normal_model_matrix * vec4(in_normal, 0.f)).xyz;
+    vertOut.normal = normalize(model.normal_model_matrix * vec4(in_normal, 0.f)).xyz;
 }

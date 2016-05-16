@@ -8,11 +8,11 @@ layout(std140) uniform ViewData {
 layout(std140) uniform ModelData {
     mat4 model_matrix;
     mat4 normal_model_matrix;
-} push;
+} model;
 
 in vec3 in_position;
 
 void main()
 {
-    gl_Position = view.view_projection_matrix * push.model_matrix * vec4(in_position, 1.f);
+    gl_Position = view.view_projection_matrix * model.model_matrix * vec4(in_position, 1.f);
 }

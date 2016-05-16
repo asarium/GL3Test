@@ -129,7 +129,7 @@ public:
 class GL3StateTracker {
     SavedState<bool> _depthTest;
     SavedState<bool> _depthMask;
-    SavedState<DepthFunction> _depthFunction;
+    SavedState<ComparisionFunction> _depthFunction;
 
     SavedState<GLuint> _vertexArray;
     SavedState<GLuint> _boundRenderbuffer;
@@ -148,7 +148,7 @@ public:
 
     void setDepthMask(bool flag);
 
-    void setDepthFunc(DepthFunction mode);
+    void setDepthFunc(ComparisionFunction mode);
 
     void bindVertexArray(GLuint handle);
 

@@ -191,6 +191,7 @@ Application::Application(Renderer* renderer, Timing* time)
     _sunLight = _lightingManager.addLight(lighting::LightType::Directional, true);
     _sunLight->setDirection(glm::vec3(10.f, 5.f, 0.f));
     _sunLight->setColor(glm::vec3(1.f));
+    _lightingManager.updateLightData();
 
 //    auto light = _renderer->getLightingManager()->addLight(LightType::Point, false);
 //    light->setPosition(glm::vec3(-3.f, 1.f, 0.f));
@@ -203,11 +204,6 @@ Application::Application(Renderer* renderer, Timing* time)
 
     _wholeFrameCategory = _renderer->getProfiler()->createCategory("Whole frame");
     nvgCreateFont(_renderer->getNanovgContext(), "sans", "resources/Roboto-Regular.ttf");
-
-    _hdrRenderTarget = createHDRRenderTarget(width, height);
-
-    _bloomRenderTargets[0] = createHDRRenderTarget(width, height);
-    _bloomRenderTargets[1] = createHDRRenderTarget(width, height);
 
     PipelineProperties brightPassProps;
     brightPassProps.shaderType = ShaderType::HdrBrightpass;
@@ -273,18 +269,18 @@ void Application::render(Renderer* renderer) {
 //    _renderer->getRenderTargetManager()->useRenderTarget(_hdrRenderTarget.get());
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-//    auto matrices = _sunLight->beginShadowPass();
-//    ViewUniformData shadowView;
-//    shadowView.projection_matrix = matrices.projection;
-//    shadowView.view_matrix = matrices.view;
-//    shadowView.view_projection_matrix = shadowView.projection_matrix * shadowView.view_matrix;
-//    _viewUniformBuffer->updateData(&shadowView, 0, sizeof(shadowView), UpdateFlags::DiscardOldData);
-//
-//    _viewDescriptorSet->bind();
-//    renderScene();
-//    _viewDescriptorSet->unbind();
-//
-//    _sunLight->endShadowPass();
+    auto matrices = _sunLight->beginShadowPass();
+    ViewUniformData shadowView;
+    shadowView.projection_matrix = matrices.projection;
+    shadowView.view_matrix = matrices.view;
+    shadowView.view_projection_matrix = shadowView.projection_matrix * shadowView.view_matrix;
+    _viewUniformBuffer->updateData(&shadowView, 0, sizeof(shadowView), UpdateFlags::DiscardOldData);
+
+    _viewDescriptorSet->bind();
+    renderScene();
+    _viewDescriptorSet->unbind();
+
+    _sunLight->endShadowPass();
 
     _viewUniforms.view_matrix =
         glm::lookAt(glm::vec3(camX, 3.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
@@ -336,11 +332,8 @@ std::unique_ptr<RenderTarget> Application::createHDRRenderTarget(uint32_t width,
     RenderTargetProperties props;
     props.width = width;
     props.height = height;
-    props.color_buffers = { ColorBufferFormat::RGB16F };
-    props.depth.enable = false;
-    props.depth.make_texture_handle = true;
 
-    return _renderer->getRenderTargetManager()->createRenderTarget(props);
+    return _renderer->getRenderTargetManager()->createRenderTarget(std::move(props));
 }
 
 void Application::changeResolution(uint32_t width, uint32_t height) {
