@@ -18,7 +18,6 @@ set(file_renderer
         renderer/DrawCallManager.hpp
         renderer/Enums.hpp
         renderer/Exceptions.hpp
-        renderer/LightingManager.hpp
         renderer/PipelineState.hpp
         renderer/Profiler.hpp
         renderer/Renderer.hpp
@@ -48,8 +47,6 @@ set(file_renderer_opengl
         renderer/opengl/GL3DrawCall.hpp
         renderer/opengl/GL3DrawCallManager.cpp
         renderer/opengl/GL3DrawCallManager.hpp
-        renderer/opengl/GL3LightingManager.cpp
-        renderer/opengl/GL3LightingManager.hpp
         renderer/opengl/GL3Object.cpp
         renderer/opengl/GL3Object.hpp
         renderer/opengl/GL3PipelineState.cpp

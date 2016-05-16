@@ -2,7 +2,6 @@
 
 #include "renderer/Renderer.hpp"
 #include "GL3DrawCallManager.hpp"
-#include "GL3LightingManager.hpp"
 #include "GL3ShaderManager.hpp"
 #include "GL3RenderTargetManager.hpp"
 #include "GL3Util.hpp"
@@ -43,7 +42,6 @@ class GL3Renderer final: public Renderer {
     SDL_GLContext _context;
 
     std::unique_ptr<GL3DrawCallManager> _drawCallManager;
-    std::unique_ptr<GL3LightingManager> _lightingManager;
     std::unique_ptr<GL3ShaderManager> _shaderManager;
     std::unique_ptr<GL3RenderTargetManager> _renderTargetManager;
     std::unique_ptr<GL3Profiler> _profiler;
@@ -97,8 +95,6 @@ class GL3Renderer final: public Renderer {
     SDL_Window* getWindow();
 
     GL3DrawCallManager* getGLDrawCallManager();
-
-    GL3LightingManager* getGLLightingManager();
 
     GL3RenderTargetManager* getGLRenderTargetManager();
 

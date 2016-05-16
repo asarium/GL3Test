@@ -149,7 +149,6 @@ void GL3Renderer::deinitialize() {
     _nvgContext = nullptr;
 
     _drawCallManager.reset();
-    _lightingManager.reset();
     _shaderManager.reset();
     _renderTargetManager.reset();
     _profiler.reset();
@@ -242,11 +241,6 @@ SDL_Window* GL3Renderer::initialize() {
     }
 
     _drawCallManager.reset(new GL3DrawCallManager(this, _shaderManager.get()));
-    _lightingManager.reset(new GL3LightingManager(this));
-    _lightingManager->initialize();
-
-    _lightingManager->changeShadowQuality(_settingsManager.getCurrentSettings().shadow_quality);
-
     _renderTargetManager.reset(new GL3RenderTargetManager(this));
 
     updateResolution(settings.resolution.x, settings.resolution.y);
@@ -259,8 +253,6 @@ SDL_Window* GL3Renderer::initialize() {
 }
 
 void GL3Renderer::updateResolution(uint32_t width, uint32_t height) {
-    _lightingManager->resizeFramebuffer(width, height);
-
     _renderTargetManager->updateDefaultTarget(width, height);
     _renderTargetManager->useRenderTarget(nullptr); // Setup correct view port
 }
@@ -325,10 +317,6 @@ RenderTargetManager* GL3Renderer::getRenderTargetManager() {
 
 GL3DrawCallManager* GL3Renderer::getGLDrawCallManager() {
     return _drawCallManager.get();
-}
-
-GL3LightingManager* GL3Renderer::getGLLightingManager() {
-    return _lightingManager.get();
 }
 
 GL3RenderTargetManager* GL3Renderer::getGLRenderTargetManager() {
@@ -437,8 +425,6 @@ bool GL3Renderer::GL3RenderSettingsManager::supportsSetting(SettingsParameter pa
             return true; // Changing resolution is supported
         case SettingsParameter::VerticalSync:
             return true; // Changing vsync is supported
-        case SettingsParameter::Shadows:
-            return true; // Shadows are implemented using shadow mapping
         default:
             return false; // Unknown option is not supported
     }
@@ -458,10 +444,6 @@ void GL3Renderer::GL3RenderSettingsManager::changeSettings(const RendererSetting
 
         if (_currentSettings.vertical_sync != previousSettings.vertical_sync) {
             SDL_GL_SetSwapInterval(_currentSettings.vertical_sync ? 1 : 0);
-        }
-
-        if (_currentSettings.shadow_quality != previousSettings.shadow_quality) {
-            _renderer->_lightingManager->changeShadowQuality(_currentSettings.shadow_quality);
         }
     }
 }

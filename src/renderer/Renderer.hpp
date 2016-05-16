@@ -36,15 +36,13 @@ enum class SettingsParameterType {
 enum class SettingsParameter {
     Resolution,
     VerticalSync,
-    MultiSamplingAntiAliasing,
-    Shadows
+    MultiSamplingAntiAliasing
 };
 
 struct RendererSettings {
     glm::uvec2 resolution;
     bool vertical_sync;
     uint32_t msaa_samples;
-    SettingsLevel shadow_quality;
 };
 
 class RendererSettingsManager {
