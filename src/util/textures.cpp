@@ -2,6 +2,7 @@
 //
 
 #include <gli/texture2d.hpp>
+#include <gli/generate_mipmaps.hpp>
 #include "textures.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -31,7 +32,9 @@ std::unique_ptr<Texture> util::load_texture(Renderer* renderer, const std::strin
 
         std::memcpy(texture.data(), texture_data, texture.size());
 
-        render_texture->initialize(texture);
+        auto mipmaped = gli::generate_mipmaps(texture, gli::FILTER_LINEAR);
+
+        render_texture->initialize(mipmaped);
 
         stbi_image_free(texture_data);
     }
