@@ -82,6 +82,8 @@ set(file_test
         test/Application.hpp
         test/DrawUtil.cpp
         test/DrawUtil.hpp
+        test/Light.cpp
+        test/Light.hpp
         test/LightingManager.cpp
         test/LightingManager.hpp
         )
