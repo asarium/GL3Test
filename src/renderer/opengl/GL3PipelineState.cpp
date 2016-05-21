@@ -150,6 +150,14 @@ GL3PipelineState::GL3PipelineState(GL3Renderer* renderer, const PipelineProperti
     _props.stencilFunc = std::make_tuple(convertComparisionFunction(std::get<0>(props.stencilFunc)), std::get<1>(props.stencilFunc), std::get<2>(props.stencilFunc));
 
     _props.colorMask = props.colorMask;
+
+    // Issue a dummy draw call for less frame drops later (if the driver actually uses this information)
+    setupState();
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, 0);
+    glDeleteVertexArrays(1, &vao);
 }
 
 void GL3PipelineState::bind()
