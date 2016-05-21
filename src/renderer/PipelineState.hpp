@@ -4,7 +4,7 @@
 #include "Enums.hpp"
 
 enum class ShaderType {
-    Mesh,
+    Mesh = 0,
     LightedMesh,
     ShadowMesh,
     PointSprite,
@@ -13,7 +13,9 @@ enum class ShaderType {
     HdrBrightpass,
     HdrBloom,
     LightingPass,
-    NanoVGShader
+    NanoVGShader,
+
+    NUM_VALUES
 };
 
 enum class BlendFunction {

@@ -44,20 +44,3 @@ enum class GL3DescriptorSetPart {
     NanoVGLocalSet_Uniforms,
     NanoVGLocalSet_Texture
 };
-
-enum class GL3ShaderType {
-    Mesh = 0,
-    DeferredMesh,
-    ShadowMesh,
-    LightingPass,
-    PointSprite,
-    InstancedSprite,
-
-    HdrPostProcessing,
-    HdrBrightpass,
-    HdrBloom,
-
-    NanoVGShader,
-
-    NUM_VALUES
-};

@@ -7,34 +7,6 @@
 
 #include <util/Assertion.hpp>
 
-inline GL3ShaderType convertShaderType(ShaderType type) {
-    switch (type) {
-        case ShaderType::Mesh:
-            return GL3ShaderType::Mesh;
-        case ShaderType::LightedMesh:
-            return GL3ShaderType::DeferredMesh;
-        case ShaderType::PointSprite:
-            return GL3ShaderType::PointSprite;
-        case ShaderType::InstancedSprite:
-            return GL3ShaderType::InstancedSprite;
-        case ShaderType::ShadowMesh:
-            return GL3ShaderType::ShadowMesh;
-        case ShaderType::HdrPostProcessing:
-            return GL3ShaderType::HdrPostProcessing;
-        case ShaderType::HdrBrightpass:
-            return GL3ShaderType::HdrBrightpass;
-        case ShaderType::HdrBloom:
-            return GL3ShaderType::HdrBloom;
-        case ShaderType::LightingPass:
-            return GL3ShaderType::LightingPass;
-        case ShaderType::NanoVGShader:
-            return GL3ShaderType::NanoVGShader;
-        default:
-            Assertion(false, "Unhandled shader type translation!");
-            return GL3ShaderType::Mesh;
-    }
-}
-
 inline Gl3DescriptorSetType convertDescriptorSetType(DescriptorSetType type) {
     switch (type) {
         case DescriptorSetType::ViewSet:

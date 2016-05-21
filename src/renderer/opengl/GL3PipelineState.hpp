@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 
 struct GL3PipelineProperties {
-    GL3ShaderType shaderType;
+    ShaderType shaderType;
 
     DepthMode depthMode;
     ComparisionFunction depthFunction;

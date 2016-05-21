@@ -9,6 +9,7 @@
 #include "GL3ShaderParameters.hpp"
 
 #include <vector>
+#include <renderer/PipelineState.hpp>
 
 struct ShaderFilename {
     GLenum type;
@@ -38,6 +39,6 @@ struct GL3ShaderDefinition {
     std::vector<DescriptorBinding> texture_bindings;
 };
 
-GL3ShaderDefinition getShaderDefinition(GL3ShaderType type);
+GL3ShaderDefinition getShaderDefinition(ShaderType type);
 
-std::vector<GL3ShaderType> getDefinedShaderTypes();
+std::vector<ShaderType> getDefinedShaderTypes();

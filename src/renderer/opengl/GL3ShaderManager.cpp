@@ -147,7 +147,7 @@ GL3ShaderManager::~GL3ShaderManager() {
     }
 }
 
-GLuint GL3ShaderManager::getProgram(GL3ShaderType type) {
+GLuint GL3ShaderManager::getProgram(ShaderType type) {
     if (_programCache[static_cast<size_t>(type)] != 0) {
         return _programCache[static_cast<size_t>(type)];
     }
@@ -160,6 +160,6 @@ GLuint GL3ShaderManager::getProgram(GL3ShaderType type) {
 
     return _programCache[static_cast<size_t>(type)];
 }
-void GL3ShaderManager::bindProgram(GL3ShaderType type) {
+void GL3ShaderManager::bindProgram(ShaderType type) {
     GLState->Program.use(getProgram(type));
 }

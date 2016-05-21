@@ -3,13 +3,13 @@
 
 namespace {
 struct ShaderDefinition {
-    GL3ShaderType type;
+    ShaderType type;
     std::vector<ShaderFilename> files;
 };
 ShaderDefinition shader_definitions[] =
     {
         {
-            GL3ShaderType::Mesh,
+            ShaderType::Mesh,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -22,7 +22,7 @@ ShaderDefinition shader_definitions[] =
             }
         },
         {
-            GL3ShaderType::DeferredMesh,
+            ShaderType::LightedMesh,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -35,7 +35,7 @@ ShaderDefinition shader_definitions[] =
             }
         },
         {
-            GL3ShaderType::LightingPass,
+            ShaderType::LightingPass,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -48,7 +48,7 @@ ShaderDefinition shader_definitions[] =
             }
         },
         {
-            GL3ShaderType::PointSprite,
+            ShaderType::PointSprite,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -65,7 +65,7 @@ ShaderDefinition shader_definitions[] =
             }
         },
         {
-            GL3ShaderType::InstancedSprite,
+            ShaderType::InstancedSprite,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -78,7 +78,7 @@ ShaderDefinition shader_definitions[] =
             }
         },
         {
-            GL3ShaderType::ShadowMesh,
+            ShaderType::ShadowMesh,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -91,7 +91,7 @@ ShaderDefinition shader_definitions[] =
             }
         },
         {
-            GL3ShaderType::HdrPostProcessing,
+            ShaderType::HdrPostProcessing,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -104,7 +104,7 @@ ShaderDefinition shader_definitions[] =
             }
         },
         {
-            GL3ShaderType::HdrBrightpass,
+            ShaderType::HdrBrightpass,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -117,7 +117,7 @@ ShaderDefinition shader_definitions[] =
             }
         },
         {
-            GL3ShaderType::HdrBloom,
+            ShaderType::HdrBloom,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -130,7 +130,7 @@ ShaderDefinition shader_definitions[] =
             }
         },
         {
-            GL3ShaderType::NanoVGShader,
+            ShaderType::NanoVGShader,
             {
                 {
                     GL_VERTEX_SHADER,
@@ -260,7 +260,7 @@ DescriptorBinding texture_bindings[] = {
     }
 };
 
-GL3ShaderDefinition getShaderDefinition(GL3ShaderType type) {
+GL3ShaderDefinition getShaderDefinition(ShaderType type) {
     GL3ShaderDefinition def;
 
     for (auto& file:shader_definitions) {
@@ -285,8 +285,8 @@ GL3ShaderDefinition getShaderDefinition(GL3ShaderType type) {
     return def;
 }
 
-std::vector<GL3ShaderType> getDefinedShaderTypes() {
-    std::vector<GL3ShaderType> types;
+std::vector<ShaderType> getDefinedShaderTypes() {
+    std::vector<ShaderType> types;
     for (auto& file:shader_definitions) {
         types.push_back(file.type);
     }

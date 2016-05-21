@@ -123,7 +123,7 @@ void GL3PipelineState::setupState()
 
 GL3PipelineState::GL3PipelineState(GL3Renderer* renderer, const PipelineProperties& props): GL3Object(renderer)
 {
-    _props.shaderType = convertShaderType(props.shaderType);
+    _props.shaderType = props.shaderType;
 
     _props.depthMode = props.depthMode;
     _props.depthFunction = props.depthFunction;
