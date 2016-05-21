@@ -16,10 +16,6 @@
 #include <renderer/Exceptions.hpp>
 #include <util/Assertion.hpp>
 
-#include <renderer/nanovg/nanovg.h>
-#define NANOVG_GL3_IMPLEMENTATION
-#include <renderer/nanovg/nanovg_gl.h>
-
 namespace {
 
 #ifndef NDEBUG
