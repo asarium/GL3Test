@@ -47,9 +47,6 @@ TextureHandle* GL3RenderTarget::getDepthTexture() {
     return _depthTexture.get();
 }
 
-bool GL3RenderTarget::hasDepthBuffer() {
-    return (bool) _depthTexture;
-}
 std::vector<TextureHandle*> GL3RenderTarget::getColorTextures() {
     std::vector<TextureHandle*> handles;
     for (auto& tex : _colorTextures) {
@@ -59,10 +56,7 @@ std::vector<TextureHandle*> GL3RenderTarget::getColorTextures() {
 }
 void GL3RenderTarget::setDepthTexture(std::unique_ptr<GL3Texture>&& handle) {
     _depthTexture = std::move(handle);
-    _depthTexture->updateSize(_width, _heigth);
 }
 void GL3RenderTarget::addColorTexture(std::unique_ptr<GL3Texture>&& handle) {
-    handle->updateSize(_width, _heigth);
-
     _colorTextures.push_back(std::move(handle));
 }

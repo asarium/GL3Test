@@ -15,6 +15,11 @@ GLenum getPrimitiveType(PrimitiveType type) {
             return GL_POINTS;
         case PrimitiveType::TriangleStrip:
             return GL_TRIANGLE_STRIP;
+        case PrimitiveType::TriangleFan:
+            return GL_TRIANGLE_FAN;
+        default:
+            Assertion(false, "Unhandled enum value detected!");
+            return GL_NONE;
     }
     return GL_TRIANGLES;
 }

@@ -5,8 +5,10 @@
 #include <model/Model.hpp>
 #include <SDL_events.h>
 
+#include <renderer/nanovg/nanovg.h>
 #include <glm/glm.hpp>
 #include <deque>
+#include <renderer/nanovg/nanovg_gl.h>
 #include "LightingManager.hpp"
 
 struct Particle {
@@ -17,6 +19,8 @@ struct Particle {
 class Application {
     Timing *_timing;
     Renderer *_renderer;
+
+    NVGcontext* _nvgCtx;
 
     std::unique_ptr<Model> _model;
 

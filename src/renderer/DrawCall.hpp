@@ -20,7 +20,7 @@ class VariableDrawCall : public GenericDrawCall {
 public:
     virtual ~VariableDrawCall() { }
 
-    virtual void draw(size_t count, size_t offset) = 0;
+    virtual void draw(size_t offset, size_t count) = 0;
 };
 
 class InstancedDrawCall : public GenericDrawCall {
@@ -34,6 +34,6 @@ class InstancedVariableDrawCall : public GenericDrawCall {
 public:
     virtual ~InstancedVariableDrawCall() { }
 
-    virtual void drawInstanced(size_t num_instances, size_t count, size_t offset) = 0;
+    virtual void drawInstanced(size_t num_instances, size_t offset, size_t count) = 0;
 };
 

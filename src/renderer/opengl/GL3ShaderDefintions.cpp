@@ -128,6 +128,19 @@ ShaderDefinition shader_definitions[] =
                     "bloom_pass.frag",
                 }
             }
+        },
+        {
+            GL3ShaderType::NanoVGShader,
+            {
+                {
+                    GL_VERTEX_SHADER,
+                    "nanovg.vert",
+                },
+                {
+                    GL_FRAGMENT_SHADER,
+                    "nanovg.frag",
+                }
+            }
         }
     };
 
@@ -167,6 +180,11 @@ AttributeBinding attribute_mappings[] =
             AttributeType::PositionOffset,
             "in_pos_offset",
             mapAttributeLocation(AttributeType::PositionOffset)
+        },
+        {
+            AttributeType::Position2D,
+            "in_position_2d",
+            mapAttributeLocation(AttributeType::Position2D)
         }
     };
 }
@@ -192,6 +210,16 @@ DescriptorBinding uniform_buffer_bindings[] = {
         "LightData",
         mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightSet_Uniforms)
     },
+    {
+        GL3DescriptorSetPart::NanoVGGlobalSet_Uniforms,
+        "NanoVGGlobalData",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::NanoVGGlobalSet_Uniforms)
+    },
+    {
+        GL3DescriptorSetPart::NanoVGLocalSet_Uniforms,
+        "NanoVGUniformData",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::NanoVGLocalSet_Uniforms)
+    }
 };
 
 DescriptorBinding texture_bindings[] = {
@@ -225,6 +253,11 @@ DescriptorBinding texture_bindings[] = {
         "directional_shadow_map",
         mapDescriptorSetPartLocation(GL3DescriptorSetPart::LightSet_DirectionalShadowMap)
     },
+    {
+        GL3DescriptorSetPart::NanoVGLocalSet_Texture,
+        "nvg_tex",
+        mapDescriptorSetPartLocation(GL3DescriptorSetPart::NanoVGLocalSet_Texture)
+    }
 };
 
 GL3ShaderDefinition getShaderDefinition(GL3ShaderType type) {

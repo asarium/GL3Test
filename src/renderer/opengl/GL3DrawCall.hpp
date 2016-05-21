@@ -14,9 +14,9 @@ class GL3DrawCall final: public GL3Object, public DrawCall, public VariableDrawC
 
     void setGLState();
 
-    void actualDraw(GLsizei count, GLint offset);
+    void actualDraw(GLint offset, GLsizei count);
 
-    void actualDrawInstanced(GLsizei instances, GLsizei count, GLint offset);
+    void actualDrawInstanced(GLsizei instances, GLsizei offset, GLint count);
 
  public:
     GL3DrawCall(GL3Renderer* renderer, const GL3DrawCallProperties&);
@@ -25,11 +25,11 @@ class GL3DrawCall final: public GL3Object, public DrawCall, public VariableDrawC
 
     virtual void draw() override;
 
-    virtual void draw(size_t count, size_t offset) override;
+    virtual void draw(size_t offset, size_t count) override;
 
     virtual void drawInstanced(size_t num_instances) override;
 
-    virtual void drawInstanced(size_t num_instances, size_t count, size_t offset) override;
+    virtual void drawInstanced(size_t num_instances, size_t offset, size_t count) override;
 
     virtual void setPushConstants(const void* data, size_t size) override;
 };

@@ -15,8 +15,10 @@ namespace {
         props.compare_mode = TextureCompareMode::CompareRefToTexture;
         props.compare_func = ComparisionFunction::Less;
 
-        props.wrap_behavior = WrapBehavior::ClampToBorder;
-        props.border_color = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        props.filterProperties.wrap_behavior_s = WrapBehavior::ClampToBorder;
+        props.filterProperties.wrap_behavior_t = WrapBehavior::ClampToBorder;
+        props.filterProperties.wrap_behavior_r = WrapBehavior::ClampToBorder;
+        props.filterProperties.border_color = glm::vec4(1.f, 1.f, 1.f, 1.f);
         texture->allocate(props);
 
         return texture;
@@ -39,7 +41,7 @@ namespace lighting
             pipelineProperties.depthMode = DepthMode::ReadWrite;
 
             pipelineProperties.blendFunction = BlendFunction::None;
-            pipelineProperties.blending = false;
+            pipelineProperties.enableBlending = false;
 
             _shadowPassPipelinestate = _renderer->createPipelineState(pipelineProperties);
 

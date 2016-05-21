@@ -25,7 +25,9 @@ enum class DescriptorSetType {
     ModelSet,
     HdrSet,
     LightingSet,
-    LightSet
+    LightSet,
+    NanoVGGlobalSet,
+    NanoVGLocalSet
 };
 
 enum class DescriptorSetPart {
@@ -43,6 +45,12 @@ enum class DescriptorSetPart {
 
     LightSet_Uniforms,
     LightSet_DirectionalShadowMap,
+
+    // NanoVG parts
+    NanoVGGlobalSet_Uniforms,
+    
+    NanoVGLocalSet_Uniforms,
+    NanoVGLocalSet_Texture
 };
 
 class DescriptorSet {

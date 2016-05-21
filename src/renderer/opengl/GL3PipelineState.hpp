@@ -12,14 +12,29 @@ struct GL3PipelineProperties {
     DepthMode depthMode;
     ComparisionFunction depthFunction;
 
-    bool blending;
+    bool enableBlending;
     BlendFunction blendFunction;
+
+    bool enableFaceCulling;
+    GLenum culledFace;
+    GLenum frontFace;
+
+    bool enableScissor;
+
+    bool enableStencil;
+    uint32_t stencilMask;
+
+    std::tuple<GLenum, GLenum, GLenum> frontStencilOp;
+    std::tuple<GLenum, GLenum, GLenum> backStencilOp;
+    std::tuple<GLenum, uint32_t, uint32_t> stencilFunc;
+
+    glm::bvec4 colorMask;
 };
 
 class GL3PipelineState final: public GL3Object, public PipelineState {
     GL3PipelineProperties _props;
  public:
-    GL3PipelineState(GL3Renderer* renderer, const GL3PipelineProperties& props) : GL3Object(renderer), _props(props) { }
+    GL3PipelineState(GL3Renderer* renderer, const PipelineProperties& props);
 
     virtual ~GL3PipelineState() { }
 

@@ -18,7 +18,6 @@
 #include "Exceptions.hpp"
 #include "Profiler.hpp"
 
-#include "nanovg/nanovg.h"
 #include "PipelineState.hpp"
 
 enum class SettingsLevel {
@@ -100,10 +99,6 @@ class Renderer {
     virtual void presentNextFrame() = 0;
 
     virtual void deinitialize() = 0;
-
-    virtual NVGcontext* getNanovgContext() = 0;
-
-    virtual void nanovgEndFrame() = 0;
 };
 
 #endif //PROJECT_RENDERER_H

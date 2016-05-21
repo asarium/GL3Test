@@ -12,7 +12,8 @@ class PipelineState;
 enum class PrimitiveType {
     Point,
     Triangle,
-    TriangleStrip
+    TriangleStrip,
+    TriangleFan
 };
 
 enum class IndexType {

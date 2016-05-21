@@ -16,7 +16,8 @@ enum class AttributeType {
     Tangent,
     Bitangent,
     Radius,
-    PositionOffset
+    PositionOffset,
+    Position2D
 };
 
 enum class DataFormat {

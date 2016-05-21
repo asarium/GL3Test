@@ -126,6 +126,39 @@ public:
     }
 };
 
+class GL3Stencil
+{
+    SavedState<bool> _stencilEnabled;
+    SavedState<GLuint> _stencilMask;
+    SavedState<std::tuple<GLenum, uint32_t, uint32_t>> _stencilFunc;
+
+    SavedState<std::tuple<GLenum, GLenum, GLenum>> _frontStencilOp;
+    SavedState<std::tuple<GLenum, GLenum, GLenum>> _backStencilOp;
+
+public:
+    void setStencilTest(bool enable);
+
+    void setStencilMask(GLuint mask);
+
+    void setFrontStencilOp(const std::tuple<GLenum, GLenum, GLenum>& values);
+    void setBackStencilOp(const std::tuple<GLenum, GLenum, GLenum>& values);
+
+    void setStencilFunc(const std::tuple<GLenum, uint32_t, uint32_t>& values);
+};
+
+class GL3CullFace{
+    SavedState<bool> _faceCulling;
+    SavedState<GLenum> _culledFace;
+    SavedState<GLenum> _frontFace;
+
+public:
+    void setFaceCulling(bool culling);
+
+    void setCulledFace(GLenum culledFace);
+
+    void setFrontFace(GLenum frontFace);
+};
+
 class GL3StateTracker {
     SavedState<bool> _depthTest;
     SavedState<bool> _depthMask;
@@ -137,12 +170,17 @@ class GL3StateTracker {
     SavedState<bool> _blendEnabled;
     SavedState<BlendFunction> _blendFunc;
 
+    SavedState<bool> _scissorTest;
+
+    SavedState<glm::bvec4> _colorMask;
 public:
     GL3BufferState Buffer;
     GL3TextureState Texture;
     GL3ProgramState Program;
     GL3FramebufferState Framebuffer;
     Gl3ContextConstants Constants;
+    GL3Stencil Stencil;
+    GL3CullFace CullFace;
 
     void setDepthTest(bool enable);
 
@@ -157,6 +195,10 @@ public:
     void setBlendMode(bool enable);
 
     void setBlendFunc(BlendFunction mode);
+
+    void setScissorTest(bool enable);
+
+    void setColorMask(const glm::bvec4& mask);
 };
 
 extern thread_local std::unique_ptr<GL3StateTracker> GLState;

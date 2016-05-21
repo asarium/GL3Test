@@ -16,7 +16,7 @@ void Model::setRootNode(ModelNode&& node) {
 
     _numDrawCalls = updateNodeIndices(_rootNode, 0);
 
-    _alignedUniformData.allocate(_numDrawCalls);
+    _alignedUniformData.resize(_numDrawCalls);
 
     _nodeUniformData = _renderer->createBuffer(BufferType::Uniform);
     _nodeUniformData->setData(nullptr, _alignedUniformData.getSize(), BufferUsage::Streaming);

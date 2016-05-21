@@ -9,13 +9,12 @@ class TextureHandle {
     TextureHandle() { }
  public:
     virtual ~TextureHandle() { }
-
-    virtual int getNanoVGHandle() = 0;
 };
 
 enum class WrapBehavior {
     ClampToEdge,
-    ClampToBorder
+    ClampToBorder,
+    Repeat
 };
 
 enum class TextureCompareMode {
@@ -23,20 +22,42 @@ enum class TextureCompareMode {
     CompareRefToTexture
 };
 
+enum class FilterMode {
+    Nearest,
+    Linear,
+    NearestMipmapNearest,
+    LinearMipmapNearest,
+    NearestMipmapLinear,
+    LinearMipmapLinear
+};
+
+struct FilterProperties {
+    WrapBehavior wrap_behavior_s;
+    WrapBehavior wrap_behavior_t;
+    WrapBehavior wrap_behavior_r;
+    glm::vec4 border_color;
+
+    FilterMode minification_filter;
+    FilterMode magnification_filter;
+
+    FilterProperties()
+        : wrap_behavior_s(WrapBehavior::ClampToEdge), wrap_behavior_t(WrapBehavior::ClampToEdge),
+          wrap_behavior_r(WrapBehavior::ClampToEdge), border_color(glm::vec4(1.f)),
+          minification_filter(FilterMode::Linear), magnification_filter(FilterMode::Linear) { }
+};
+
 struct AllocationProperties {
     gli::target target;
     gli::extent3d size;
     gli::format format;
 
-    WrapBehavior wrap_behavior;
-    glm::vec4 border_color;
+    FilterProperties filterProperties;
 
     TextureCompareMode compare_mode;
     ComparisionFunction compare_func;
 
     AllocationProperties()
-        : wrap_behavior(WrapBehavior::ClampToEdge), border_color(glm::vec4()), compare_mode(TextureCompareMode::None),
-          compare_func(ComparisionFunction::Always) { }
+        : compare_mode(TextureCompareMode::None), compare_func(ComparisionFunction::Always) { }
 };
 
 class Texture: public TextureHandle {
@@ -45,5 +66,10 @@ class Texture: public TextureHandle {
 
     virtual void allocate(const AllocationProperties& props) = 0;
 
-    virtual void initialize(const gli::texture& texture) = 0;
+    virtual void initialize(const gli::texture& texture, const FilterProperties& filterProperties) = 0;
+
+    virtual void update(const gli::extent3d& position,
+                        const gli::extent3d& size, const gli::format dataFormat, const void* data) = 0;
+
+    virtual gli::extent3d getSize() const = 0;
 };

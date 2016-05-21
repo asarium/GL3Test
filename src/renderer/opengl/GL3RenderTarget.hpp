@@ -31,8 +31,6 @@ class GL3RenderTarget final: public GL3Object, public RenderTarget {
 
     TextureHandle* getDepthTexture() override;
 
-    bool hasDepthBuffer();
-
     void bindFramebuffer();
 
     void setDepthTexture(std::unique_ptr<GL3Texture>&& handle);

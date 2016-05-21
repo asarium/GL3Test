@@ -27,6 +27,8 @@ inline GL3ShaderType convertShaderType(ShaderType type) {
             return GL3ShaderType::HdrBloom;
         case ShaderType::LightingPass:
             return GL3ShaderType::LightingPass;
+        case ShaderType::NanoVGShader:
+            return GL3ShaderType::NanoVGShader;
         default:
             Assertion(false, "Unhandled shader type translation!");
             return GL3ShaderType::Mesh;
@@ -45,6 +47,10 @@ inline Gl3DescriptorSetType convertDescriptorSetType(DescriptorSetType type) {
             return Gl3DescriptorSetType::LightingSet;
         case DescriptorSetType::LightSet:
             return Gl3DescriptorSetType::LightSet;
+        case DescriptorSetType::NanoVGGlobalSet:
+            return Gl3DescriptorSetType::NanoVGGlobalSet;
+        case DescriptorSetType::NanoVGLocalSet:
+            return Gl3DescriptorSetType::NanoVGLocalSet;
         default:
             Assertion(false, "Unhandled descriptor set type!");
             return Gl3DescriptorSetType::ViewSet;
@@ -71,6 +77,13 @@ inline GL3DescriptorSetPart convertDescriptorSetPart(DescriptorSetPart type) {
             return GL3DescriptorSetPart::LightSet_Uniforms;
         case DescriptorSetPart::LightSet_DirectionalShadowMap:
             return GL3DescriptorSetPart::LightSet_DirectionalShadowMap;
+        case DescriptorSetPart::NanoVGGlobalSet_Uniforms:
+            return GL3DescriptorSetPart::NanoVGGlobalSet_Uniforms;
+        case DescriptorSetPart::NanoVGLocalSet_Uniforms:
+            return GL3DescriptorSetPart::NanoVGLocalSet_Uniforms;
+        case DescriptorSetPart::NanoVGLocalSet_Texture:
+            return GL3DescriptorSetPart::NanoVGLocalSet_Texture;
+                
         default:
             Assertion(false, "Unhandled descriptor set part!");
             return GL3DescriptorSetPart::ViewSet_Uniforms;
@@ -89,19 +102,25 @@ inline GLuint mapDescriptorSetPartLocation(GL3DescriptorSetPart part) {
             return 2;
         case GL3DescriptorSetPart::LightSet_Uniforms:
             return 3;
+        case GL3DescriptorSetPart::NanoVGGlobalSet_Uniforms:
+            return 4;
+        case GL3DescriptorSetPart::NanoVGLocalSet_Uniforms:
+            return 5;
 
         case GL3DescriptorSetPart::HdrSet_BloomedTexture:
-            return 0;
-        case GL3DescriptorSetPart::ModelSet_DiffuseTexture:
             return 1;
-        case GL3DescriptorSetPart::LightingSet_PositionTexture:
+        case GL3DescriptorSetPart::ModelSet_DiffuseTexture:
             return 2;
-        case GL3DescriptorSetPart::LightingSet_NormalTexture:
+        case GL3DescriptorSetPart::LightingSet_PositionTexture:
             return 3;
-        case GL3DescriptorSetPart::LightingSet_AlbedoTexture:
+        case GL3DescriptorSetPart::LightingSet_NormalTexture:
             return 4;
-        case GL3DescriptorSetPart::LightSet_DirectionalShadowMap:
+        case GL3DescriptorSetPart::LightingSet_AlbedoTexture:
             return 5;
+        case GL3DescriptorSetPart::LightSet_DirectionalShadowMap:
+            return 6;
+        case GL3DescriptorSetPart::NanoVGLocalSet_Texture:
+            return 7;
 
         default:
             Assertion(false, "Unhandled descriptor set part!");
@@ -127,6 +146,8 @@ inline GLuint mapAttributeLocation(AttributeType type) {
             return 6;
         case AttributeType::PositionOffset:
             return 7;
+        case AttributeType::Position2D:
+            return 8;
         default:
             Assertion(false, "Unhandled attribute location mapping!");
             return 0;

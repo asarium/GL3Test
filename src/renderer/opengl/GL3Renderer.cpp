@@ -16,7 +16,8 @@
 #include <renderer/Exceptions.hpp>
 #include <util/Assertion.hpp>
 
-#define NANOVG_GL3_IMPLEMENTATION   // Use GL2 implementation.
+#include <renderer/nanovg/nanovg.h>
+#define NANOVG_GL3_IMPLEMENTATION
 #include <renderer/nanovg/nanovg_gl.h>
 
 namespace {
@@ -145,9 +146,6 @@ GL3Renderer::~GL3Renderer() {
 }
 
 void GL3Renderer::deinitialize() {
-    nvgDeleteGL3(_nvgContext);
-    _nvgContext = nullptr;
-
     _drawCallManager.reset();
     _shaderManager.reset();
     _renderTargetManager.reset();
@@ -245,8 +243,6 @@ SDL_Window* GL3Renderer::initialize() {
 
     updateResolution(settings.resolution.x, settings.resolution.y);
 
-    _nvgContext = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
-
     _initialized = true;
 
     return _window;
@@ -292,15 +288,7 @@ std::unique_ptr<Texture> GL3Renderer::createTexture() {
 }
 
 std::unique_ptr<PipelineState> GL3Renderer::createPipelineState(const PipelineProperties& props) {
-    GL3PipelineProperties gl_props;
-    gl_props.shaderType = convertShaderType(props.shaderType);
-
-    gl_props.blending = props.blending;
-    gl_props.blendFunction = props.blendFunction;
-    gl_props.depthMode = props.depthMode;
-    gl_props.depthFunction = props.depthFunction;
-
-    return std::unique_ptr<PipelineState>(new GL3PipelineState(this, gl_props));
+    return std::unique_ptr<PipelineState>(new GL3PipelineState(this, props));
 }
 
 std::unique_ptr<DescriptorSet> GL3Renderer::createDescriptorSet(DescriptorSetType type) {
@@ -346,29 +334,6 @@ Profiler* GL3Renderer::getProfiler() {
     return _profiler.get();
 }
 
-NVGcontext* GL3Renderer::getNanovgContext() {
-    return _nvgContext;
-}
-
-void GL3Renderer::nanovgEndFrame() {
-    nvgEndFrame(_nvgContext);
-
-    // Communicate the changes to out state tracker
-    GLState->setBlendMode(true);
-    GLState->setBlendFunc(BlendFunction::AdditiveAlpha);
-    GLState->setDepthTest(false);
-
-    GLState->bindVertexArray(0);
-    GLState->Buffer.bindUniformBuffer(0);
-
-    GLState->Buffer.bindArrayBuffer(0);
-    GLState->Program.use(0);
-
-    GLState->Texture.setActiveUnit(0);
-}
-int GL3Renderer::getNanoVGImageHandle(GLuint tex_handle, GLsizei width, GLsizei height) {
-    return nvglCreateImageFromHandleGL3(_nvgContext, tex_handle, width, height, NVG_IMAGE_NODELETE);
-}
 GL3PushConstantManager* GL3Renderer::getPushConstantManager() {
     return _pushConstantManager.get();
 }

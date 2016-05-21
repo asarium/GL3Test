@@ -14,7 +14,10 @@ enum class Gl3DescriptorSetType {
 
     // Lighting pass set
     LightingSet,
-    LightSet
+    LightSet,
+
+    NanoVGGlobalSet,
+    NanoVGLocalSet
 };
 
 enum class GL3DescriptorSetPart {
@@ -34,6 +37,12 @@ enum class GL3DescriptorSetPart {
 
     LightSet_Uniforms,
     LightSet_DirectionalShadowMap,
+
+    // NanoVG parts
+    NanoVGGlobalSet_Uniforms,
+
+    NanoVGLocalSet_Uniforms,
+    NanoVGLocalSet_Texture
 };
 
 enum class GL3ShaderType {
@@ -47,6 +56,8 @@ enum class GL3ShaderType {
     HdrPostProcessing,
     HdrBrightpass,
     HdrBloom,
+
+    NanoVGShader,
 
     NUM_VALUES
 };

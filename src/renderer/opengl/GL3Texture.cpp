@@ -13,22 +13,43 @@
 
 namespace {
 GLenum convertWrapMode(WrapBehavior mode) {
-    switch(mode) {
+    switch (mode) {
         case WrapBehavior::ClampToEdge:
             return GL_CLAMP_TO_EDGE;
         case WrapBehavior::ClampToBorder:
             return GL_CLAMP_TO_BORDER;
+        case WrapBehavior::Repeat:
+            return GL_REPEAT;
         default:
             Assertion(false, "Unhandled enum value!");
-            return GL_CLAMP_TO_EDGE;
+            return GL_NONE;
     }
 }
 GLenum convertCompareMode(TextureCompareMode mode) {
-    switch(mode) {
+    switch (mode) {
         case TextureCompareMode::None:
             return GL_NONE;
         case TextureCompareMode::CompareRefToTexture:
             return GL_COMPARE_REF_TO_TEXTURE;
+        default:
+            Assertion(false, "Unhandled enum value!");
+            return GL_NONE;
+    }
+}
+GLenum convertFilterMode(FilterMode mode) {
+    switch (mode) {
+        case FilterMode::Nearest:
+            return GL_NEAREST;
+        case FilterMode::Linear:
+            return GL_LINEAR;
+        case FilterMode::NearestMipmapNearest:
+            return GL_NEAREST_MIPMAP_NEAREST;
+        case FilterMode::LinearMipmapNearest:
+            return GL_LINEAR_MIPMAP_NEAREST;
+        case FilterMode::NearestMipmapLinear:
+            return GL_NEAREST_MIPMAP_LINEAR;
+        case FilterMode::LinearMipmapLinear:
+            return GL_LINEAR_MIPMAP_LINEAR;
         default:
             Assertion(false, "Unhandled enum value!");
             return GL_NONE;
@@ -90,11 +111,17 @@ void GL3OwnedTextureHandle::reset(GLenum target, GLuint handle) {
 }
 
 GL3Texture::GL3Texture(GL3Renderer* renderer)
-    : GL3Object(renderer), GL3OwnedTextureHandle(GL_TEXTURE_2D, 0), _nvgHandle(0) {
+    : GL3Object(renderer), GL3OwnedTextureHandle(GL_TEXTURE_2D, 0), _swizzles(gli::SWIZZLE_RED,
+                                                                              gli::SWIZZLE_GREEN,
+                                                                              gli::SWIZZLE_BLUE,
+                                                                              gli::SWIZZLE_ALPHA) {
 }
 
 GL3Texture::GL3Texture(GL3Renderer* renderer, GLuint handle)
-    : GL3Object(renderer), GL3OwnedTextureHandle(GL_TEXTURE_2D, handle), _nvgHandle(0) {
+    : GL3Object(renderer), GL3OwnedTextureHandle(GL_TEXTURE_2D, handle), _swizzles(gli::SWIZZLE_RED,
+                                                                                   gli::SWIZZLE_GREEN,
+                                                                                   gli::SWIZZLE_BLUE,
+                                                                                   gli::SWIZZLE_ALPHA) {
 }
 
 GL3Texture::~GL3Texture() {
@@ -123,23 +150,6 @@ std::unique_ptr<GL3Texture> GL3Texture::createTexture(GL3Renderer* renderer) {
     return std::unique_ptr<GL3Texture>(new GL3Texture(renderer, name));
 }
 
-void GL3Texture::updateSize(GLsizei width, GLsizei height) {
-    _extent.x = width;
-    _extent.y = height;
-
-    // Implicitly makes this texture 2D
-    reset(GL_TEXTURE_2D, _handle);
-}
-int GL3Texture::getNanoVGHandle() {
-    Assertion(_handle != 0, "Trying to get NanoVG handle from invalid texture!");
-
-    if (_nvgHandle > 0) {
-        return _nvgHandle;
-    }
-
-    _nvgHandle = _renderer->getNanoVGImageHandle(_handle, _extent.x, _extent.y);
-    return _nvgHandle;
-}
 void GL3Texture::allocate(const AllocationProperties& props) {
     gli::gl GL(gli::gl::PROFILE_GL33);
     gli::gl::format const format = GL.translate(props.format,
@@ -152,19 +162,15 @@ void GL3Texture::allocate(const AllocationProperties& props) {
     reset(target, _handle);
     bind(0);
 
-    glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, format.Swizzles[0]);
-    glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, format.Swizzles[1]);
-    glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, format.Swizzles[2]);
-    glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, format.Swizzles[3]);
+    glTexParameteri(_target, GL_TEXTURE_SWIZZLE_R, format.Swizzles[0]);
+    glTexParameteri(_target, GL_TEXTURE_SWIZZLE_G, format.Swizzles[1]);
+    glTexParameteri(_target, GL_TEXTURE_SWIZZLE_B, format.Swizzles[2]);
+    glTexParameteri(_target, GL_TEXTURE_SWIZZLE_A, format.Swizzles[3]);
 
-    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(target, GL_TEXTURE_WRAP_S, convertWrapMode(props.wrap_behavior));
-    glTexParameteri(target, GL_TEXTURE_WRAP_T, convertWrapMode(props.wrap_behavior));
-    glTexParameteri(target, GL_TEXTURE_WRAP_R, convertWrapMode(props.wrap_behavior));
-    glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(props.border_color));
-    glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, convertCompareMode(props.compare_mode));
-    glTexParameteri(target, GL_TEXTURE_COMPARE_FUNC, convertComparisionFunction(props.compare_func));
+    setFilterProperties(props.filterProperties);
+
+    glTexParameteri(_target, GL_TEXTURE_COMPARE_MODE, convertCompareMode(props.compare_mode));
+    glTexParameteri(_target, GL_TEXTURE_COMPARE_FUNC, convertComparisionFunction(props.compare_func));
 
     switch (props.target) {
         case gli::TARGET_1D:
@@ -201,9 +207,24 @@ void GL3Texture::allocate(const AllocationProperties& props) {
             Assertion(false, "Unknown texture target encountered!");
             break;
     }
+
+    _format = props.format;
+    _swizzles = gli::swizzles(gli::SWIZZLE_RED,
+                              gli::SWIZZLE_GREEN,
+                              gli::SWIZZLE_BLUE,
+                              gli::SWIZZLE_ALPHA);
+    _extent = props.size;
     GLState->Texture.bindTexture(0, _target, 0);
 }
-void GL3Texture::initialize(const gli::texture& texture) {
+void GL3Texture::setFilterProperties(const FilterProperties& props) const {
+    glTexParameteri(_target, GL_TEXTURE_MAG_FILTER, convertFilterMode(props.magnification_filter));
+    glTexParameteri(_target, GL_TEXTURE_MIN_FILTER, convertFilterMode(props.minification_filter));
+    glTexParameteri(_target, GL_TEXTURE_WRAP_S, convertWrapMode(props.wrap_behavior_s));
+    glTexParameteri(_target, GL_TEXTURE_WRAP_T, convertWrapMode(props.wrap_behavior_t));
+    glTexParameteri(_target, GL_TEXTURE_WRAP_R, convertWrapMode(props.wrap_behavior_r));
+    glTexParameterfv(_target, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(props.border_color));
+}
+void GL3Texture::initialize(const gli::texture& texture, const FilterProperties& filterProperties) {
     gli::gl GL(gli::gl::PROFILE_GL33);
     gli::gl::format const format = GL.translate(texture.format(), texture.swizzles());
     GLenum target = GL.translate(texture.target());
@@ -211,18 +232,14 @@ void GL3Texture::initialize(const gli::texture& texture) {
     reset(target, _handle);
     bind(0);
 
-    glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(texture.levels() - 1));
-    glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, format.Swizzles[0]);
-    glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, format.Swizzles[1]);
-    glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, format.Swizzles[2]);
-    glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, format.Swizzles[3]);
+    glTexParameteri(_target, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(_target, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(texture.levels() - 1));
+    glTexParameteri(_target, GL_TEXTURE_SWIZZLE_R, format.Swizzles[0]);
+    glTexParameteri(_target, GL_TEXTURE_SWIZZLE_G, format.Swizzles[1]);
+    glTexParameteri(_target, GL_TEXTURE_SWIZZLE_B, format.Swizzles[2]);
+    glTexParameteri(_target, GL_TEXTURE_SWIZZLE_A, format.Swizzles[3]);
 
-    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    setFilterProperties(filterProperties);
 
     // First allocate store for all mipmap levels
     for (std::size_t level = 0; level < texture.levels(); ++level) {
@@ -337,5 +354,52 @@ void GL3Texture::initialize(const gli::texture& texture) {
 
     _extent = texture.extent(0);
     _format = texture.format();
+    _swizzles = texture.swizzles();
     GLState->Texture.bindTexture(0, _target, 0);
 }
+void GL3Texture::update(const gli::extent3d& position,
+                        const gli::extent3d& size,
+                        const gli::format dataFormat,
+                        const void* data) {
+    Assertion(!gli::is_compressed(_format), "Only not compressed textures can be updated!");
+
+    gli::gl GL(gli::gl::PROFILE_GL33);
+    gli::gl::format const glDataFormat = GL.translate(dataFormat, gli::swizzles(gli::SWIZZLE_RED,
+                                                                                gli::SWIZZLE_GREEN,
+                                                                                gli::SWIZZLE_BLUE,
+                                                                                gli::SWIZZLE_ALPHA));
+
+    bind(0);
+    switch (_target) {
+        case GL_TEXTURE_1D:
+            glTexSubImage1D(
+                _target, 0, position.x, size.x, glDataFormat.External, glDataFormat.Type, data);
+            break;
+        case GL_TEXTURE_1D_ARRAY:
+        case GL_TEXTURE_2D:
+        case GL_TEXTURE_CUBE_MAP:
+            glTexSubImage2D(
+                _target, 0,
+                position.x, position.y,
+                size.x, size.y,
+                glDataFormat.External, glDataFormat.Type, data);
+            break;
+        case GL_TEXTURE_2D_ARRAY:
+        case GL_TEXTURE_3D:
+            glTexSubImage3D(
+                _target, 0,
+                position.x, position.y, position.z,
+                size.x, size.y, size.z,
+                glDataFormat.External, glDataFormat.Type, data);
+            break;
+        default:
+            Assertion(false, "Unknown texture target encountered!");
+            break;
+    }
+    GLState->Texture.bindTexture(0, _target, 0);
+}
+gli::extent3d GL3Texture::getSize() const {
+    return _extent;
+}
+
+

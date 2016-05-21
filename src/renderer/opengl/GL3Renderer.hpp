@@ -47,8 +47,6 @@ class GL3Renderer final: public Renderer {
     std::unique_ptr<GL3Profiler> _profiler;
     std::unique_ptr<GL3Util> _util;
     std::unique_ptr<GL3PushConstantManager> _pushConstantManager;
-
-    NVGcontext* _nvgContext;
  public:
     GL3Renderer(std::unique_ptr<FileLoader>&& fileLoader);
 
@@ -84,13 +82,7 @@ class GL3Renderer final: public Renderer {
 
     virtual void presentNextFrame() override;
 
-    virtual NVGcontext* getNanovgContext() override;
-
-    virtual void nanovgEndFrame() override;
-
     void updateResolution(uint32_t width, uint32_t height);
-
-    int getNanoVGImageHandle(GLuint tex_handle, GLsizei width, GLsizei height);
 
     SDL_Window* getWindow();
 

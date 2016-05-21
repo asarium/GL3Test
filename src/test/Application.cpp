@@ -14,6 +14,7 @@
 #include <renderer/RenderTargetManager.hpp>
 
 #include "util/textures.hpp"
+#include "NanoVGRenderer.hpp"
 
 using namespace glm;
 
@@ -148,6 +149,8 @@ Application::Application(Renderer* renderer, Timing* time)
 
     printf("Loading: %fms\n", (end - begin) * 1000.0 / freq);
 
+    _nvgCtx = createNanoVGContext(_renderer);
+
     _floorVertexDataObject = renderer->createBuffer(BufferType::Vertex);
     auto quadData = getQuadData();
     _floorVertexDataObject->setData(quadData.data(), quadData.size() * sizeof(VertexData), BufferUsage::Static);
@@ -203,7 +206,7 @@ Application::Application(Renderer* renderer, Timing* time)
     _viewUniforms.projection_matrix = glm::perspectiveFov(45.0f, (float) width, (float) height, 0.01f, 50000.0f);
 
     _wholeFrameCategory = _renderer->getProfiler()->createCategory("Whole frame");
-    nvgCreateFont(_renderer->getNanovgContext(), "sans", "resources/Roboto-Regular.ttf");
+    nvgCreateFont(_nvgCtx, "sans", "resources/Roboto-Regular.ttf");
 
     PipelineProperties brightPassProps;
     brightPassProps.shaderType = ShaderType::HdrBrightpass;
@@ -257,6 +260,7 @@ Application::Application(Renderer* renderer, Timing* time)
 }
 
 Application::~Application() {
+    deleteNanoVGContext(_nvgCtx);
 }
 
 void Application::render(Renderer* renderer) {
@@ -349,21 +353,19 @@ void Application::changeResolution(uint32_t width, uint32_t height) {
 void Application::renderUI() {
     auto settings = _renderer->getSettingsManager()->getCurrentSettings();
 
-    auto ctx = _renderer->getNanovgContext();
-
-    nvgBeginFrame(ctx, settings.resolution.x, settings.resolution.y, 1.f);
+    nvgBeginFrame(_nvgCtx, settings.resolution.x, settings.resolution.y, 1.f);
 
     auto w = 300;
     auto h = 50;
     auto x = settings.resolution.x - w - 20;
     auto y = 20;
 
-    drawTimes(ctx, _cpuTimes, 120, x, y, w, h, "CPU Time");
+    drawTimes(_nvgCtx, _cpuTimes, 120, x, y, w, h, "CPU Time");
 
     y += h + 20;
-    drawTimes(ctx, _gpuTimes, 120, x, y, w, h, "GPU Time");
+    drawTimes(_nvgCtx, _gpuTimes, 120, x, y, w, h, "GPU Time");
 
-    _renderer->nanovgEndFrame();
+    nvgEndFrame(_nvgCtx);
 }
 void Application::renderScene() {
     _model->prepareData(mat4());

@@ -13,6 +13,7 @@ class UniformAligner {
     size_t _requiredAlignment;
 
     std::vector<uint8_t> _buffer;
+    size_t _numElements;
 
     static size_t alignSize(size_t size, size_t align) {
         if (align == 0) {
@@ -27,13 +28,24 @@ class UniformAligner {
         return size + align - remainder;
     }
  public:
-    explicit UniformAligner(size_t requiredAlignment) : _requiredAlignment(requiredAlignment) { }
+    explicit UniformAligner(size_t requiredAlignment) : _requiredAlignment(requiredAlignment), _numElements(0) {
+        // Make sure that the header space is already reserved
+        resize(0);
+    }
 
-    void allocate(size_t num_elements) {
+    void resize(size_t num_elements) {
         size_t final_size =
             alignSize(HeaderSize, _requiredAlignment) + alignSize(sizeof(TData), _requiredAlignment) * num_elements;
 
         _buffer.resize(final_size);
+        _numElements = num_elements;
+    }
+
+    TData* addElement() {
+        _buffer.insert(_buffer.end(), alignSize(sizeof(TData), _requiredAlignment), 0);
+        ++_numElements;
+
+        return getElement(_numElements - 1);
     }
 
     template<typename THeader>
@@ -67,6 +79,10 @@ class UniformAligner {
         current += alignSize(sizeof(TData), _requiredAlignment);
 
         return reinterpret_cast<TData*>(current);
+    }
+
+    size_t getNumElements() {
+        return _numElements;
     }
 
     size_t getSize() {

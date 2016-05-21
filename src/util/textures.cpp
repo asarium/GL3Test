@@ -34,7 +34,11 @@ std::unique_ptr<Texture> util::load_texture(Renderer* renderer, const std::strin
 
         auto mipmaped = gli::generate_mipmaps(texture, gli::FILTER_LINEAR);
 
-        render_texture->initialize(mipmaped);
+        FilterProperties props;
+        props.magnification_filter = FilterMode::Linear;
+        props.minification_filter = FilterMode::LinearMipmapLinear;
+
+        render_texture->initialize(mipmaped, props);
 
         stbi_image_free(texture_data);
     }

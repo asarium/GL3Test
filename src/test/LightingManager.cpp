@@ -25,7 +25,7 @@ std::unique_ptr<Texture> createTexture(Renderer* renderer, uint32_t width, uint3
 namespace lighting {
 LightingManager::LightingManager(Renderer* renderer)
     : _renderer(renderer), _util(renderer), _alignedUniformData(renderer->getLimits().uniform_offset_alignment) {
-    _alignedUniformData.allocate(MAX_LIGHTS);
+    _alignedUniformData.resize(MAX_LIGHTS);
 
     _uniformBuffer = _renderer->createBuffer(BufferType::Uniform);
     _uniformBuffer->setData(nullptr, _alignedUniformData.getSize(), BufferUsage::Dynamic);
@@ -43,7 +43,7 @@ LightingManager::LightingManager(Renderer* renderer)
         pipelineProperties.depthMode = DepthMode::ReadWrite;
         pipelineProperties.depthFunction = ComparisionFunction::Less;
 
-        pipelineProperties.blending = false;
+        pipelineProperties.enableBlending = false;
         pipelineProperties.blendFunction = BlendFunction::None;
 
         _geometryPipelinestate = _renderer->createPipelineState(pipelineProperties);
@@ -55,7 +55,7 @@ LightingManager::LightingManager(Renderer* renderer)
         pipelineProperties.depthMode = DepthMode::None;
         pipelineProperties.depthFunction = ComparisionFunction::Equal;
 
-        pipelineProperties.blending = true;
+        pipelineProperties.enableBlending = true;
         pipelineProperties.blendFunction = BlendFunction::Additive;
 
         _lightingPassPipelineState = _renderer->createPipelineState(pipelineProperties);
