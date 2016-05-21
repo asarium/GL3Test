@@ -31,7 +31,7 @@ void GL3Descriptor::setGLTexture(const GL3TextureHandle& handle) {
 
 void GL3Descriptor::setUniformBuffer(BufferObject* object, size_t offset, size_t range) {
     Assertion(object->getType() == BufferType::Uniform, "Buffer must be a uniform buffer!");
-    Assertion((offset & GLState->Constants.getUniformBufferAlignment()) == 0,
+    Assertion((offset % GLState->Constants.getUniformBufferAlignment()) == 0,
               "The uniform offset must be properly aligned!");
 
     _data.type = DescriptorType::UniformBuffer;
