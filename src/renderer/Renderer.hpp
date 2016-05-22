@@ -66,6 +66,16 @@ struct RendererLimits {
     size_t uniform_offset_alignment;
 };
 
+enum class ClearTarget {
+    Color = 1 << 0,
+    Depth = 1 << 1,
+    Stencil = 1 << 2,
+};
+template<>
+struct BitOperationsTag<ClearTarget> {
+    static constexpr bool value = true;
+};
+
 class Renderer {
  public:
     virtual ~Renderer() { }
@@ -94,7 +104,7 @@ class Renderer {
 
     virtual RendererLimits getLimits() const = 0;
 
-    virtual void clear(const glm::vec4& color) = 0;
+    virtual void clear(const glm::vec4& color, ClearTarget target = ClearTarget::Color | ClearTarget::Depth) = 0;
 
     virtual void presentNextFrame() = 0;
 

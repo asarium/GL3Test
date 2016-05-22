@@ -257,10 +257,21 @@ void GL3Renderer::presentNextFrame() {
     SDL_GL_SwapWindow(_window);
 }
 
-void GL3Renderer::clear(const glm::vec4& color) {
-    glClearColor(color.r, color.g, color.b, color.a);
-    GLState->setDepthMask(true);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void GL3Renderer::clear(const glm::vec4& color, ClearTarget target) {
+    GLenum mask = 0;
+    if (target & ClearTarget::Color) {
+        mask |= GL_COLOR_BUFFER_BIT;
+        glClearColor(color.r, color.g, color.b, color.a);
+    }
+    if (target & ClearTarget::Depth) {
+        mask |= GL_DEPTH_BUFFER_BIT;
+        GLState->setDepthMask(true);
+    }
+    if (target & ClearTarget::Stencil) {
+        mask |= GL_STENCIL_BUFFER_BIT;
+    }
+
+    glClear(mask);
 }
 
 std::unique_ptr<BufferObject> GL3Renderer::createBuffer(BufferType type) {

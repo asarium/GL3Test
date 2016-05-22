@@ -112,7 +112,7 @@ namespace lighting
 
         _renderer->getRenderTargetManager()->pushRenderTargetBinding();
         _renderer->getRenderTargetManager()->useRenderTarget(_shadowMapTarget.get());
-        _renderer->clear(glm::vec4(0.f));
+        _renderer->clear(glm::vec4(0.f), ClearTarget::Depth);
 
         _shadowPassPipelinestate->bind();
 

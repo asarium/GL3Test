@@ -78,7 +78,7 @@ class GL3Renderer final: public Renderer {
 
     virtual RendererLimits getLimits() const override;
 
-    virtual void clear(const glm::vec4& color) override;
+    virtual void clear(const glm::vec4& color, ClearTarget target) override;
 
     virtual void presentNextFrame() override;
 

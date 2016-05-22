@@ -271,7 +271,7 @@ void Application::render(Renderer* renderer) {
     _wholeFrameCategory->begin();
 
 //    _renderer->getRenderTargetManager()->useRenderTarget(_hdrRenderTarget.get());
-    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
+    renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), ClearTarget::Color | ClearTarget::Depth | ClearTarget::Stencil);
 
     auto matrices = _sunLight->beginShadowPass();
     ViewUniformData shadowView;
