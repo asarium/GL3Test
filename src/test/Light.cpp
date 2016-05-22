@@ -95,8 +95,8 @@ namespace lighting
         params->light_has_shadow = _shadowing ? 1 : 0;
         if (_shadowing)
         {
-            float near_plane = 1.0f, far_plane = 70.f;
-            _matricies.projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+            float near_plane = 1.0f, far_plane = 20.f;
+            _matricies.projection = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, near_plane, far_plane);
             _matricies.view = glm::lookAt(_direction * 10.f,
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(0.0f, 1.0f, 0.0f));
