@@ -6,7 +6,8 @@
 #pragma once
 
 #include <cstddef>
-#include <type_traits>
+
+#include "Enums.hpp"
 
 enum class BufferType {
     None,
@@ -25,26 +26,10 @@ enum class UpdateFlags {
     None = 0,
     DiscardOldData = 1 << 0
 };
-
-inline UpdateFlags operator|(UpdateFlags lhs, UpdateFlags rhs) {
-    typedef std::underlying_type<UpdateFlags>::type int_type;
-
-    return static_cast<UpdateFlags>(static_cast<int_type>(lhs) | static_cast<int_type>(rhs));
-}
-
-inline UpdateFlags &operator|=(UpdateFlags &lhs, UpdateFlags rhs) {
-    typedef std::underlying_type<UpdateFlags>::type int_type;
-
-    lhs = static_cast<UpdateFlags>(static_cast<int_type>(lhs) | static_cast<int_type>(rhs));
-
-    return lhs;
-}
-
-inline bool operator&(UpdateFlags lhs, UpdateFlags rhs) {
-    typedef std::underlying_type<UpdateFlags>::type int_type;
-
-    return (static_cast<int_type>(lhs) & static_cast<int_type>(rhs)) != int_type(0);
-}
+template<>
+struct BitOperationsTag<UpdateFlags> {
+    static constexpr bool value = true;
+};
 
 enum class BufferMapFlags {
     None = 0,
@@ -52,26 +37,11 @@ enum class BufferMapFlags {
     Write = 1 << 1,
     InvalidateData = 1 << 2,
 };
+template<>
+struct BitOperationsTag<BufferMapFlags> {
+    static constexpr bool value = true;
+};
 
-inline BufferMapFlags operator|(BufferMapFlags lhs, BufferMapFlags rhs) {
-    typedef std::underlying_type<BufferMapFlags>::type int_type;
-
-    return static_cast<BufferMapFlags>(static_cast<int_type>(lhs) | static_cast<int_type>(rhs));
-}
-
-inline BufferMapFlags &operator|=(BufferMapFlags &lhs, BufferMapFlags rhs) {
-    typedef std::underlying_type<BufferMapFlags>::type int_type;
-
-    lhs = static_cast<BufferMapFlags>(static_cast<int_type>(lhs) | static_cast<int_type>(rhs));
-
-    return lhs;
-}
-
-inline bool operator&(BufferMapFlags lhs, BufferMapFlags rhs) {
-    typedef std::underlying_type<BufferMapFlags>::type int_type;
-
-    return (static_cast<int_type>(lhs) & static_cast<int_type>(rhs)) != int_type(0);
-}
 
 class BufferObject {
 public:
