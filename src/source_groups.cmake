@@ -94,13 +94,16 @@ set(file_util
     util/Assertion.hpp
     util/DefaultFileLoader.hpp
     util/DefaultFileLoader.cpp
+    util/EnumClassUtil.hpp
     util/FileLoader.hpp
+    util/HashUtil.hpp
     util/textures.hpp
     util/textures.cpp
     util/Timing.hpp
     util/Timing.cpp
     util/UniformAligner.hpp
     util/UniqueHandle.hpp
+    util/VariableStackArray.hpp
     util/VariableUniformBuffer.cpp
     util/VariableUniformBuffer.hpp
     util/stb_image.h

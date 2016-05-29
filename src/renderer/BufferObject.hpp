@@ -9,6 +9,8 @@
 
 #include "Enums.hpp"
 
+#include <util/EnumClassUtil.hpp>
+
 enum class BufferType {
     None,
     Vertex,

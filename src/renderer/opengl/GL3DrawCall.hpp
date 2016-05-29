@@ -3,7 +3,8 @@
 #include "renderer/DrawCall.hpp"
 #include "GL3VertexLayout.hpp"
 #include "GL3DrawCallManager.hpp"
-#include "GL3Util.hpp"
+
+#include <util/VariableStackArray.hpp>
 
 
 class GL3DrawCall final: public GL3Object, public DrawCall, public VariableDrawCall,
