@@ -68,7 +68,7 @@ namespace lighting
         void bindDescriptorSet();
         void unbindDescriptorSet();
 
-        ShadowMatrices beginShadowPass();
+        ShadowMatrices beginShadowPass(const ViewUniformData& viewdata);
 
         void endShadowPass();
     };

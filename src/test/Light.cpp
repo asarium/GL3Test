@@ -107,7 +107,7 @@ namespace lighting
     LightType Light::getType() {
         return _type;
     }
-    ShadowMatrices Light::beginShadowPass() {
+    ShadowMatrices Light::beginShadowPass(const ViewUniformData&) {
         Assertion(_shadowing, "Shadowing is not enabled for this light!");
 
         _renderer->getRenderTargetManager()->pushRenderTargetBinding();

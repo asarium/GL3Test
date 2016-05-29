@@ -273,7 +273,7 @@ void Application::render(Renderer* renderer) {
 //    _renderer->getRenderTargetManager()->useRenderTarget(_hdrRenderTarget.get());
     renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), ClearTarget::Color | ClearTarget::Depth | ClearTarget::Stencil);
 
-    auto matrices = _sunLight->beginShadowPass();
+    auto matrices = _sunLight->beginShadowPass(_viewUniforms);
     ViewUniformData shadowView;
     shadowView.projection_matrix = matrices.projection;
     shadowView.view_matrix = matrices.view;
