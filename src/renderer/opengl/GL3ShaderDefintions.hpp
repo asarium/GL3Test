@@ -31,6 +31,7 @@ struct DescriptorBinding
 
 struct GL3ShaderDefinition {
     std::vector<ShaderFilename> filenames;
+    ShaderFlags allFlags;
 
     std::vector<AttributeBinding> attribute_bindings;
 
@@ -41,4 +42,4 @@ struct GL3ShaderDefinition {
 
 GL3ShaderDefinition getShaderDefinition(ShaderType type);
 
-std::vector<ShaderType> getDefinedShaderTypes();
+std::vector<std::pair<ShaderType, ShaderFlags>> getDefinedShaderTypes();

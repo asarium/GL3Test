@@ -5,15 +5,17 @@
 #include "GL3ShaderDefintions.hpp"
 #include "GL3State.hpp"
 #include <renderer/Renderer.hpp>
+#include <sstream>
 
 namespace {
 template<typename T, size_t size>
-constexpr size_t array_size(const T(&)[size])
-{
+constexpr size_t array_size(const T(&)[size]) {
     return size;
 }
 
-std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<ShaderFilename>& parts, const char* header) {
+std::vector<GLuint> compileShaderParts(FileLoader* loader,
+                                       const std::vector<ShaderFilename>& parts,
+                                       const std::string& header) {
     std::vector<GLuint> compiled_parts;
     compiled_parts.reserve(parts.size());
 
@@ -22,8 +24,7 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<Sha
         auto handle = glCreateShader(filename.type);
 
         auto content = loader->getFileContents(filename.filename);
-        if (content.empty())
-        {
+        if (content.empty()) {
             throw RendererException("No shader content found!");
         }
 
@@ -31,11 +32,11 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<Sha
         GLint length = static_cast<GLint>(content.size());
 
         const GLchar* sources[] = {
-            reinterpret_cast<const GLchar*>(header),
+            reinterpret_cast<const GLchar*>(header.c_str()),
             contentStr
         };
         GLint sizes[] = {
-            static_cast<GLint>(std::strlen(header)),
+            static_cast<GLint>(header.size()),
             length
         };
 
@@ -72,7 +73,7 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader, const std::vector<Sha
     return compiled_parts;
 }
 
-GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params, const char* header) {
+GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params, const std::string& header) {
     auto parts = compileShaderParts(loader, params.filenames, header);
 
     auto prog = glCreateProgram();
@@ -116,14 +117,11 @@ GLuint compileProgram(FileLoader* loader, const GL3ShaderDefinition& params, con
     return prog;
 }
 
-void bindLocations(GLuint program, const GL3ShaderDefinition& def)
-{
-    for (auto& block : def.buffer_bindings)
-    {
+void bindLocations(GLuint program, const GL3ShaderDefinition& def) {
+    for (auto& block : def.buffer_bindings) {
         auto blockIndex = glGetUniformBlockIndex(program, block.name);
 
-        if (blockIndex != GL_INVALID_INDEX)
-        {
+        if (blockIndex != GL_INVALID_INDEX) {
             glUniformBlockBinding(program, blockIndex, block.location);
         }
     }
@@ -134,32 +132,60 @@ void bindLocations(GLuint program, const GL3ShaderDefinition& def)
         glUniform1i(uniformIdx, texture.location);
     }
 }
+
+std::vector<std::string> getShaderDefines(ShaderFlags flags) {
+    std::vector<std::string> ret;
+
+    if (flags & ShaderFlags::NanoVGEdgeAA) {
+        ret.push_back("EDGE_AA");
+    }
+
+    return ret;
+}
+std::string getHeader(ShaderFlags flags) {
+    std::stringstream stream;
+    stream << "#version 330 core\n";
+
+    auto defs = getShaderDefines(flags);
+    printf(" Using definitions:");
+    if (defs.empty()) {
+        printf(" <None>\n");
+    } else {
+        for (auto& definition : defs) {
+            printf(" %s", definition.c_str());
+            stream << "#define " << definition << "\n";
+        }
+        printf("\n");
+    }
+
+    stream << "#line 1\n";
+    return stream.str();
+}
 }
 
-GL3ShaderManager::GL3ShaderManager(FileLoader* fileLoader) : _programCache{0}, _fileLoader(fileLoader) {
+GL3ShaderManager::GL3ShaderManager(FileLoader* fileLoader) : _fileLoader(fileLoader) {
 }
 
 GL3ShaderManager::~GL3ShaderManager() {
-    for (auto prog : _programCache) {
-        if (prog != 0) {
-            glDeleteProgram(prog);
+    for (auto& prog : _programCache) {
+        if (prog.second != 0) {
+            glDeleteProgram(prog.second);
         }
     }
+    _programCache.clear();
 }
 
-GLuint GL3ShaderManager::getProgram(ShaderType type) {
-    if (_programCache[static_cast<size_t>(type)] != 0) {
-        return _programCache[static_cast<size_t>(type)];
+GLuint GL3ShaderManager::getProgram(ShaderType type, ShaderFlags flags) {
+    auto iter = _programCache.find(std::make_pair(type, flags));
+    if (iter != _programCache.end()) {
+        return iter->second;
     }
 
     auto definition = getShaderDefinition(type);
 
-    auto prog = compileProgram(_fileLoader, definition, "#version 330 core\n#line 1\n");
+    auto prog = compileProgram(_fileLoader, definition, getHeader(flags));
     bindLocations(prog, definition);
-    _programCache[static_cast<size_t>(type)] = prog;
+    _programCache.insert(std::make_pair(std::make_pair(type, flags), prog));
 
-    return _programCache[static_cast<size_t>(type)];
-}
-void GL3ShaderManager::bindProgram(ShaderType type) {
-    GLState->Program.use(getProgram(type));
+    return prog;
 }

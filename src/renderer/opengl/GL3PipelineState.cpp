@@ -71,7 +71,7 @@ namespace
 
 void GL3PipelineState::setupState()
 {
-    _renderer->getShaderManager()->bindProgram(_props.shaderType);
+    GLState->Program.use(_props.shaderHandle);
 
     switch (_props.depthMode)
     {
@@ -123,7 +123,7 @@ void GL3PipelineState::setupState()
 
 GL3PipelineState::GL3PipelineState(GL3Renderer* renderer, const PipelineProperties& props): GL3Object(renderer)
 {
-    _props.shaderType = props.shaderType;
+    _props.shaderHandle = _renderer->getShaderManager()->getProgram(props.shaderType, props.shaderFlags);
 
     _props.depthMode = props.depthMode;
     _props.depthFunction = props.depthFunction;

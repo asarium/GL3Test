@@ -231,7 +231,7 @@ SDL_Window* GL3Renderer::initialize() {
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
     // Preload the shaders
     for (auto type : getDefinedShaderTypes()) {
-        _shaderManager->getProgram(type);
+        _shaderManager->getProgram(type.first, type.second);
     }
 
     _drawCallManager.reset(new GL3DrawCallManager(this, _shaderManager.get()));

@@ -55,8 +55,18 @@ enum class StencilOperation {
     Invert
 };
 
+enum class ShaderFlags {
+    None = 0,
+    NanoVGEdgeAA = 1 << 0,
+};
+template<>
+struct BitOperationsTag<ShaderFlags> {
+    static constexpr bool value = true;
+};
+
 struct PipelineProperties {
     ShaderType shaderType;
+    ShaderFlags shaderFlags;
 
     DepthMode depthMode;
     ComparisionFunction depthFunction;
@@ -79,7 +89,8 @@ struct PipelineProperties {
     glm::bvec4 colorMask;
 
     PipelineProperties()
-        : shaderType(ShaderType::Mesh), depthMode(DepthMode::None), depthFunction(ComparisionFunction::Less),
+        : shaderType(ShaderType::Mesh), shaderFlags(ShaderFlags::None), depthMode(DepthMode::None),
+          depthFunction(ComparisionFunction::Less),
           enableBlending(false), blendFunction(BlendFunction::None), enableFaceCulling(false),
           culledFace(CullFace::Back), frontFace(FrontFace::CounterClockWise), enableScissor(false),
           enableStencil(false), stencilMask(0xffffffff),

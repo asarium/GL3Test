@@ -5,6 +5,7 @@ namespace {
 struct ShaderDefinition {
     ShaderType type;
     std::vector<ShaderFilename> files;
+    std::vector<ShaderFlags> supportedFlags;
 };
 ShaderDefinition shader_definitions[] =
     {
@@ -19,6 +20,8 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "model.frag"
                 }
+            },
+            {
             }
         },
         {
@@ -32,6 +35,8 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "mesh_deferred.frag"
                 }
+            },
+            {
             }
         },
         {
@@ -45,6 +50,8 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "lighting_pass.frag"
                 }
+            },
+            {
             }
         },
         {
@@ -62,6 +69,8 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "2d_sprite.frag"
                 }
+            },
+            {
             }
         },
         {
@@ -75,6 +84,8 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "2d_sprite.frag"
                 }
+            },
+            {
             }
         },
         {
@@ -88,6 +99,8 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "mesh_shadow.frag"
                 }
+            },
+            {
             }
         },
         {
@@ -101,6 +114,8 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "hdr_post_processing.frag",
                 }
+            },
+            {
             }
         },
         {
@@ -114,6 +129,8 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "brightpass.frag",
                 }
+            },
+            {
             }
         },
         {
@@ -127,6 +144,8 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "bloom_pass.frag",
                 }
+            },
+            {
             }
         },
         {
@@ -140,6 +159,9 @@ ShaderDefinition shader_definitions[] =
                     GL_FRAGMENT_SHADER,
                     "nanovg.frag",
                 }
+            },
+            {
+                ShaderFlags::NanoVGEdgeAA
             }
         }
     };
@@ -187,7 +209,6 @@ AttributeBinding attribute_mappings[] =
             mapAttributeLocation(AttributeType::Position2D)
         }
     };
-}
 
 DescriptorBinding uniform_buffer_bindings[] = {
     {
@@ -260,15 +281,58 @@ DescriptorBinding texture_bindings[] = {
     }
 };
 
+// The following is from http://stackoverflow.com/a/9253062/844001
+// Returns which bits are on in the integer a
+std::vector<size_t> getOnLocations(size_t a) {
+    std::vector<size_t> result;
+    size_t place = 0;
+    while (a != 0) {
+        if (a & 1) {
+            result.push_back(place);
+        }
+        ++place;
+        a >>= 1;
+    }
+    return result;
+}
+
+template<typename T>
+std::vector<std::vector<T> > powerSet(const std::vector<T>& set) {
+    std::vector<std::vector<T> > result;
+    size_t numPowerSets = static_cast<size_t>(pow(2.0, static_cast<double>(set.size())));
+    for (size_t i = 0; i < numPowerSets; ++i) {
+        std::vector<size_t> onLocations = getOnLocations(i);
+        std::vector<T> subSet;
+        for (size_t j = 0; j < onLocations.size(); ++j) {
+            subSet.push_back(set.at(onLocations.at(j)));
+        }
+        result.push_back(subSet);
+    }
+    return result;
+}
+
+ShaderFlags combineShaderFlags(const std::vector<ShaderFlags>& flags) {
+    ShaderFlags ret = ShaderFlags::None;
+    for (auto flag : flags) {
+        ret |= flag;
+    }
+    return ret;
+}
+}
+
 GL3ShaderDefinition getShaderDefinition(ShaderType type) {
     GL3ShaderDefinition def;
 
+    ShaderDefinition shaderDef;
     for (auto& file:shader_definitions) {
         if (file.type == type) {
-            def.filenames = file.files;
+            shaderDef = file;
             break;
         }
     }
+    def.filenames = shaderDef.files;
+
+    def.allFlags = combineShaderFlags(shaderDef.supportedFlags);
 
     for (auto& attr : attribute_mappings) {
         def.attribute_bindings.push_back(attr);
@@ -285,10 +349,13 @@ GL3ShaderDefinition getShaderDefinition(ShaderType type) {
     return def;
 }
 
-std::vector<ShaderType> getDefinedShaderTypes() {
-    std::vector<ShaderType> types;
+std::vector<std::pair<ShaderType, ShaderFlags>> getDefinedShaderTypes() {
+    std::vector<std::pair<ShaderType, ShaderFlags>> types;
     for (auto& file:shader_definitions) {
-        types.push_back(file.type);
+        auto combinations = powerSet(file.supportedFlags);
+        for (auto& combs : combinations) {
+            types.push_back(std::make_pair(file.type, combineShaderFlags(combs)));
+        }
     }
     return types;
 }

@@ -1,6 +1,4 @@
 
-#define EDGE_AA
-
 layout(std140) uniform NanoVGUniformData {
     mat3 scissorMat;
     mat3 paintMat;

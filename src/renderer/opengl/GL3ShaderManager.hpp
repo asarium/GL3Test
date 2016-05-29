@@ -7,18 +7,19 @@
 
 #include <glad/glad.h>
 #include <renderer/PipelineState.hpp>
+#include <unordered_map>
+
+#include <util/HashUtil.hpp>
 
 class GL3ShaderManager {
-    GLuint _programCache[num_enum_values<ShaderType>()];
+    std::unordered_map<std::pair<ShaderType, ShaderFlags>, GLuint> _programCache;
 
     FileLoader* _fileLoader;
 public:
     GL3ShaderManager(FileLoader *_fileLoader);
     ~GL3ShaderManager();
 
-    GLuint getProgram(ShaderType type);
-
-    void bindProgram(ShaderType type);
+    GLuint getProgram(ShaderType type, ShaderFlags flags);
 };
 
 

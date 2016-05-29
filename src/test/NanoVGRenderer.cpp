@@ -115,6 +115,7 @@ void vertexSet(NVGvertex* vtx, float x, float y, float u, float v) {
 PipelineProperties getDefaultPipelineProperties() {
     PipelineProperties props;
     props.shaderType = ShaderType::NanoVGShader;
+    props.shaderFlags = ShaderFlags::NanoVGEdgeAA;
 
     props.enableBlending = true;
     props.blendFunction = BlendFunction::PremultAlpha;

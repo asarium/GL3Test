@@ -7,9 +7,10 @@
 #include "Enums.hpp"
 #include "GL3Texture.hpp"
 #include "GL3BufferObject.hpp"
-#include "GL3Util.hpp"
 
 #include <glad/glad.h>
+
+#include <util/HashUtil.hpp>
 
 #include <vector>
 #include <cstring>
@@ -60,7 +61,7 @@ class GL3DescriptorSet final: public DescriptorSet {
     Gl3DescriptorSetType _type;
     bool _active;
 
-    std::unordered_map<GL3DescriptorSetPart, std::unique_ptr<GL3Descriptor>, EnumClassHash<GL3DescriptorSetPart>> _descriptors;
+    std::unordered_map<GL3DescriptorSetPart, std::unique_ptr<GL3Descriptor>> _descriptors;
 public:
     explicit GL3DescriptorSet(Gl3DescriptorSetType type);
     virtual ~GL3DescriptorSet() {}
