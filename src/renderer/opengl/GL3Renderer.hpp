@@ -52,7 +52,7 @@ class GL3Renderer final: public Renderer {
 
     virtual ~GL3Renderer();
 
-    virtual SDL_Window* initialize() override;
+    virtual void initialize(SDL_Window* window) override;
 
     virtual void deinitialize() override;
 
@@ -83,8 +83,6 @@ class GL3Renderer final: public Renderer {
     virtual void presentNextFrame() override;
 
     void updateResolution(uint32_t width, uint32_t height);
-
-    SDL_Window* getWindow();
 
     GL3DrawCallManager* getGLDrawCallManager();
 

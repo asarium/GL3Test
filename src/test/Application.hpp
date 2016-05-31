@@ -19,6 +19,7 @@ struct Particle {
 class Application {
     Timing *_timing;
     Renderer *_renderer;
+    SDL_Window* _window;
 
     NVGcontext* _nvgCtx;
 
@@ -70,7 +71,7 @@ class Application {
 
     TextureHandle* doBloomPass();
 public:
-    Application(Renderer *renderer, Timing *timimg);
+    Application(Renderer *renderer, Timing *timimg, SDL_Window* window);
 
     ~Application();
 

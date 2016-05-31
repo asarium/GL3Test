@@ -69,7 +69,11 @@ namespace {
             settings.msaa_samples = 0;
             renderer->getSettingsManager()->changeSettings(settings);
 
-            window = renderer->initialize();
+            SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
+            window = SDL_CreateWindow("OGL3 Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, settings.resolution.x,
+                                       settings.resolution.y, SDL_WINDOW_OPENGL);
+
+            renderer->initialize(window);
         } catch (const RendererException& e) {
             printf("Failed to initialize renderer: %s\n", e.what());
             return false;
@@ -85,7 +89,7 @@ namespace {
 
         timing.reset(new Timing());
 
-        app.reset(new Application(renderer.get(), timing.get()));
+        app.reset(new Application(renderer.get(), timing.get(), window));
 
         return true;
     }
@@ -94,6 +98,10 @@ namespace {
         app.reset();
 
         renderer->deinitialize();
+
+        SDL_DestroyWindow(window);
+        SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
+        window = nullptr;
 
         timing.reset();
         renderer.reset();

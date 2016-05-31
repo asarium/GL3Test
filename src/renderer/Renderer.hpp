@@ -80,7 +80,7 @@ class Renderer {
  public:
     virtual ~Renderer() { }
 
-    virtual SDL_Window* initialize() = 0;
+    virtual void initialize(SDL_Window* window) = 0;
 
     virtual RendererSettingsManager* getSettingsManager() = 0;
 

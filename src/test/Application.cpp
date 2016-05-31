@@ -131,8 +131,8 @@ void drawTimes(NVGcontext* ctx, const std::deque<float>& vals, size_t maxVals, i
 }
 }
 
-Application::Application(Renderer* renderer, Timing* time)
-    : _timing(time), _renderer(renderer), _lightingManager(renderer) {
+Application::Application(Renderer* renderer, Timing* time, SDL_Window* window)
+    : _timing(time), _renderer(renderer), _window(window), _lightingManager(renderer) {
     auto freq = SDL_GetPerformanceFrequency();
     auto begin = SDL_GetPerformanceCounter();
     AssimpModelConverter converter;
@@ -341,6 +341,33 @@ std::unique_ptr<RenderTarget> Application::createHDRRenderTarget(uint32_t width,
 }
 
 void Application::changeResolution(uint32_t width, uint32_t height) {
+    SDL_SetWindowSize(_window, width, height);
+    if (SDL_GetWindowFlags(_window) & SDL_WINDOW_FULLSCREEN) {
+        // In fullscreen mode the normal method doesn't work
+        SDL_DisplayMode target;
+        target.w = width;
+        target.h = height;
+        target.format = 0; // don't care
+        target.refresh_rate = 0; // dont't care
+        target.driverdata = 0; // initialize to 0
+
+        SDL_DisplayMode closest;
+
+        if (SDL_GetClosestDisplayMode(0, &target, &closest) != nullptr) {
+            // I haven't found a perfect solution for changing resolution when in fullscreen mode
+            // On Windows simply calling SDL_SetWindowDisplayMode is enough but on Linux (with GNOME) it just doesn't work
+            // This workaround works for linux but is suboptimal for Windows
+
+            SDL_SetWindowFullscreen(_window, 0);
+
+            SDL_SetWindowDisplayMode(_window, &closest);
+
+            SDL_Delay(250);
+
+            SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
+        }
+    }
+
     auto settings = _renderer->getSettingsManager()->getCurrentSettings();
     settings.resolution = glm::uvec2(width, height);
     _renderer->getSettingsManager()->changeSettings(settings);
@@ -426,15 +453,15 @@ void Application::handleEvent(SDL_Event* event) {
                     }
                     break;
                 case SDL_SCANCODE_F:
-                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), SDL_WINDOW_FULLSCREEN);
+                    SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
                     break;
                 case SDL_SCANCODE_B:
-                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
-                    SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_FALSE);
+                    SDL_SetWindowFullscreen(_window, 0);
+                    SDL_SetWindowBordered(_window, SDL_FALSE);
                     break;
                 case SDL_SCANCODE_W:
-                    SDL_SetWindowFullscreen(SDL_GL_GetCurrentWindow(), 0);
-                    SDL_SetWindowBordered(SDL_GL_GetCurrentWindow(), SDL_TRUE);
+                    SDL_SetWindowFullscreen(_window, 0);
+                    SDL_SetWindowBordered(_window, SDL_TRUE);
                     break;
                 case SDL_SCANCODE_V: {
                     _last_vsync = !_last_vsync;

@@ -152,14 +152,17 @@ void GL3Renderer::deinitialize() {
     SDL_GL_DeleteContext(_context);
     _context = nullptr;
 
-    SDL_DestroyWindow(_window);
     _window = nullptr;
 
-    SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-SDL_Window* GL3Renderer::initialize() {
-    SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
+void GL3Renderer::initialize(SDL_Window* window) {
+    Assertion(window, "Invalid window handle passed!");
+
+    _window = window;
+
+    SDL_InitSubSystem(SDL_INIT_VIDEO);
 
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -182,20 +185,9 @@ SDL_Window* GL3Renderer::initialize() {
     auto haveSettings = _settingsManager.getSettings(settings);
     Assertion(haveSettings, "Settings have not been initialized!");
 
-    _window = SDL_CreateWindow("OGL3 Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, settings.resolution.x,
-                               settings.resolution.y, SDL_WINDOW_OPENGL);
-
-    if (!_window) {
-        std::stringstream ss;
-        ss << "Error while creating window: " << SDL_GetError();
-        throw RendererException(ss.str());
-    }
-
     _context = SDL_GL_CreateContext(_window);
 
     if (!_context) {
-        SDL_DestroyWindow(_window);
-
         std::stringstream ss;
         ss << "Error while creating OpenGL context: " << SDL_GetError();
         throw RendererException(ss.str());
@@ -240,8 +232,6 @@ SDL_Window* GL3Renderer::initialize() {
     updateResolution(settings.resolution.x, settings.resolution.y);
 
     _initialized = true;
-
-    return _window;
 }
 
 void GL3Renderer::updateResolution(uint32_t width, uint32_t height) {
@@ -318,10 +308,6 @@ GL3RenderTargetManager* GL3Renderer::getGLRenderTargetManager() {
     return _renderTargetManager.get();
 }
 
-SDL_Window* GL3Renderer::getWindow() {
-    return _window;
-}
-
 bool GL3Renderer::hasCapability(GraphicsCapability capability) const {
     switch (capability) {
         case GraphicsCapability::PointSprites:
@@ -357,37 +343,6 @@ GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer* ren
 }
 
 void GL3Renderer::GL3RenderSettingsManager::changeResolution(uint32_t width, uint32_t height) {
-    if (_renderer->getWindow() == nullptr) {
-        return; // No window has been created yet
-    }
-
-    SDL_SetWindowSize(_renderer->getWindow(), width, height);
-    if (SDL_GetWindowFlags(_renderer->getWindow()) & SDL_WINDOW_FULLSCREEN) {
-        // In fullscreen mode the normal method doesn't work
-        SDL_DisplayMode target;
-        target.w = width;
-        target.h = height;
-        target.format = 0; // don't care
-        target.refresh_rate = 0; // dont't care
-        target.driverdata = 0; // initialize to 0
-
-        SDL_DisplayMode closest;
-
-        if (SDL_GetClosestDisplayMode(0, &target, &closest) != nullptr) {
-            // I haven't found a perfect solution for changing resolution when in fullscreen mode
-            // On Windows simply calling SDL_SetWindowDisplayMode is enough but on Linux (with GNOME) it just doesn't work
-            // This workaround works for linux but is suboptimal for Windows
-
-            SDL_SetWindowFullscreen(_renderer->getWindow(), 0);
-
-            SDL_SetWindowDisplayMode(_renderer->getWindow(), &closest);
-
-            SDL_Delay(250);
-
-            SDL_SetWindowFullscreen(_renderer->getWindow(), SDL_WINDOW_FULLSCREEN);
-        }
-    }
-
     _renderer->updateResolution(width, height);
 }
 
