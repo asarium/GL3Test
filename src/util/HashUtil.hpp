@@ -4,15 +4,6 @@
 #include <functional>
 
 namespace std {
-    template<typename Enum>
-    struct hash {
-        typedef typename std::underlying_type<Enum>::type underlying_type;
-
-        typename std::enable_if<std::is_enum<Enum>::value, size_t>::type operator()(Enum e) const {
-            return std::hash<underlying_type>()(static_cast<underlying_type>(e));
-        }
-    };
-
     template<typename T, typename U>
     struct hash<std::pair<T, U>> {
      public:
@@ -21,3 +12,17 @@ namespace std {
         }
     };
 }
+
+template<typename Enum>
+struct EnumClassHash {
+private:
+    typedef typename std::underlying_type<Enum>::type underlying_type;
+
+public:
+    size_t operator()(Enum e) const {
+        return std::hash<underlying_type>()(static_cast<underlying_type>(e));
+    }
+};
+
+#define HASHABLE_ENUMCLASS(TYPE) namespace std{template<> struct hash<TYPE> : EnumClassHash<TYPE> {};}
+

@@ -3,6 +3,8 @@
 #include "DrawCallManager.hpp"
 #include "Enums.hpp"
 
+#include <util/HashUtil.hpp>
+
 enum class ShaderType {
     Mesh = 0,
     LightedMesh,
@@ -16,6 +18,18 @@ enum class ShaderType {
     NanoVGShader,
 
     NUM_VALUES
+};
+HASHABLE_ENUMCLASS(ShaderType)
+
+enum class ShaderFlags {
+    None = 0,
+    NanoVGEdgeAA = 1 << 0,
+};
+HASHABLE_ENUMCLASS(ShaderFlags)
+
+template<>
+struct BitOperationsTag<ShaderFlags> {
+    static constexpr bool value = true;
 };
 
 enum class BlendFunction {
@@ -53,15 +67,6 @@ enum class StencilOperation {
     Decrement,
     DecrementWrap,
     Invert
-};
-
-enum class ShaderFlags {
-    None = 0,
-    NanoVGEdgeAA = 1 << 0,
-};
-template<>
-struct BitOperationsTag<ShaderFlags> {
-    static constexpr bool value = true;
 };
 
 struct PipelineProperties {

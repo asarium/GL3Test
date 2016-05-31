@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <util/HashUtil.hpp>
 
 template<typename E>
 constexpr size_t num_enum_values() {
@@ -44,3 +45,4 @@ enum class GL3DescriptorSetPart {
     NanoVGLocalSet_Uniforms,
     NanoVGLocalSet_Texture
 };
+HASHABLE_ENUMCLASS(GL3DescriptorSetPart)
