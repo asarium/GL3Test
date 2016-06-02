@@ -128,6 +128,8 @@ bool printNextDebugMessage() {
     return true;
 }
 
+void glad_noop_callback(const char *name, void *funcptr, int len_args, ...) {
+}
 #endif
 }
 
@@ -203,6 +205,8 @@ void GL3Renderer::initialize(SDL_Window* window) {
 #ifndef NDEBUG
     // Set up the debug extension if present
     if (GLAD_GL_ARB_debug_output) {
+        glad_set_post_callback(glad_noop_callback); // Disable callback based error checking
+
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
         GLuint unusedIds = 0;
         glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, GL_TRUE);
