@@ -21,7 +21,6 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader,
 
     for (auto& filename : parts) {
         printf("Compiling %s...\n", filename.filename);
-        auto handle = glCreateShader(filename.type);
 
         auto content = loader->getFileContents(filename.filename);
         if (content.empty()) {
@@ -43,6 +42,7 @@ std::vector<GLuint> compileShaderParts(FileLoader* loader,
         static_assert(array_size(sources) == array_size((sizes)), "Sizes of source and size array do not match!");
         auto numParts = static_cast<GLsizei>(array_size(sources));
 
+        auto handle = glCreateShader(filename.type);
         glShaderSource(handle, numParts, sources, sizes);
 
         glCompileShader(handle);
