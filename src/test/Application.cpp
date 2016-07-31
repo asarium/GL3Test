@@ -258,7 +258,7 @@ void Application::render(Renderer* renderer) {
     cmd->bindDescriptorSet(_viewDescriptorSet.get());
     _lightingManager.beginLightPass(cmd.get());
 
-    cmd->bindPipeline(_modelPipelineState.get());
+    cmd->bindPipeline(_modelPipelineState);
     renderScene(cmd.get());
 
     _lightingManager.endLightPass(cmd.get());

@@ -33,12 +33,12 @@ GL3RenderTargetManager::GL3RenderTargetManager(GL3Renderer* renderer) : GL3Objec
                                                                         _currentRenderTarget(nullptr) {
 }
 
-void GL3RenderTargetManager::useRenderTarget(RenderTarget* target) {
+void GL3RenderTargetManager::useRenderTarget(PointerWrapper<RenderTarget> target) {
     if (target == nullptr) {
         // This uses the id 0
         _currentRenderTarget = _defaultRenderTarget.get();
     } else {
-        _currentRenderTarget = static_cast<GL3RenderTarget*>(target);
+        _currentRenderTarget = static_cast<GL3RenderTarget*>(&target);
     }
     _currentRenderTarget->bindFramebuffer();
 }

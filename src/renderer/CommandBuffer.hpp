@@ -2,6 +2,7 @@
 
 #include "PipelineState.hpp"
 #include "ShaderParameters.hpp"
+#include "Util.hpp"
 
 enum class ClearTarget {
     Color = 1 << 0,
@@ -19,11 +20,11 @@ class CommandBuffer {
 
     virtual void clear(const glm::vec4& color, ClearTarget target) = 0;
 
-    virtual void bindPipeline(PipelineState* pipeline) = 0;
+    virtual void bindPipeline(PointerWrapper<PipelineState> pipeline) = 0;
 
-    virtual void bindVertexArrayObject(VertexArrayObject* vao) = 0;
+    virtual void bindVertexArrayObject(PointerWrapper<VertexArrayObject> vao) = 0;
 
-    virtual void bindDescriptorSet(DescriptorSet* set) = 0;
+    virtual void bindDescriptorSet(PointerWrapper<DescriptorSet> set) = 0;
 
     virtual void pushConstants(void* data, size_t size) = 0;
 

@@ -32,8 +32,8 @@ void GL3RenderTarget::bindFramebuffer() {
     glViewport(0, 0, (GLsizei) _width, (GLsizei) _heigth);
 }
 
-void GL3RenderTarget::copyToTexture(Texture* target) {
-    auto glTexture = static_cast<GL3Texture*>(target);
+void GL3RenderTarget::copyToTexture(PointerWrapper<Texture> target) {
+    auto glTexture = static_cast<GL3Texture*>(&target);
 
     GLState->Framebuffer.pushBinding();
 

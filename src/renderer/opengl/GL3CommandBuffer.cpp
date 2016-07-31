@@ -32,17 +32,17 @@ void GL3CommandBuffer::clear(const glm::vec4& color, ClearTarget target)
     glClear(mask);
 }
 
-void GL3CommandBuffer::bindPipeline(PipelineState* pipeline)
+void GL3CommandBuffer::bindPipeline(PointerWrapper<PipelineState> pipeline)
 {
-    auto glState = static_cast<GL3PipelineState*>(pipeline);
+    auto glState = static_cast<GL3PipelineState*>(&pipeline);
 
     glState->setupState();
     _currentPrimitiveType = glState->getPrimitiveType();
 }
 
-void GL3CommandBuffer::bindVertexArrayObject(VertexArrayObject* vao)
+void GL3CommandBuffer::bindVertexArrayObject(PointerWrapper<VertexArrayObject> vao)
 {
-    auto glVao = static_cast<GL3VertexArrayObject*>(vao);
+    auto glVao = static_cast<GL3VertexArrayObject*>(&vao);
 
     glVao->bind();
 
@@ -89,8 +89,8 @@ void GL3CommandBuffer::drawIndexed(uint32_t indexCount, uint32_t instanceCount, 
             instanceCount);
     }
 }
-void GL3CommandBuffer::bindDescriptorSet(DescriptorSet* set) {
-    auto glSet = static_cast<GL3DescriptorSet*>(set);
+void GL3CommandBuffer::bindDescriptorSet(PointerWrapper<DescriptorSet> set) {
+    auto glSet = static_cast<GL3DescriptorSet*>(&set);
 
     glSet->bind();
 }

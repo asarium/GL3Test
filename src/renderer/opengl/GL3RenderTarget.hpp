@@ -25,7 +25,7 @@ class GL3RenderTarget final: public GL3Object, public RenderTarget {
 
     virtual size_t getHeight() const override;
 
-    virtual void copyToTexture(Texture* target) override;
+    virtual void copyToTexture(PointerWrapper<Texture> target) override;
 
     std::vector<TextureHandle*> getColorTextures() override;
 

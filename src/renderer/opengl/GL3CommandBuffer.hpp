@@ -16,11 +16,11 @@ public:
 
     void clear(const glm::vec4& color, ClearTarget target) override;
 
-    void bindPipeline(PipelineState* pipeline) override;
+    void bindPipeline(PointerWrapper<PipelineState> pipeline) override;
 
-    void bindVertexArrayObject(VertexArrayObject* vao) override;
+    void bindVertexArrayObject(PointerWrapper<VertexArrayObject> vao) override;
 
-    void bindDescriptorSet(DescriptorSet* set) override;
+    void bindDescriptorSet(PointerWrapper<DescriptorSet> set) override;
 
     void pushConstants(void* data, size_t size) override;
     

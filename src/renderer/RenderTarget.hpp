@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "Texture.hpp"
+#include "Util.hpp"
 
 class RenderTarget {
 public:
@@ -12,7 +13,7 @@ public:
 
     virtual size_t getHeight() const = 0;
 
-    virtual void copyToTexture(Texture* target) = 0;
+    virtual void copyToTexture(PointerWrapper<Texture> target) = 0;
 
     virtual std::vector<TextureHandle*> getColorTextures() = 0;
 

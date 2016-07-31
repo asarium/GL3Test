@@ -11,14 +11,14 @@ class GL3RenderTargetManager final: GL3Object, public RenderTargetManager {
 
     std::stack<GL3RenderTarget*> _renderTargetStack;
  public:
-    GL3RenderTargetManager(GL3Renderer* renderer);
+    explicit GL3RenderTargetManager(GL3Renderer* renderer);
     virtual ~GL3RenderTargetManager() { };
 
     void updateDefaultTarget(uint32_t width, uint32_t height);
 
     std::unique_ptr<RenderTarget> createRenderTarget(RenderTargetProperties&& properties) override;
 
-    void useRenderTarget(RenderTarget* target) override;
+    void useRenderTarget(PointerWrapper<RenderTarget> target) override;
 
     RenderTarget* getCurrentRenderTarget() override;
 

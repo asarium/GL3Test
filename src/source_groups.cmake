@@ -24,6 +24,7 @@ set(file_renderer
     renderer/RenderTargetManager.hpp
     renderer/ShaderParameters.hpp
     renderer/Texture.hpp
+    renderer/Util.hpp
     renderer/VertexLayout.hpp
     )
 

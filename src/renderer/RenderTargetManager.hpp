@@ -27,7 +27,7 @@ class RenderTargetManager {
 
     virtual std::unique_ptr<RenderTarget> createRenderTarget(RenderTargetProperties&& properties) = 0;
 
-    virtual void useRenderTarget(RenderTarget* target) = 0;
+    virtual void useRenderTarget(PointerWrapper<RenderTarget> target) = 0;
 
     virtual RenderTarget* getCurrentRenderTarget() = 0;
 

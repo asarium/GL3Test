@@ -57,7 +57,7 @@ struct AllocationProperties {
     ComparisionFunction compare_func;
 
     AllocationProperties()
-        : compare_mode(TextureCompareMode::None), compare_func(ComparisionFunction::Always) { }
+        : target(gli::TARGET_FIRST), format(gli::FORMAT_FIRST), compare_mode(TextureCompareMode::None), compare_func(ComparisionFunction::Always) { }
 };
 
 class Texture: public TextureHandle {
