@@ -6,6 +6,28 @@
 Model::Model(Renderer* renderer)
     : _renderer(renderer), _alignedUniformData(renderer->getLimits().uniform_offset_alignment), _numDrawCalls(0) {
 
+    _vertexInputState.addComponent(AttributeType::Position,
+                                   0,
+                                   DataFormat::Vec3,
+                                   offsetof(ModelVertexData, position));
+    _vertexInputState.addComponent(AttributeType::TexCoord,
+                                   0,
+                                   DataFormat::Vec3,
+                                   offsetof(ModelVertexData, tex_coord));
+    _vertexInputState.addComponent(AttributeType::Normal,
+                                   0,
+                                   DataFormat::Vec3,
+                                   offsetof(ModelVertexData, normal));
+    _vertexInputState.addComponent(AttributeType::Tangent,
+                                   0,
+                                   DataFormat::Vec3,
+                                   offsetof(ModelVertexData, tangent));
+    _vertexInputState.addComponent(AttributeType::Bitangent,
+                                   0,
+                                   DataFormat::Vec3,
+                                   offsetof(ModelVertexData, bitangent));
+
+    _vertexInputState.addBufferBinding(0, false, sizeof(ModelVertexData));
 }
 
 Model::~Model() {
@@ -28,38 +50,14 @@ void Model::setModelData(std::unique_ptr<BufferObject>&& data_buffer, std::uniqu
     _modelData = std::move(data_buffer);
     _indexData = std::move(index_buffer);
 
-    _vertexLayout = _renderer->createVertexLayout();
-    auto modelIdx = _vertexLayout->attachBufferObject(_modelData.get());
-    auto indexIdx = _vertexLayout->attachBufferObject(_indexData.get());
+    VertexArrayProperties vaoProps;
+    vaoProps.addBufferBinding(0, _modelData.get());
 
-    _vertexLayout->setIndexBuffer(indexIdx);
+    vaoProps.indexBuffer = _indexData.get();
+    vaoProps.indexOffset = 0;
+    vaoProps.indexType = IndexType::Short;
 
-    _vertexLayout->addComponent(AttributeType::Position,
-                                DataFormat::Vec3,
-                                sizeof(ModelVertexData),
-                                modelIdx,
-                                offsetof(ModelVertexData, position));
-    _vertexLayout->addComponent(AttributeType::TexCoord,
-                                DataFormat::Vec3,
-                                sizeof(ModelVertexData),
-                                modelIdx,
-                                offsetof(ModelVertexData, tex_coord));
-    _vertexLayout->addComponent(AttributeType::Normal,
-                                DataFormat::Vec3,
-                                sizeof(ModelVertexData),
-                                modelIdx,
-                                offsetof(ModelVertexData, normal));
-    _vertexLayout->addComponent(AttributeType::Tangent,
-                                DataFormat::Vec3,
-                                sizeof(ModelVertexData),
-                                modelIdx,
-                                offsetof(ModelVertexData, tangent));
-    _vertexLayout->addComponent(AttributeType::Bitangent,
-                                DataFormat::Vec3,
-                                sizeof(ModelVertexData),
-                                modelIdx,
-                                offsetof(ModelVertexData, bitangent));
-    _vertexLayout->finalize();
+    _vertexArrayObject = _renderer->createVertexArrayObject(_vertexInputState, vaoProps);
 }
 
 void Model::setMeshData(std::vector<MeshData>&& data) {
@@ -69,20 +67,21 @@ void Model::setMeshData(std::vector<MeshData>&& data) {
 void Model::setMaterials(std::vector<Material>&& data) {
     _materials = std::move(data);
 }
-void Model::render() {
-    recursiveRender(_rootNode);
+void Model::render(CommandBuffer* cmd) {
+    cmd->bindVertexArrayObject(_vertexArrayObject.get());
+
+    recursiveRender(cmd, _rootNode);
 }
-void Model::recursiveRender(const ModelNode& node) {
+void Model::recursiveRender(CommandBuffer* cmd, const ModelNode& node) {
     for (auto& node_data : node.mesh_data) {
         auto& mesh = _meshData[node_data.mesh_index];
 
-        node_data.model_descriptor_set->bind();
-        mesh.mesh_draw_call->draw();
-        node_data.model_descriptor_set->unbind();
+        cmd->bindDescriptorSet(node_data.model_descriptor_set.get());
+        cmd->drawIndexed(mesh.vertex_count, 1, mesh.vertex_offset, mesh.base_vertex, 0);
     }
 
     for (auto& child : node.child_nodes) {
-        recursiveRender(*child);
+        recursiveRender(cmd, *child);
     }
 }
 

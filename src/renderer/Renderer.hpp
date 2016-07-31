@@ -11,13 +11,11 @@
 #include "BufferObject.hpp"
 #include "VertexLayout.hpp"
 #include "util/FileLoader.hpp"
-#include "DrawCall.hpp"
-#include "DrawCallManager.hpp"
 #include "ShaderParameters.hpp"
 #include "RenderTargetManager.hpp"
 #include "Exceptions.hpp"
 #include "Profiler.hpp"
-
+#include "CommandBuffer.hpp"
 #include "PipelineState.hpp"
 
 enum class SettingsLevel {
@@ -46,7 +44,7 @@ struct RendererSettings {
 
 class RendererSettingsManager {
  public:
-    virtual ~RendererSettingsManager() { }
+    virtual ~RendererSettingsManager() {}
 
     virtual void changeSettings(const RendererSettings& settings) = 0;
 
@@ -66,25 +64,13 @@ struct RendererLimits {
     size_t uniform_offset_alignment;
 };
 
-enum class ClearTarget {
-    Color = 1 << 0,
-    Depth = 1 << 1,
-    Stencil = 1 << 2,
-};
-template<>
-struct BitOperationsTag<ClearTarget> {
-    static constexpr bool value = true;
-};
-
 class Renderer {
  public:
-    virtual ~Renderer() { }
+    virtual ~Renderer() {}
 
     virtual void initialize(SDL_Window* window) = 0;
 
     virtual RendererSettingsManager* getSettingsManager() = 0;
-
-    virtual DrawCallManager* getDrawCallManager() = 0;
 
     virtual RenderTargetManager* getRenderTargetManager() = 0;
 
@@ -92,19 +78,20 @@ class Renderer {
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) = 0;
 
-    virtual std::unique_ptr<VertexLayout> createVertexLayout() = 0;
-
     virtual std::unique_ptr<Texture> createTexture() = 0;
 
     virtual std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props) = 0;
 
     virtual std::unique_ptr<DescriptorSet> createDescriptorSet(DescriptorSetType type) = 0;
 
+    virtual std::unique_ptr<CommandBuffer> createCommandBuffer() = 0;
+
+    virtual std::unique_ptr<VertexArrayObject> createVertexArrayObject(const VertexInputStateProperties& input,
+                                                                       const VertexArrayProperties& props) = 0;
+
     virtual bool hasCapability(GraphicsCapability capability) const = 0;
 
     virtual RendererLimits getLimits() const = 0;
-
-    virtual void clear(const glm::vec4& color, ClearTarget target = ClearTarget::Color | ClearTarget::Depth) = 0;
 
     virtual void presentNextFrame() = 0;
 

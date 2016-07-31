@@ -107,18 +107,19 @@ namespace lighting
     LightType Light::getType() {
         return _type;
     }
-    ShadowMatrices Light::beginShadowPass(const ViewUniformData&) {
+    ShadowMatrices Light::beginShadowPass(CommandBuffer* cmd, const ViewUniformData&) {
         Assertion(_shadowing, "Shadowing is not enabled for this light!");
 
         _renderer->getRenderTargetManager()->pushRenderTargetBinding();
         _renderer->getRenderTargetManager()->useRenderTarget(_shadowMapTarget.get());
-        _renderer->clear(glm::vec4(0.f), ClearTarget::Depth);
 
-        _shadowPassPipelinestate->bind();
+        cmd->clear(glm::vec4(0.f), ClearTarget::Depth);
+
+        cmd->bindPipeline(_shadowPassPipelinestate.get());
 
         return _matricies;
     }
-    void Light::endShadowPass() {
+    void Light::endShadowPass(CommandBuffer* cmd) {
         Assertion(_shadowing, "Shadowing is not enabled for this light!");
         _renderer->getRenderTargetManager()->popRenderTargetBinding();
     }
@@ -127,11 +128,8 @@ namespace lighting
             offset,
             size);
     }
-    void Light::bindDescriptorSet() {
-        _lightDescriptorSet->bind();
-    }
-    void Light::unbindDescriptorSet() {
-        _lightDescriptorSet->unbind();
+    void Light::bindDescriptorSet(CommandBuffer* cmd) {
+        cmd->bindDescriptorSet(_lightDescriptorSet.get());
     }
 
 }

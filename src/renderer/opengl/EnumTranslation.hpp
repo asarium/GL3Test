@@ -4,6 +4,7 @@
 
 #include <renderer/PipelineState.hpp>
 #include <renderer/VertexLayout.hpp>
+#include <renderer/ShaderParameters.hpp>
 
 #include <util/Assertion.hpp>
 

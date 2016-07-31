@@ -14,8 +14,7 @@ set(file_model
 
 set(file_renderer
     renderer/BufferObject.hpp
-    renderer/DrawCall.hpp
-    renderer/DrawCallManager.hpp
+    renderer/CommandBuffer.hpp
     renderer/Enums.hpp
     renderer/Exceptions.hpp
     renderer/PipelineState.hpp
@@ -43,10 +42,8 @@ set(file_renderer_opengl
     renderer/opengl/EnumTranslation.hpp
     renderer/opengl/GL3BufferObject.cpp
     renderer/opengl/GL3BufferObject.hpp
-    renderer/opengl/GL3DrawCall.cpp
-    renderer/opengl/GL3DrawCall.hpp
-    renderer/opengl/GL3DrawCallManager.cpp
-    renderer/opengl/GL3DrawCallManager.hpp
+    renderer/opengl/GL3CommandBuffer.hpp
+    renderer/opengl/GL3CommandBuffer.cpp
     renderer/opengl/GL3Object.cpp
     renderer/opengl/GL3Object.hpp
     renderer/opengl/GL3PipelineState.cpp
@@ -80,6 +77,8 @@ set(file_renderer_opengl
 set(file_test
     test/Application.cpp
     test/Application.hpp
+    test/DrawCall.cpp
+    test/DrawCall.hpp
     test/DrawUtil.cpp
     test/DrawUtil.hpp
     test/Light.cpp

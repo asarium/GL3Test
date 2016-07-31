@@ -30,7 +30,10 @@ struct MeshData {
 
     size_t material_index;
 
-    std::unique_ptr<DrawCall> mesh_draw_call;
+    uint32_t vertex_offset;
+    uint32_t vertex_count;
+
+    uint32_t base_vertex;
 
     MeshData() : material_index(0) { }
 };
@@ -57,7 +60,7 @@ class Model {
     std::unique_ptr<BufferObject> _indexData;
     std::unique_ptr<BufferObject> _nodeUniformData;
 
-    std::unique_ptr<VertexLayout> _vertexLayout;
+    std::unique_ptr<VertexArrayObject> _vertexArrayObject;
 
     Renderer* _renderer;
 
@@ -70,15 +73,17 @@ class Model {
 
     size_t _numDrawCalls;
 
+    VertexInputStateProperties _vertexInputState;
+
     size_t updateNodeIndices(ModelNode& node, size_t nextIndex);
 
     void initializeDescriptorSets(ModelNode& node);
 
     void updateUniformData(const ModelNode& node, const glm::mat4& model);
 
-    void recursiveRender(const ModelNode& node);
+    void recursiveRender(CommandBuffer* cmd, const ModelNode& node);
  public:
-    Model(Renderer* renderer);
+    explicit Model(Renderer* renderer);
     ~Model();
 
     void setRootNode(ModelNode&& node);
@@ -91,7 +96,7 @@ class Model {
 
     void prepareData(const glm::mat4& world_transform);
 
-    void render();
+    void render(CommandBuffer* cmd);
 
     const std::vector<MeshData>& getMeshData() const {
         return _meshData;
@@ -100,7 +105,7 @@ class Model {
         return _materials;
     }
 
-    const std::unique_ptr<VertexLayout>& getVertexLayout() const {
-        return _vertexLayout;
+    const VertexInputStateProperties& getVertexInputState() const {
+        return _vertexInputState;
     }
 };

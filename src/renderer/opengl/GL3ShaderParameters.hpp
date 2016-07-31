@@ -70,8 +70,8 @@ public:
 
     Descriptor* getDescriptor(DescriptorSetPart part) override;
 
-    void bind() override;
+    void bind();
 
-    void unbind() override;
+    void unbind();
 };
 

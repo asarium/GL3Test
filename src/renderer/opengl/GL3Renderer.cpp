@@ -5,6 +5,10 @@
 #include "GL3State.hpp"
 #include "EnumTranslation.hpp"
 #include "GL3ShaderDefintions.hpp"
+#include "GL3CommandBuffer.hpp"
+#include "renderer/Exceptions.hpp"
+#include "util/Assertion.hpp"
+#include "GL3PipelineState.hpp"
 
 #include <glad/glad.h>
 
@@ -13,8 +17,6 @@
 
 #include <sstream>
 
-#include <renderer/Exceptions.hpp>
-#include <util/Assertion.hpp>
 
 namespace {
 
@@ -128,7 +130,7 @@ bool printNextDebugMessage() {
     return true;
 }
 
-void glad_noop_callback(const char *name, void *funcptr, int len_args, ...) {
+void glad_noop_callback(const char* name, void* funcptr, int len_args, ...) {
 }
 #endif
 }
@@ -144,11 +146,9 @@ GL3Renderer::~GL3Renderer() {
 }
 
 void GL3Renderer::deinitialize() {
-    _drawCallManager.reset();
     _shaderManager.reset();
     _renderTargetManager.reset();
     _profiler.reset();
-    _util.reset();
     _pushConstantManager.reset();
 
     SDL_GL_DeleteContext(_context);
@@ -220,7 +220,6 @@ void GL3Renderer::initialize(SDL_Window* window) {
     }
 #endif
     GLState.reset(new GL3StateTracker());
-    _util.reset(new GL3Util(this));
     _pushConstantManager.reset(new GL3PushConstantManager(this));
     _profiler.reset(new GL3Profiler(this));
 
@@ -230,7 +229,6 @@ void GL3Renderer::initialize(SDL_Window* window) {
         _shaderManager->getProgram(type.first, type.second);
     }
 
-    _drawCallManager.reset(new GL3DrawCallManager(this, _shaderManager.get()));
     _renderTargetManager.reset(new GL3RenderTargetManager(this));
 
     updateResolution(settings.resolution.x, settings.resolution.y);
@@ -251,23 +249,6 @@ void GL3Renderer::presentNextFrame() {
     SDL_GL_SwapWindow(_window);
 }
 
-void GL3Renderer::clear(const glm::vec4& color, ClearTarget target) {
-    GLenum mask = 0;
-    if (target & ClearTarget::Color) {
-        mask |= GL_COLOR_BUFFER_BIT;
-        glClearColor(color.r, color.g, color.b, color.a);
-    }
-    if (target & ClearTarget::Depth) {
-        mask |= GL_DEPTH_BUFFER_BIT;
-        GLState->setDepthMask(true);
-    }
-    if (target & ClearTarget::Stencil) {
-        mask |= GL_STENCIL_BUFFER_BIT;
-    }
-
-    glClear(mask);
-}
-
 std::unique_ptr<BufferObject> GL3Renderer::createBuffer(BufferType type) {
     if (type == BufferType::None) {
         return nullptr;
@@ -276,12 +257,8 @@ std::unique_ptr<BufferObject> GL3Renderer::createBuffer(BufferType type) {
     return std::unique_ptr<BufferObject>(new GL3BufferObject(type));
 }
 
-std::unique_ptr<VertexLayout> GL3Renderer::createVertexLayout() {
-    return std::unique_ptr<VertexLayout>(new GL3VertexLayout());
-}
-
-DrawCallManager* GL3Renderer::getDrawCallManager() {
-    return _drawCallManager.get();
+std::unique_ptr<CommandBuffer> GL3Renderer::createCommandBuffer() {
+    return std::unique_ptr<CommandBuffer>(new GL3CommandBuffer(this));
 }
 
 std::unique_ptr<Texture> GL3Renderer::createTexture() {
@@ -302,10 +279,6 @@ GL3ShaderManager* GL3Renderer::getShaderManager() {
 
 RenderTargetManager* GL3Renderer::getRenderTargetManager() {
     return _renderTargetManager.get();
-}
-
-GL3DrawCallManager* GL3Renderer::getGLDrawCallManager() {
-    return _drawCallManager.get();
 }
 
 GL3RenderTargetManager* GL3Renderer::getGLRenderTargetManager() {
@@ -340,6 +313,11 @@ RendererLimits GL3Renderer::getLimits() const {
     limits.uniform_offset_alignment = (size_t) GLState->Constants.getUniformBufferAlignment();
 
     return limits;
+}
+std::unique_ptr<VertexArrayObject> GL3Renderer::createVertexArrayObject(const VertexInputStateProperties& input,
+                                                                        const VertexArrayProperties& props) {
+    GL3VertexInputState inputState(input);
+    return inputState.createArrayObject(props);
 }
 
 GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer* renderer) : GL3Object(renderer),

@@ -1,10 +1,8 @@
 #pragma once
 
 #include "renderer/Renderer.hpp"
-#include "GL3DrawCallManager.hpp"
 #include "GL3ShaderManager.hpp"
 #include "GL3RenderTargetManager.hpp"
-#include "GL3Util.hpp"
 #include "GL3Profiler.hpp"
 #include "GL3PushConstantManager.hpp"
 
@@ -41,14 +39,12 @@ class GL3Renderer final: public Renderer {
     bool _initialized;
     SDL_GLContext _context;
 
-    std::unique_ptr<GL3DrawCallManager> _drawCallManager;
     std::unique_ptr<GL3ShaderManager> _shaderManager;
     std::unique_ptr<GL3RenderTargetManager> _renderTargetManager;
     std::unique_ptr<GL3Profiler> _profiler;
-    std::unique_ptr<GL3Util> _util;
     std::unique_ptr<GL3PushConstantManager> _pushConstantManager;
  public:
-    GL3Renderer(std::unique_ptr<FileLoader>&& fileLoader);
+    explicit GL3Renderer(std::unique_ptr<FileLoader>&& fileLoader);
 
     virtual ~GL3Renderer();
 
@@ -58,15 +54,13 @@ class GL3Renderer final: public Renderer {
 
     virtual RendererSettingsManager* getSettingsManager() override;
 
-    virtual DrawCallManager* getDrawCallManager() override;
-
     virtual RenderTargetManager* getRenderTargetManager() override;
 
     virtual Profiler* getProfiler() override;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) override;
 
-    virtual std::unique_ptr<VertexLayout> createVertexLayout() override;
+    virtual std::unique_ptr<CommandBuffer> createCommandBuffer() override;
 
     virtual std::unique_ptr<Texture> createTexture() override;
 
@@ -74,27 +68,22 @@ class GL3Renderer final: public Renderer {
 
     virtual std::unique_ptr<DescriptorSet> createDescriptorSet(DescriptorSetType type) override;
 
+    virtual std::unique_ptr<VertexArrayObject> createVertexArrayObject(const VertexInputStateProperties& input,
+                                                                       const VertexArrayProperties& props) override;
+
     virtual bool hasCapability(GraphicsCapability capability) const override;
 
     virtual RendererLimits getLimits() const override;
 
-    virtual void clear(const glm::vec4& color, ClearTarget target) override;
-
     virtual void presentNextFrame() override;
 
     void updateResolution(uint32_t width, uint32_t height);
-
-    GL3DrawCallManager* getGLDrawCallManager();
 
     GL3RenderTargetManager* getGLRenderTargetManager();
 
     GL3ShaderManager* getShaderManager();
 
     GL3PushConstantManager* getPushConstantManager();
-
-    GL3Util* getGLUtil() {
-        return _util.get();
-    }
 };
 
 

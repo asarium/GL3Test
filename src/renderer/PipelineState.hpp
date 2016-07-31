@@ -1,9 +1,11 @@
 #pragma once
 
-#include "DrawCallManager.hpp"
 #include "Enums.hpp"
+#include "VertexLayout.hpp"
 
 #include <util/HashUtil.hpp>
+
+#include <glm/glm.hpp>
 
 enum class ShaderType {
     Mesh = 0,
@@ -69,9 +71,19 @@ enum class StencilOperation {
     Invert
 };
 
+enum class PrimitiveType {
+    Point,
+    Triangle,
+    TriangleStrip,
+    TriangleFan
+};
+
 struct PipelineProperties {
     ShaderType shaderType;
     ShaderFlags shaderFlags;
+
+    PrimitiveType primitive_type;
+    VertexInputStateProperties vertexInput;
 
     DepthMode depthMode;
     ComparisionFunction depthFunction;
@@ -94,7 +106,7 @@ struct PipelineProperties {
     glm::bvec4 colorMask;
 
     PipelineProperties()
-        : shaderType(ShaderType::Mesh), shaderFlags(ShaderFlags::None), depthMode(DepthMode::None),
+        : shaderType(ShaderType::Mesh), shaderFlags(ShaderFlags::None), primitive_type(PrimitiveType::Triangle), depthMode(DepthMode::None),
           depthFunction(ComparisionFunction::Less),
           enableBlending(false), blendFunction(BlendFunction::None), enableFaceCulling(false),
           culledFace(CullFace::Back), frontFace(FrontFace::CounterClockWise), enableScissor(false),
@@ -113,6 +125,4 @@ struct PipelineProperties {
 class PipelineState {
  public:
     virtual ~PipelineState() { }
-
-    virtual void bind() = 0;
 };

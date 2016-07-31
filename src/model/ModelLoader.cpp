@@ -288,22 +288,9 @@ bool ModelLoader::loadMeshes(json_t* meshes_root) {
         mesh.mesh_name = name_node == nullptr ? "" : json_string_value(name_node);
         mesh.material_index = (size_t) json_integer_value(material_index_node);
 
-        DrawCallCreateProperties props;
-        props.vertexLayout = _currentModel->getVertexLayout().get();
-
-        props.primitive_type = PrimitiveType::Triangle;
-
-        props.offset = (size_t) json_integer_value(offset_node);
-        props.count = (size_t) json_integer_value(count_node);
-
-        props.index_type = IndexType::Short;
-
-        props.base_vertex = (uint32_t) json_integer_value(base_index_node);
-
-        props.min_index = (uint32_t) json_integer_value(min_index_node);
-        props.max_index = (uint32_t) json_integer_value(max_index_node);
-
-        mesh.mesh_draw_call = _renderer->getDrawCallManager()->createDrawCall(props);
+        mesh.vertex_offset = (uint32_t) json_integer_value(offset_node);
+        mesh.vertex_count = (uint32_t) json_integer_value(count_node);
+        mesh.base_vertex = (uint32_t) json_integer_value(base_index_node);
 
         meshData.push_back(std::move(mesh));
     }

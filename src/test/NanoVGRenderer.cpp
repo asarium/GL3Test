@@ -3,6 +3,8 @@
 #include <gli/texture2d.hpp>
 #include <gli/generate_mipmaps.hpp>
 
+#include <math.h>
+
 namespace {
 int nvgRenderCreate(void* userptr) {
     auto renderer = static_cast<NanoVGRenderer*>(userptr);
@@ -178,14 +180,6 @@ void deleteNanoVGContext(NVGcontext* context) {
     nvgDeleteInternal(context);
 }
 
-std::unique_ptr<VariableDrawCall> NanoVGRenderer::createDrawCall(PrimitiveType type) const {
-    DrawCallCreateProperties drawProps;
-    drawProps.primitive_type = type;
-    drawProps.vertexLayout = _vertexLayout.get();
-
-    return _renderer->getDrawCallManager()->createVariableDrawCall(drawProps);
-}
-
 NanoVGRenderer::NanoVGRenderer(Renderer* renderer)
     : _renderer(renderer), _uniformAligner(renderer->getLimits().uniform_offset_alignment), _lastImageId(0) {
 }
@@ -193,24 +187,21 @@ NanoVGRenderer::NanoVGRenderer(Renderer* renderer)
 void NanoVGRenderer::initialize() {
     _vertexBuffer = _renderer->createBuffer(BufferType::Vertex);
 
-    _vertexLayout = _renderer->createVertexLayout();
-    auto bufferIdx = _vertexLayout->attachBufferObject(_vertexBuffer.get());
+    VertexInputStateProperties vertexInput;
+    vertexInput.addComponent(AttributeType::Position2D,
+                                   0,
+                                   DataFormat::Vec2,
+                                   offsetof(NVGvertex, x));
+    vertexInput.addComponent(AttributeType::TexCoord,
+                                   0,
+                                   DataFormat::Vec2,
+                                   offsetof(NVGvertex, x));
+    vertexInput.addBufferBinding(0, false, sizeof(NVGvertex));
 
-    _vertexLayout->addComponent(AttributeType::Position2D,
-                                DataFormat::Vec2,
-                                sizeof(NVGvertex),
-                                bufferIdx,
-                                offsetof(NVGvertex, x));
-    _vertexLayout->addComponent(AttributeType::TexCoord,
-                                DataFormat::Vec2,
-                                sizeof(NVGvertex),
-                                bufferIdx,
-                                offsetof(NVGvertex, u));
-    _vertexLayout->finalize();
+    VertexArrayProperties arrayProps;
+    arrayProps.addBufferBinding(0, _vertexBuffer.get());
 
-    _triangleDrawCall = createDrawCall(PrimitiveType::Triangle);
-    _triangleFanDrawCall = createDrawCall(PrimitiveType::TriangleFan);
-    _triangleStripDrawCall = createDrawCall(PrimitiveType::TriangleStrip);
+    _vertexArrayObject = _renderer->createVertexArrayObject(vertexInput, arrayProps);
 
     _uniformBuffer = VariableUniformBuffer::createVariableBuffer(_renderer);
 
@@ -224,8 +215,12 @@ void NanoVGRenderer::initialize() {
 
     // Now create all the pipeline states that we are going to need
     {
+        auto props = getDefaultPipelineProperties();
+
         // Pipeline state for simple triangle draws
-        _trianglesPipelineState = _renderer->createPipelineState(getDefaultPipelineProperties());
+        _trianglesPipelineState = createPipelineState(props, vertexInput, PrimitiveType::Triangle);
+        _triangleFillPipelineState = createPipelineState(props, vertexInput, PrimitiveType::TriangleFan);
+        _triangleStrokePipelineState = createPipelineState(props, vertexInput, PrimitiveType::TriangleStrip);
     }
     {
         // Pipeline states for the fill shader
@@ -241,17 +236,20 @@ void NanoVGRenderer::initialize() {
             std::make_tuple(StencilOperation::Keep, StencilOperation::Keep, StencilOperation::DecrementWrap);
 
         props.enableFaceCulling = false;
-        _fillShapePipelineState = _renderer->createPipelineState(props);
+
+        _fillShapePipelineState = createPipelineState(props, vertexInput, PrimitiveType::TriangleFan);
 
         props.enableFaceCulling = true;
         props.colorMask = glm::bvec4(true, true, true, true);
         props.stencilFunc = std::make_tuple(ComparisionFunction::Equal, 0x00, 0xFF);
         props.setStencilOp(std::make_tuple(StencilOperation::Keep, StencilOperation::Keep, StencilOperation::Keep));
-        _fillAntiAliasPipelineState = _renderer->createPipelineState(props);
+
+        _fillAntiAliasPipelineState = createPipelineState(props, vertexInput, PrimitiveType::TriangleStrip);
 
         props.stencilFunc = std::make_tuple(ComparisionFunction::NotEqual, 0x00, 0xFF);
         props.setStencilOp(std::make_tuple(StencilOperation::Zero, StencilOperation::Zero, StencilOperation::Zero));
-        _fillFillPipelineState = _renderer->createPipelineState(props);
+
+        _fillFillPipelineState = createPipelineState(props, vertexInput, PrimitiveType::Triangle);
     }
     {
         // Pipeline states for the stroke shader
@@ -259,16 +257,18 @@ void NanoVGRenderer::initialize() {
         props.enableStencil = true;
         props.stencilMask = 0xFF;
         props.stencilFunc = std::make_tuple(ComparisionFunction::Equal, 0x00, 0xFF);
-        props.setStencilOp(std::make_tuple(StencilOperation::Keep, StencilOperation::Keep, StencilOperation::Increment));
-        _strokeFillPipelineState = _renderer->createPipelineState(props);
+        props.setStencilOp(std::make_tuple(StencilOperation::Keep,
+                                           StencilOperation::Keep,
+                                           StencilOperation::Increment));
+        _strokeFillPipelineState = createPipelineState(props, vertexInput, PrimitiveType::TriangleStrip);
 
         props.setStencilOp(std::make_tuple(StencilOperation::Keep, StencilOperation::Keep, StencilOperation::Keep));
-        _strokeAntiaiasPipelineState = _renderer->createPipelineState(props);
+        _strokeAntiaiasPipelineState = createPipelineState(props, vertexInput, PrimitiveType::TriangleStrip);
 
         props.colorMask = glm::bvec4(false, false, false, false);
         props.stencilFunc = std::make_tuple(ComparisionFunction::Always, 0x00, 0xFF);
         props.setStencilOp(std::make_tuple(StencilOperation::Zero, StencilOperation::Zero, StencilOperation::Zero));
-        _strokeClearStencilPipelineState = _renderer->createPipelineState(props);
+        _strokeClearStencilPipelineState = createPipelineState(props, vertexInput, PrimitiveType::TriangleStrip);
     }
 }
 
@@ -406,36 +406,36 @@ void NanoVGRenderer::renderFlush() {
         return;
     }
 
+    auto cmd = _renderer->createCommandBuffer();
+
     // First update changed data
     _uniformAligner.getHeader<GlobalUniformData>()->viewSize = _viewport;
 
     _uniformBuffer->setData(_uniformAligner.getData(), _uniformAligner.getSize());
     _vertexBuffer->setData(_vertices.data(), sizeof(NVGvertex) * _vertices.size(), BufferUsage::Streaming);
 
-    _globalDescriptorSet->bind();
+    cmd->bindVertexArrayObject(_vertexArrayObject.get());
+    cmd->bindDescriptorSet(_globalDescriptorSet.get());
 
     for (auto& drawCall : _drawCalls) {
         switch (drawCall.type) {
             case CallType::Fill:
-                drawFill(drawCall);
+                drawFill(cmd.get(), drawCall);
                 break;
             case CallType::ConvexFill:
-                drawConvexFill(drawCall);
+                drawConvexFill(cmd.get(), drawCall);
                 break;
             case CallType::Stroke:
-                drawStroke(drawCall);
+                drawStroke(cmd.get(), drawCall);
                 break;
             case CallType::Triangles:
-                drawTriangles(drawCall);
+                drawTriangles(cmd.get(), drawCall);
                 break;
         }
     }
 
     // Reset all data again
-    _vertices.clear();
-    _uniformAligner.resize(0);
-    _drawCalls.clear();
-    _paths.clear();
+    renderCancel();
 }
 void NanoVGRenderer::renderCancel() {
     // Clear all data written by the render functions
@@ -655,7 +655,20 @@ NanoVGRenderer::Image* NanoVGRenderer::getTexture(int id) {
     }
     return &iter->second;
 }
-std::unique_ptr<DescriptorSet> NanoVGRenderer::createAndBindUniforms(size_t uniform_index, int image) {
+
+std::unique_ptr<PipelineState> NanoVGRenderer::createPipelineState(const PipelineProperties& props,
+                                                                   const VertexInputStateProperties& vertexProps,
+                                                                   PrimitiveType primitive) {
+    PipelineProperties copy = props;
+
+    copy.primitive_type = primitive;
+    copy.vertexInput = vertexProps;
+
+    return _renderer->createPipelineState(copy);
+}
+
+std::unique_ptr<DescriptorSet>
+NanoVGRenderer::createAndBindUniforms(CommandBuffer* cmd, size_t uniform_index, int image) {
     auto tex = getTexture(image);
     auto descriptor = _renderer->createDescriptorSet(DescriptorSetType::NanoVGLocalSet);
     if (tex == nullptr) {
@@ -668,72 +681,71 @@ std::unique_ptr<DescriptorSet> NanoVGRenderer::createAndBindUniforms(size_t unif
                          _uniformAligner.getOffset(uniform_index),
                          sizeof(UniformData));
 
-    descriptor->bind();
+    cmd->bindDescriptorSet(descriptor.get());
 
     return descriptor;
 }
 
-void NanoVGRenderer::drawTriangles(const DrawCall& call) {
-    auto descriptor = createAndBindUniforms(call.uniformIndex, call.image);
+void NanoVGRenderer::drawTriangles(CommandBuffer* cmd, const DrawCall& call) {
+    auto descriptor = createAndBindUniforms(cmd, call.uniformIndex, call.image);
 
-    _trianglesPipelineState->bind();
+    cmd->bindPipeline(_trianglesPipelineState.get());
 
-    _triangleDrawCall->draw(call.triangleOffset, call.triangleCount);
+    cmd->draw(call.triangleCount, 1, call.triangleOffset, 0);
 }
-void NanoVGRenderer::drawFill(const DrawCall& call) {
-    auto shapeDescriptor = createAndBindUniforms(call.uniformIndex, 0);
+void NanoVGRenderer::drawFill(CommandBuffer* cmd, const DrawCall& call) {
+    auto shapeDescriptor = createAndBindUniforms(cmd, call.uniformIndex, 0);
 
-    _fillShapePipelineState->bind();
+    cmd->bindPipeline(_fillShapePipelineState.get());
     auto pathOffset = call.pathOffset;
     for (size_t i = 0; i < call.pathCount; ++i) {
-        _triangleFanDrawCall->draw(_paths[pathOffset + i].fillOffset, _paths[pathOffset + i].fillCount);
+        cmd->draw(_paths[pathOffset + i].fillCount, 1, _paths[pathOffset + i].fillOffset, 0);
     }
 
-    auto fillDescriptor = createAndBindUniforms(call.uniformIndex + 1, call.image);
-    _fillAntiAliasPipelineState->bind();
+    auto fillDescriptor = createAndBindUniforms(cmd, call.uniformIndex + 1, call.image);
+    cmd->bindPipeline(_fillAntiAliasPipelineState.get());
     // Draw fringes
     for (size_t i = 0; i < call.pathCount; ++i) {
-        _triangleStripDrawCall->draw(_paths[pathOffset + i].strokeOffset, _paths[pathOffset + i].strokeCount);
+        cmd->draw(_paths[pathOffset + i].strokeCount, 1, _paths[pathOffset + i].strokeOffset, 0);
     }
 
-    _fillFillPipelineState->bind();
-    _triangleDrawCall->draw(call.triangleOffset, call.triangleCount);
+    cmd->bindPipeline(_fillFillPipelineState.get());
+    cmd->draw(call.triangleCount, 1, call.triangleOffset, 0);
 }
-void NanoVGRenderer::drawConvexFill(const DrawCall& call) {
-    _trianglesPipelineState->bind();
-    auto descriptor = createAndBindUniforms(call.uniformIndex, call.image);
+void NanoVGRenderer::drawConvexFill(CommandBuffer* cmd, const DrawCall& call) {
+    auto descriptor = createAndBindUniforms(cmd, call.uniformIndex, call.image);
 
+    cmd->bindPipeline(_triangleFillPipelineState.get());
     auto pathOffset = call.pathOffset;
     for (size_t i = 0; i < call.pathCount; ++i) {
-        _triangleFanDrawCall->draw(_paths[pathOffset + i].fillOffset, _paths[pathOffset + i].fillCount);
+        cmd->draw(_paths[pathOffset + i].fillCount, 1, _paths[pathOffset + i].fillOffset, 0);
     }
+    cmd->bindPipeline(_triangleStrokePipelineState.get());
     // Draw fringes
     for (size_t i = 0; i < call.pathCount; ++i) {
-        _triangleStripDrawCall->draw(_paths[pathOffset + i].strokeOffset, _paths[pathOffset + i].strokeCount);
+        cmd->draw(_paths[pathOffset + i].strokeCount, 1, _paths[pathOffset + i].strokeOffset, 0);
     }
 }
-void NanoVGRenderer::drawStroke(const DrawCall& call) {
+void NanoVGRenderer::drawStroke(CommandBuffer* cmd, const DrawCall& call) {
     auto pathOffset = call.pathOffset;
 
     // Fill the stroke base without overlap
-    _strokeFillPipelineState->bind();
-    auto fillDescriptor = createAndBindUniforms(call.uniformIndex + 1, call.image);
+    cmd->bindPipeline(_strokeFillPipelineState.get());
+    auto fillDescriptor = createAndBindUniforms(cmd, call.uniformIndex + 1, call.image);
     for (size_t i = 0; i < call.pathCount; ++i) {
-        _triangleStripDrawCall->draw(_paths[pathOffset + i].strokeOffset, _paths[pathOffset + i].strokeCount);
+        cmd->draw(_paths[pathOffset + i].strokeCount, 1, _paths[pathOffset + i].strokeOffset, 0);
     }
 
     // Draw anti-aliased pixels.
-    _strokeAntiaiasPipelineState->bind();
-    auto aaDescriptor = createAndBindUniforms(call.uniformIndex, call.image);
+    cmd->bindPipeline(_strokeAntiaiasPipelineState.get());
+    auto aaDescriptor = createAndBindUniforms(cmd, call.uniformIndex, call.image);
     for (size_t i = 0; i < call.pathCount; ++i) {
-        _triangleStripDrawCall->draw(_paths[pathOffset + i].strokeOffset, _paths[pathOffset + i].strokeCount);
+        cmd->draw(_paths[pathOffset + i].strokeCount, 1, _paths[pathOffset + i].strokeOffset, 0);
     }
 
     // Clear stencil buffer.
-    _strokeClearStencilPipelineState->bind();
+    cmd->bindPipeline(_strokeClearStencilPipelineState.get());
     for (size_t i = 0; i < call.pathCount; ++i) {
-        _triangleStripDrawCall->draw(_paths[pathOffset + i].strokeOffset, _paths[pathOffset + i].strokeCount);
+        cmd->draw(_paths[pathOffset + i].strokeCount, 1, _paths[pathOffset + i].strokeOffset, 0);
     }
 }
-
-

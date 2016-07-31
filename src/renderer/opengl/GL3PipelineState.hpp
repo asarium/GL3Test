@@ -9,6 +9,7 @@
 struct GL3PipelineProperties {
     GLuint shaderHandle;
 
+    GLenum primitiveType;
     DepthMode depthMode;
     ComparisionFunction depthFunction;
 
@@ -38,9 +39,12 @@ class GL3PipelineState final: public GL3Object, public PipelineState {
 
     virtual ~GL3PipelineState() { }
 
-    virtual void bind() override;
-
     void setupState();
+
+    GLenum getPrimitiveType() const
+    {
+        return _props.primitiveType;
+    }
 };
 
 

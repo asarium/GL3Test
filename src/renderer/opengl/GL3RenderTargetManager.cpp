@@ -3,6 +3,7 @@
 
 #include "GL3RenderTargetManager.hpp"
 #include "GL3State.hpp"
+#include "GL3Util.hpp"
 
 #include <iostream>
 #include <renderer/RenderTargetManager.hpp>

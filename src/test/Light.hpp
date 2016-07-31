@@ -65,12 +65,11 @@ namespace lighting
 
         void updateDescriptor(BufferObject* uniforms, size_t offset, size_t size);
 
-        void bindDescriptorSet();
-        void unbindDescriptorSet();
+        void bindDescriptorSet(CommandBuffer* cmd);
 
-        ShadowMatrices beginShadowPass(const ViewUniformData& viewdata);
+        ShadowMatrices beginShadowPass(CommandBuffer* cmd, const ViewUniformData& viewdata);
 
-        void endShadowPass();
+        void endShadowPass(CommandBuffer* cmd);
     };
 
 }

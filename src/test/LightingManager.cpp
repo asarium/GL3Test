@@ -38,18 +38,6 @@ LightingManager::LightingManager(Renderer* renderer)
 
     {
         PipelineProperties pipelineProperties;
-        pipelineProperties.shaderType = ShaderType::LightedMesh;
-
-        pipelineProperties.depthMode = DepthMode::ReadWrite;
-        pipelineProperties.depthFunction = ComparisionFunction::Less;
-
-        pipelineProperties.enableBlending = false;
-        pipelineProperties.blendFunction = BlendFunction::None;
-
-        _geometryPipelinestate = _renderer->createPipelineState(pipelineProperties);
-    }
-    {
-        PipelineProperties pipelineProperties;
         pipelineProperties.shaderType = ShaderType::LightingPass;
 
         pipelineProperties.depthMode = DepthMode::None;
@@ -58,7 +46,12 @@ LightingManager::LightingManager(Renderer* renderer)
         pipelineProperties.enableBlending = true;
         pipelineProperties.blendFunction = BlendFunction::Additive;
 
+        _util.setVertexProperties(pipelineProperties);
+
         _lightingPassPipelineState = _renderer->createPipelineState(pipelineProperties);
+
+        _sphereMesh = _util.getSphereMesh();
+        _fullscreenTriMesh = _util.getFullscreenTriMesh();
     }
 }
 Light* LightingManager::addLight(LightType type, bool shadowing) {
@@ -80,36 +73,32 @@ void LightingManager::removeLight(Light* light) {
 void LightingManager::clearLights() {
     _lights.clear();
 }
-void LightingManager::beginLightPass() {
+void LightingManager::beginLightPass(CommandBuffer* cmd) {
     auto current = _renderer->getRenderTargetManager()->getCurrentRenderTarget();
 
     ensureRenderTargetSize(current->getWidth(), current->getHeight());
 
     _renderer->getRenderTargetManager()->pushRenderTargetBinding();
     _renderer->getRenderTargetManager()->useRenderTarget(_lightingRenderTarget.get());
-    _renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
-    _geometryPipelinestate->bind();
+    cmd->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), ClearTarget::Color);
 }
-void LightingManager::endLightPass() {
+void LightingManager::endLightPass(CommandBuffer* cmd) {
     _renderer->getRenderTargetManager()->popRenderTargetBinding();
-    _renderer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
+    cmd->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), ClearTarget::Color);
 
-    _lightingPassPipelineState->bind();
+    cmd->bindPipeline(_lightingPassPipelineState.get());
 
-    _lightingDescriptorSet->bind();
+    cmd->bindDescriptorSet(_lightingDescriptorSet.get());
 
     for (auto& light : _lights) {
-        light->bindDescriptorSet();
+        light->bindDescriptorSet(cmd);
         if (light->getType() == LightType::Point) {
-            _util.drawSphere();
+            _sphereMesh->draw(cmd, 1);
         } else {
-            _util.drawFullscreenTri();
+            _fullscreenTriMesh->draw(cmd, 1);
         }
-        light->unbindDescriptorSet();
     }
-
-    _lightingDescriptorSet->unbind();
 }
 void LightingManager::ensureRenderTargetSize(size_t width, size_t height) {
     if (_lightingRenderTarget
@@ -160,6 +149,19 @@ void LightingManager::updateLightData() {
                                0,
                                _alignedUniformData.getSize(),
                                UpdateFlags::DiscardOldData);
+}
+
+PipelineProperties LightingManager::getGeometryProperties() const {
+    PipelineProperties pipelineProperties;
+    pipelineProperties.shaderType = ShaderType::LightedMesh;
+
+    pipelineProperties.depthMode = DepthMode::ReadWrite;
+    pipelineProperties.depthFunction = ComparisionFunction::Less;
+
+    pipelineProperties.enableBlending = false;
+    pipelineProperties.blendFunction = BlendFunction::None;
+
+    return pipelineProperties;
 }
 
 }

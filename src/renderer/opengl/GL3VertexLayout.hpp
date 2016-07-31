@@ -6,43 +6,40 @@
 #include <vector>
 #include <glad/glad.h>
 
+
 struct Component {
+    uint32_t buffer_binding;
+
     GLuint attribute_location;
     GLenum data_type;
     GLint size;
     GLsizei stride;
     GLuint divisor;
     void* offset;
-
-    GL3BufferObject* buffer;
 };
 
-class GL3VertexLayout final: public VertexLayout {
-    std::vector<GL3BufferObject*> _attachedBuffers;
-
-    std::vector<Component> _components;
-
+class GL3VertexArrayObject final: public VertexArrayObject {
     GLuint _vaoHandle;
 
-    bool _haveIndexBuffer;
-    BufferIndex _indexBuffer;
+    GLenum _indexType;
+    size_t _indexOffset;
  public:
-    GL3VertexLayout();
-    virtual ~GL3VertexLayout();
-
-    virtual BufferIndex attachBufferObject(BufferObject* buffer) override;
-
-    virtual void addComponent(AttributeType type, DataFormat format, size_t stride,
-                              BufferIndex source, size_t offset) override;
-
-    virtual void addInstanceComponent(AttributeType type, DataFormat format, size_t instanceDivisor, size_t stride,
-                                      BufferIndex source, size_t offset) override;
-
-    virtual void setIndexBuffer(BufferIndex source) override;
-
-    virtual void finalize() override;
+    GL3VertexArrayObject(const VertexArrayProperties& props, const std::vector<Component>& components);
+    virtual ~GL3VertexArrayObject() override;
 
     void bind();
+
+    void* computeIndexOffset(uint32_t firstIndex);
+
+    GLenum getIndexType();
 };
 
+class GL3VertexInputState final: public VertexInputState {
+    std::vector<Component> _components;
+ public:
+    GL3VertexInputState(const VertexInputStateProperties& props);
 
+    virtual ~GL3VertexInputState() override;
+
+    virtual std::unique_ptr<VertexArrayObject> createArrayObject(const VertexArrayProperties& props) override;
+};

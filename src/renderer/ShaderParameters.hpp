@@ -58,10 +58,6 @@ class DescriptorSet {
     virtual ~DescriptorSet() {}
 
     virtual Descriptor* getDescriptor(DescriptorSetPart part) = 0;
-
-    virtual void bind() = 0;
-
-    virtual void unbind() = 0;
 };
 
 struct ViewUniformData {

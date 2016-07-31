@@ -3,6 +3,8 @@
 
 #include "DrawUtil.hpp"
 
+#include <math.h>
+
 namespace {
 
 struct VertexData {
@@ -50,12 +52,12 @@ std::vector<VertexData> getQuadData() {
     return data;
 }
 
-std::pair<std::vector<glm::vec3>, std::vector<uint16_t>> generate_sphere_mesh(size_t rings, size_t segments) {
+std::pair<std::vector<VertexData>, std::vector<uint16_t>> generate_sphere_mesh(size_t rings, size_t segments) {
     // Code copied from the original deferred rendering backend of FSO
     auto nVertex = (rings + 1) * (segments + 1);
     auto nIndex = 6 * rings * (segments + 1);
 
-    std::vector<glm::vec3> vertices;
+    std::vector<VertexData> vertices;
     vertices.reserve(nVertex);
     std::vector<uint16_t> indices;
     indices.reserve(nIndex);
@@ -75,7 +77,10 @@ std::pair<std::vector<glm::vec3>, std::vector<uint16_t>> generate_sphere_mesh(si
             auto z0 = r0 * cos(seg * fDeltaSegAngle);
 
             // Add one vertex to the strip which makes up the sphere
-            vertices.push_back(glm::vec3(x0, y0, z0));
+            VertexData vertex;
+            vertex.position = glm::vec3(x0, y0, z0);
+            vertex.tex_coord = glm::vec2(0.f, 0.f);
+            vertices.push_back(vertex);
 
             if (ring != rings) {
                 // each vertex (except the last) has six indices pointing to it
@@ -94,91 +99,82 @@ std::pair<std::vector<glm::vec3>, std::vector<uint16_t>> generate_sphere_mesh(si
 }
 }
 
-DrawUtil::DrawUtil(Renderer* renderer) {
+DrawMesh::DrawMesh(std::unique_ptr<VertexArrayObject>&& vertex_array_object, bool indexed, uint32_t count): _vao(std::move(vertex_array_object)),
+                                                                                                            _indexed(indexed),
+                                                                                                            _count(count)
+{
+}
+
+void DrawMesh::draw(CommandBuffer* cmd, uint32_t instances)
+{
+    cmd->bindVertexArrayObject(_vao.get());
+
+    if (_indexed)
     {
-        _fullscreenTriBuffer = renderer->createBuffer(BufferType::Vertex);
-        auto quadData = getFullscreenTriData();
-        _fullscreenTriBuffer->setData(quadData.data(), quadData.size() * sizeof(VertexData), BufferUsage::Static);
+        cmd->drawIndexed(_count, instances, 0, 0, 0);
+    }
+    else
+    {
+        cmd->draw(_count, instances, 0, 0);
+    }
+}
 
-        _fullscreenTriLayout = renderer->createVertexLayout();
-        auto vertexBufferIndex = _fullscreenTriLayout->attachBufferObject(_fullscreenTriBuffer.get());
-        _fullscreenTriLayout->addComponent(AttributeType::Position,
-                                           DataFormat::Vec3,
-                                           sizeof(VertexData),
-                                           vertexBufferIndex,
-                                           offsetof(VertexData, position));
-        _fullscreenTriLayout->addComponent(AttributeType::TexCoord,
-                                           DataFormat::Vec2,
-                                           sizeof(VertexData),
-                                           vertexBufferIndex,
-                                           offsetof(VertexData, tex_coord));
-        _fullscreenTriLayout->finalize();
+DrawUtil::DrawUtil(Renderer* renderer) {
+    _renderer = renderer;
+    {
+        _vertexInputProps.addComponent(AttributeType::Position, 0, DataFormat::Vec3, offsetof(VertexData, position));
+        _vertexInputProps.addComponent(AttributeType::TexCoord, 0, DataFormat::Vec2, offsetof(VertexData, tex_coord));
 
-        DrawCallCreateProperties props;
-        props.primitive_type = PrimitiveType::Triangle;
-        props.index_type = IndexType::None;
-        props.count = 3;
-
-        props.vertexLayout = _fullscreenTriLayout.get();
-
-        _fullscreenTriDrawCall = renderer->getDrawCallManager()->createDrawCall(props);
+        _vertexInputProps.addBufferBinding(0, false, sizeof(VertexData));
     }
     {
-        _quadBuffer = renderer->createBuffer(BufferType::Vertex);
-        auto quadData = getQuadData();
-        _quadBuffer->setData(quadData.data(), quadData.size() * sizeof(VertexData), BufferUsage::Static);
-
-        _quadLayout = renderer->createVertexLayout();
-        auto vertexBufferIndex = _quadLayout->attachBufferObject(_quadBuffer.get());
-        _quadLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(VertexData), vertexBufferIndex,
-                                  offsetof(VertexData, position));
-        _quadLayout->addComponent(AttributeType::TexCoord, DataFormat::Vec2, sizeof(VertexData), vertexBufferIndex,
-                                  offsetof(VertexData, tex_coord));
-        _quadLayout->finalize();
-
-        DrawCallCreateProperties props;
-        props.primitive_type = PrimitiveType::TriangleStrip;
-        props.index_type = IndexType::None;
-        props.count = 4;
-
-        props.vertexLayout = _quadLayout.get();
-
-        _quadDrawCall = renderer->getDrawCallManager()->createDrawCall(props);
+        _fullscreenTriBuffer = _renderer->createBuffer(BufferType::Vertex);
+        auto quadData = getFullscreenTriData();
+        _fullscreenTriBuffer->setData(quadData.data(), quadData.size() * sizeof(VertexData), BufferUsage::Static);
     }
     {
         auto dataPair = generate_sphere_mesh(16, 16);
 
-        _sphereVertexData = renderer->createBuffer(BufferType::Vertex);
+        _sphereVertexData = _renderer->createBuffer(BufferType::Vertex);
         _sphereVertexData->setData(dataPair.first.data(),
-                                   sizeof(glm::vec3) * dataPair.first.size(),
+                                   sizeof(VertexData) * dataPair.first.size(),
                                    BufferUsage::Static);
 
-        _sphereIndexData = renderer->createBuffer(BufferType::Index);
+        _sphereIndexData = _renderer->createBuffer(BufferType::Index);
         _sphereIndexData->setData(dataPair.second.data(),
                                   sizeof(uint16_t) * dataPair.second.size(),
                                   BufferUsage::Static);
-
-        _sphereLayout = renderer->createVertexLayout();
-        auto vertexIdx = _sphereLayout->attachBufferObject(_sphereVertexData.get());
-        auto indexIdx = _sphereLayout->attachBufferObject(_sphereIndexData.get());
-
-        _sphereLayout->addComponent(AttributeType::Position, DataFormat::Vec3, sizeof(glm::vec3), vertexIdx, 0);
-        _sphereLayout->setIndexBuffer(indexIdx);
-
-        _sphereLayout->finalize();
-
-        DrawCallCreateProperties props;
-        props.primitive_type = PrimitiveType::Triangle;
-        props.count = dataPair.second.size();
-        props.index_type = IndexType::Short;
-        props.vertexLayout = _sphereLayout.get();
-
-        _quadDrawCall = renderer->getDrawCallManager()->createDrawCall(props);
+        
+        _sphereNumIndices = (uint32_t) dataPair.second.size();
     }
 }
-void DrawUtil::drawSphere() {
-    _sphereDrawCall->draw();
+
+void DrawUtil::setVertexProperties(PipelineProperties& props) const
+{
+    props.vertexInput = _vertexInputProps;
+    props.primitive_type = PrimitiveType::Triangle;
 }
-void DrawUtil::drawFullscreenTri() {
-    _fullscreenTriDrawCall->draw();
+
+std::unique_ptr<DrawMesh> DrawUtil::getFullscreenTriMesh() const
+{
+    VertexArrayProperties props;
+    props.addBufferBinding(0, _fullscreenTriBuffer.get());
+
+    auto vao = _renderer->createVertexArrayObject(_vertexInputProps, props);
+
+    return std::unique_ptr<DrawMesh>(new DrawMesh(std::move(vao), false, 3));
+}
+
+std::unique_ptr<DrawMesh> DrawUtil::getSphereMesh() const
+{
+    VertexArrayProperties props;
+    props.addBufferBinding(0, _sphereVertexData.get());
+
+    props.indexBuffer = _sphereIndexData.get();
+    props.indexOffset = 0;
+    props.indexType = IndexType::Short;
+
+    auto vao = _renderer->createVertexArrayObject(_vertexInputProps, props);
+
+    return std::unique_ptr<DrawMesh>(new DrawMesh(std::move(vao), false, 3));
 }

@@ -33,11 +33,11 @@ class NanoVGRenderer
     struct DrawCall {
         CallType type;
 
-        size_t triangleOffset;
-        size_t triangleCount;
+        uint32_t triangleOffset;
+        uint32_t triangleCount;
 
-        size_t pathOffset;
-        size_t pathCount;
+        uint32_t pathOffset;
+        uint32_t pathCount;
 
         size_t uniformIndex;
 
@@ -45,10 +45,10 @@ class NanoVGRenderer
     };
     struct Path
     {
-        size_t fillOffset;
-        size_t fillCount;
-        size_t strokeOffset;
-        size_t strokeCount;
+        uint32_t fillOffset;
+        uint32_t fillCount;
+        uint32_t strokeOffset;
+        uint32_t strokeCount;
     };
     struct UniformData {
         float scissorMat[12]; // matrices are actually 3 vec4s
@@ -72,18 +72,17 @@ class NanoVGRenderer
     Renderer* _renderer;
 
     std::unique_ptr<BufferObject> _vertexBuffer;
-    std::unique_ptr<VertexLayout> _vertexLayout;
+    std::unique_ptr<VertexArrayObject> _vertexArrayObject;
 
     std::unique_ptr<VariableUniformBuffer> _uniformBuffer;
     UniformAligner<UniformData, sizeof(GlobalUniformData)> _uniformAligner;
 
     std::unique_ptr<DescriptorSet> _globalDescriptorSet;
 
-    std::unique_ptr<VariableDrawCall> _triangleDrawCall;
-    std::unique_ptr<VariableDrawCall> _triangleFanDrawCall;
-    std::unique_ptr<VariableDrawCall> _triangleStripDrawCall;
 
     std::unique_ptr<PipelineState> _trianglesPipelineState;
+    std::unique_ptr<PipelineState> _triangleFillPipelineState;
+    std::unique_ptr<PipelineState> _triangleStrokePipelineState;
 
     std::unique_ptr<PipelineState> _fillShapePipelineState;
     std::unique_ptr<PipelineState> _fillAntiAliasPipelineState;
@@ -102,8 +101,6 @@ class NanoVGRenderer
 
     glm::ivec2 _viewport;
 
-    std::unique_ptr<VariableDrawCall> createDrawCall(PrimitiveType type) const;
-
     DrawCall* addDrawCall();
     size_t addUniformData(size_t num);
     size_t addVertices(const NVGvertex* vert, size_t num);
@@ -115,7 +112,16 @@ class NanoVGRenderer
 
     Image* getTexture(int id);
 
-    std::unique_ptr<DescriptorSet> createAndBindUniforms(size_t uniform_index, int image);
+    std::unique_ptr<PipelineState> createPipelineState(const PipelineProperties& props,
+                                                       const VertexInputStateProperties& vertexProps,
+                                                       PrimitiveType primitive);
+
+    std::unique_ptr<DescriptorSet> createAndBindUniforms(CommandBuffer* cmd, size_t uniform_index, int image);
+
+    void drawTriangles(CommandBuffer* cmd, const DrawCall& call);
+    void drawFill(CommandBuffer* cmd, const DrawCall& call);
+    void drawConvexFill(CommandBuffer* cmd, const DrawCall& call);
+    void drawStroke(CommandBuffer* cmd, const DrawCall& call);
 public:
     explicit NanoVGRenderer(Renderer* renderer);
 
@@ -140,8 +146,4 @@ public:
     int updateTexture(int image, int x, int y, int w, int h, const unsigned char* data);
 
     int getTextureSize(int image, int* w, int* h);
-    void drawTriangles(const DrawCall& call);
-    void drawFill(const DrawCall& call);
-    void drawConvexFill(const DrawCall& call);
-    void drawStroke(const DrawCall& call);
 };
