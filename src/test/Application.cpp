@@ -336,11 +336,14 @@ void Application::renderUI() {
     nvgEndFrame(_nvgCtx);
 }
 void Application::renderScene(CommandBuffer* cmd) {
+    DEBUG_SCOPE(debug1, _renderer->getDebugging(), "Scene render");
+
     _model->prepareData(mat4());
 
     _model->render(cmd);
 
     cmd->bindDescriptorSet(_floorModelDescriptorSet.get());
+    cmd->bindVertexArrayObject(_floorVertexArrayObject);
     _floorDrawCall.draw(cmd);
 }
 

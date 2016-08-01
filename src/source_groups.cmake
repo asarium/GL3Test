@@ -15,6 +15,7 @@ set(file_model
 set(file_renderer
     renderer/BufferObject.hpp
     renderer/CommandBuffer.hpp
+    renderer/Debugging.hpp
     renderer/Enums.hpp
     renderer/Exceptions.hpp
     renderer/PipelineState.hpp
@@ -45,6 +46,8 @@ set(file_renderer_opengl
     renderer/opengl/GL3BufferObject.hpp
     renderer/opengl/GL3CommandBuffer.hpp
     renderer/opengl/GL3CommandBuffer.cpp
+    renderer/opengl/GL3Debugging.hpp
+    renderer/opengl/GL3Debugging.cpp
     renderer/opengl/GL3Object.cpp
     renderer/opengl/GL3Object.hpp
     renderer/opengl/GL3PipelineState.cpp

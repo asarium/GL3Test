@@ -17,6 +17,7 @@
 #include "Profiler.hpp"
 #include "CommandBuffer.hpp"
 #include "PipelineState.hpp"
+#include "Debugging.hpp"
 
 enum class SettingsLevel {
     Disabled,
@@ -75,6 +76,8 @@ class Renderer {
     virtual RenderTargetManager* getRenderTargetManager() = 0;
 
     virtual Profiler* getProfiler() = 0;
+
+    virtual Debugging* getDebugging() = 0;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) = 0;
 

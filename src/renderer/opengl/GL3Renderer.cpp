@@ -150,6 +150,7 @@ void GL3Renderer::deinitialize() {
     _renderTargetManager.reset();
     _profiler.reset();
     _pushConstantManager.reset();
+    _debugging.reset();
 
     SDL_GL_DeleteContext(_context);
     _context = nullptr;
@@ -222,6 +223,7 @@ void GL3Renderer::initialize(SDL_Window* window) {
     GLState.reset(new GL3StateTracker());
     _pushConstantManager.reset(new GL3PushConstantManager(this));
     _profiler.reset(new GL3Profiler(this));
+    _debugging.reset(new GL3Debugging());
 
     _shaderManager.reset(new GL3ShaderManager(_fileLoader.get()));
     // Preload the shaders
@@ -318,6 +320,9 @@ std::unique_ptr<VertexArrayObject> GL3Renderer::createVertexArrayObject(const Ve
                                                                         const VertexArrayProperties& props) {
     GL3VertexInputState inputState(input);
     return inputState.createArrayObject(props);
+}
+Debugging* GL3Renderer::getDebugging() {
+    return _debugging.get();
 }
 
 GL3Renderer::GL3RenderSettingsManager::GL3RenderSettingsManager(GL3Renderer* renderer) : GL3Object(renderer),

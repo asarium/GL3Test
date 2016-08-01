@@ -5,6 +5,7 @@
 #include "GL3RenderTargetManager.hpp"
 #include "GL3Profiler.hpp"
 #include "GL3PushConstantManager.hpp"
+#include "GL3Debugging.hpp"
 
 #include <SDL_video.h>
 
@@ -43,6 +44,7 @@ class GL3Renderer final: public Renderer {
     std::unique_ptr<GL3RenderTargetManager> _renderTargetManager;
     std::unique_ptr<GL3Profiler> _profiler;
     std::unique_ptr<GL3PushConstantManager> _pushConstantManager;
+    std::unique_ptr<GL3Debugging> _debugging;
  public:
     explicit GL3Renderer(std::unique_ptr<FileLoader>&& fileLoader);
 
@@ -57,6 +59,8 @@ class GL3Renderer final: public Renderer {
     virtual RenderTargetManager* getRenderTargetManager() override;
 
     virtual Profiler* getProfiler() override;
+
+    virtual Debugging* getDebugging() override;
 
     virtual std::unique_ptr<BufferObject> createBuffer(BufferType type) override;
 

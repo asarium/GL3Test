@@ -108,6 +108,8 @@ namespace lighting
         return _type;
     }
     ShadowMatrices Light::beginShadowPass(CommandBuffer* cmd, const ViewUniformData&) {
+        _renderer->getDebugging()->pushGroup("Shadow pass");
+
         Assertion(_shadowing, "Shadowing is not enabled for this light!");
 
         _renderer->getRenderTargetManager()->pushRenderTargetBinding();
@@ -122,6 +124,8 @@ namespace lighting
     void Light::endShadowPass(CommandBuffer* cmd) {
         Assertion(_shadowing, "Shadowing is not enabled for this light!");
         _renderer->getRenderTargetManager()->popRenderTargetBinding();
+
+        _renderer->getDebugging()->popGroup();
     }
     void Light::updateDescriptor(BufferObject* uniforms, size_t offset, size_t size) {
         _uniformDescriptor->setUniformBuffer(uniforms,

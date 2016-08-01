@@ -406,6 +406,8 @@ void NanoVGRenderer::renderFlush() {
         return;
     }
 
+    DEBUG_SCOPE(nvg_scope, _renderer->getDebugging(), "NanoVG flush");
+
     auto cmd = _renderer->createCommandBuffer();
 
     // First update changed data

@@ -74,6 +74,8 @@ void LightingManager::clearLights() {
     _lights.clear();
 }
 void LightingManager::beginLightPass(CommandBuffer* cmd) {
+    _renderer->getDebugging()->pushGroup("Light pass");
+
     auto current = _renderer->getRenderTargetManager()->getCurrentRenderTarget();
 
     ensureRenderTargetSize(current->getWidth(), current->getHeight());
@@ -91,14 +93,20 @@ void LightingManager::endLightPass(CommandBuffer* cmd) {
 
     cmd->bindDescriptorSet(_lightingDescriptorSet.get());
 
-    for (auto& light : _lights) {
-        light->bindDescriptorSet(cmd);
-        if (light->getType() == LightType::Point) {
-            _sphereMesh->draw(cmd, 1);
-        } else {
-            _fullscreenTriMesh->draw(cmd, 1);
+    {
+        DEBUG_SCOPE(lights, _renderer->getDebugging(), "Render lights");
+
+        for (auto& light : _lights) {
+            light->bindDescriptorSet(cmd);
+            if (light->getType() == LightType::Point) {
+                _sphereMesh->draw(cmd, 1);
+            } else {
+                _fullscreenTriMesh->draw(cmd, 1);
+            }
         }
     }
+
+    _renderer->getDebugging()->popGroup();
 }
 void LightingManager::ensureRenderTargetSize(size_t width, size_t height) {
     if (_lightingRenderTarget
