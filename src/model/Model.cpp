@@ -78,6 +78,7 @@ void Model::recursiveRender(CommandBuffer* cmd, const ModelNode& node) {
 
         cmd->bindDescriptorSet(node_data.model_descriptor_set.get());
         cmd->drawIndexed(mesh.vertex_count, 1, mesh.vertex_offset, mesh.base_vertex, 0);
+        cmd->unbindDescriptorSet(node_data.model_descriptor_set);
     }
 
     for (auto& child : node.child_nodes) {

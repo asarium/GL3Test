@@ -344,7 +344,9 @@ void Application::renderScene(CommandBuffer* cmd) {
 
     cmd->bindDescriptorSet(_floorModelDescriptorSet.get());
     cmd->bindVertexArrayObject(_floorVertexArrayObject);
+    cmd->bindPipeline(_floorPipelineState);
     _floorDrawCall.draw(cmd);
+    cmd->unbindDescriptorSet(_floorModelDescriptorSet);
 }
 
 void Application::handleEvent(SDL_Event* event) {

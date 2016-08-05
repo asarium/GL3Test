@@ -22,6 +22,8 @@ public:
 
     void bindDescriptorSet(PointerWrapper<DescriptorSet> set) override;
 
+    void unbindDescriptorSet(PointerWrapper<DescriptorSet> set) override;
+
     void pushConstants(void* data, size_t size) override;
     
     void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t vertexOffset, uint32_t baseInstance) override;

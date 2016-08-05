@@ -24,6 +24,11 @@ namespace {
 
 void debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity,
                     GLsizei length, const GLchar* message, const void* userParam) {
+    if (source == GL_DEBUG_SOURCE_APPLICATION_ARB) {
+        // Ignore application messages
+        return;
+    }
+
     const char* sourceStr;
     const char* typeStr;
     const char* severityStr;
@@ -40,9 +45,6 @@ void debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity,
             break;
         case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
             sourceStr = "Third Party";
-            break;
-        case GL_DEBUG_SOURCE_APPLICATION_ARB:
-            sourceStr = "Application";
             break;
         case GL_DEBUG_SOURCE_OTHER_ARB:
             sourceStr = "Other";

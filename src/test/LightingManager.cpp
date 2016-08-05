@@ -83,7 +83,7 @@ void LightingManager::beginLightPass(CommandBuffer* cmd) {
     _renderer->getRenderTargetManager()->pushRenderTargetBinding();
     _renderer->getRenderTargetManager()->useRenderTarget(_lightingRenderTarget.get());
 
-    cmd->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), ClearTarget::Color);
+    cmd->clear(glm::vec4(0.f, 0.f, 0.f, 1.f), ClearTarget::Color | ClearTarget::Depth);
 }
 void LightingManager::endLightPass(CommandBuffer* cmd) {
     _renderer->getRenderTargetManager()->popRenderTargetBinding();
@@ -105,6 +105,8 @@ void LightingManager::endLightPass(CommandBuffer* cmd) {
             }
         }
     }
+
+    cmd->unbindDescriptorSet(_lightingDescriptorSet);
 
     _renderer->getDebugging()->popGroup();
 }

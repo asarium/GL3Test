@@ -14,7 +14,7 @@ GL3CommandBuffer::GL3CommandBuffer(GL3Renderer* renderer) : GL3Object(renderer),
 }
 
 void GL3CommandBuffer::clear(const glm::vec4& color, ClearTarget target) {
-    if (GLAD_GL_ARB_debug_output) {
+    if (false) {
         glDebugMessageInsertARB(GL_DEBUG_SOURCE_APPLICATION_ARB,
                                 GL_DEBUG_TYPE_OTHER_ARB,
                                 0,
@@ -40,7 +40,7 @@ void GL3CommandBuffer::clear(const glm::vec4& color, ClearTarget target) {
 }
 
 void GL3CommandBuffer::bindPipeline(PointerWrapper<PipelineState> pipeline) {
-    if (GLAD_GL_ARB_debug_output) {
+    if (false) {
         glDebugMessageInsertARB(GL_DEBUG_SOURCE_APPLICATION_ARB,
                                 GL_DEBUG_TYPE_OTHER_ARB,
                                 0,
@@ -56,7 +56,7 @@ void GL3CommandBuffer::bindPipeline(PointerWrapper<PipelineState> pipeline) {
 }
 
 void GL3CommandBuffer::bindVertexArrayObject(PointerWrapper<VertexArrayObject> vao) {
-    if (GLAD_GL_ARB_debug_output) {
+    if (false) {
         glDebugMessageInsertARB(GL_DEBUG_SOURCE_APPLICATION_ARB,
                                 GL_DEBUG_TYPE_OTHER_ARB,
                                 0,
@@ -73,7 +73,7 @@ void GL3CommandBuffer::bindVertexArrayObject(PointerWrapper<VertexArrayObject> v
 }
 
 void GL3CommandBuffer::pushConstants(void* data, size_t size) {
-    if (GLAD_GL_ARB_debug_output) {
+    if (false) {
         glDebugMessageInsertARB(GL_DEBUG_SOURCE_APPLICATION_ARB,
                                 GL_DEBUG_TYPE_OTHER_ARB,
                                 0,
@@ -123,7 +123,7 @@ void GL3CommandBuffer::drawIndexed(uint32_t indexCount,
     }
 }
 void GL3CommandBuffer::bindDescriptorSet(PointerWrapper<DescriptorSet> set) {
-    if (GLAD_GL_ARB_debug_output) {
+    if (false) {
         glDebugMessageInsertARB(GL_DEBUG_SOURCE_APPLICATION_ARB,
                                 GL_DEBUG_TYPE_OTHER_ARB,
                                 0,
@@ -135,4 +135,18 @@ void GL3CommandBuffer::bindDescriptorSet(PointerWrapper<DescriptorSet> set) {
     auto glSet = static_cast<GL3DescriptorSet*>(&set);
 
     glSet->bind();
+}
+void GL3CommandBuffer::unbindDescriptorSet(PointerWrapper<DescriptorSet> set) {
+    if (false) {
+        glDebugMessageInsertARB(GL_DEBUG_SOURCE_APPLICATION_ARB,
+                                GL_DEBUG_TYPE_OTHER_ARB,
+                                0,
+                                GL_DEBUG_SEVERITY_LOW_ARB,
+                                -1,
+                                "Unbinding descriptor set");
+    }
+
+    auto glSet = static_cast<GL3DescriptorSet*>(&set);
+
+    glSet->unbind();
 }

@@ -26,6 +26,8 @@ class CommandBuffer {
 
     virtual void bindDescriptorSet(PointerWrapper<DescriptorSet> set) = 0;
 
+    virtual void unbindDescriptorSet(PointerWrapper<DescriptorSet> set) = 0;
+
     virtual void pushConstants(void* data, size_t size) = 0;
 
     virtual void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t vertexOffset, uint32_t baseInstance) = 0;
