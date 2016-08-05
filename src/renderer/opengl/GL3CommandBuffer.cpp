@@ -101,26 +101,14 @@ void GL3CommandBuffer::drawIndexed(uint32_t indexCount,
     Assertion(_vao, "A Vertex Array Object has to be set for drawing!");
     Assertion(_vao->getIndexType() != GL_NONE, "Vertex Array Object needs index information for indexed rendering!");
 
-    auto has_base = baseVertex != 0;
     auto indices = _vao->computeIndexOffset(indexOffset);
 
-    // There are no glDrawRangeElements* variants for instanced rendering, just use the normal functions
-
-    if (has_base) {
-        glDrawElementsInstancedBaseVertex(_currentPrimitiveType,
-                                          indexCount,
-                                          _vao->getIndexType(),
-                                          indices,
-                                          baseVertex,
-                                          instanceCount);
-    } else {
-        // We have neither, use the standard way
-        glDrawElementsInstanced(_currentPrimitiveType,
-                                indexCount,
-                                _vao->getIndexType(),
-                                indices,
-                                instanceCount);
-    }
+    glDrawElementsInstancedBaseVertex(_currentPrimitiveType,
+                                      indexCount,
+                                      _vao->getIndexType(),
+                                      indices,
+                                      instanceCount,
+                                      baseVertex);
 }
 void GL3CommandBuffer::bindDescriptorSet(PointerWrapper<DescriptorSet> set) {
     if (false) {
