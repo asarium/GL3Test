@@ -88,6 +88,12 @@ void GL3BufferObject::setData(const void *data, size_t size, BufferUsage usage) 
 
 void GL3BufferObject::updateData(const void *data, size_t offset, size_t size, UpdateFlags flags) {
     this->bind();
+    if (_type == BufferType::Uniform) {
+        // Prefer to use buffer sub data for uniform buffers
+        glBufferSubData(getGLType(_type), offset, size, data);
+        return;
+    }
+
     if (flags & UpdateFlags::DiscardOldData) {
         auto ptr = map(offset, size, BufferMapFlags::Write | BufferMapFlags::InvalidateData);
 
