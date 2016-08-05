@@ -195,7 +195,7 @@ void NanoVGRenderer::initialize() {
     vertexInput.addComponent(AttributeType::TexCoord,
                                    0,
                                    DataFormat::Vec2,
-                                   offsetof(NVGvertex, x));
+                                   offsetof(NVGvertex, u));
     vertexInput.addBufferBinding(0, false, sizeof(NVGvertex));
 
     VertexArrayProperties arrayProps;
@@ -683,7 +683,7 @@ NanoVGRenderer::createAndBindUniforms(CommandBuffer* cmd, size_t uniform_index, 
                          _uniformAligner.getOffset(uniform_index),
                          sizeof(UniformData));
 
-    cmd->bindDescriptorSet(descriptor.get());
+    cmd->bindDescriptorSet(descriptor);
 
     return descriptor;
 }
@@ -693,7 +693,7 @@ void NanoVGRenderer::drawTriangles(CommandBuffer* cmd, const DrawCall& call) {
 
     auto descriptor = createAndBindUniforms(cmd, call.uniformIndex, call.image);
 
-    cmd->bindPipeline(_trianglesPipelineState.get());
+    cmd->bindPipeline(_trianglesPipelineState);
 
     cmd->draw(call.triangleCount, 1, call.triangleOffset, 0);
 }
