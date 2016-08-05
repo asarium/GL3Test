@@ -689,6 +689,8 @@ NanoVGRenderer::createAndBindUniforms(CommandBuffer* cmd, size_t uniform_index, 
 }
 
 void NanoVGRenderer::drawTriangles(CommandBuffer* cmd, const DrawCall& call) {
+    DEBUG_SCOPE(fillScope, _renderer->getDebugging(), "Draw triangles");
+
     auto descriptor = createAndBindUniforms(cmd, call.uniformIndex, call.image);
 
     cmd->bindPipeline(_trianglesPipelineState.get());
@@ -696,6 +698,8 @@ void NanoVGRenderer::drawTriangles(CommandBuffer* cmd, const DrawCall& call) {
     cmd->draw(call.triangleCount, 1, call.triangleOffset, 0);
 }
 void NanoVGRenderer::drawFill(CommandBuffer* cmd, const DrawCall& call) {
+    DEBUG_SCOPE(fillScope, _renderer->getDebugging(), "Draw fill");
+
     auto shapeDescriptor = createAndBindUniforms(cmd, call.uniformIndex, 0);
 
     cmd->bindPipeline(_fillShapePipelineState.get());
@@ -715,6 +719,8 @@ void NanoVGRenderer::drawFill(CommandBuffer* cmd, const DrawCall& call) {
     cmd->draw(call.triangleCount, 1, call.triangleOffset, 0);
 }
 void NanoVGRenderer::drawConvexFill(CommandBuffer* cmd, const DrawCall& call) {
+    DEBUG_SCOPE(fillScope, _renderer->getDebugging(), "Draw convex fill");
+
     auto descriptor = createAndBindUniforms(cmd, call.uniformIndex, call.image);
 
     cmd->bindPipeline(_triangleFillPipelineState.get());
@@ -729,6 +735,8 @@ void NanoVGRenderer::drawConvexFill(CommandBuffer* cmd, const DrawCall& call) {
     }
 }
 void NanoVGRenderer::drawStroke(CommandBuffer* cmd, const DrawCall& call) {
+    DEBUG_SCOPE(fillScope, _renderer->getDebugging(), "Draw stroke");
+
     auto pathOffset = call.pathOffset;
 
     // Fill the stroke base without overlap
